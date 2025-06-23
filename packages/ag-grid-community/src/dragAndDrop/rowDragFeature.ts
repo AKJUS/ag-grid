@@ -20,7 +20,7 @@ import {
 import type { IClientSideRowModel } from '../interfaces/iClientSideRowModel';
 import type { AgGridCommon } from '../interfaces/iCommon';
 import type { IRowNode } from '../interfaces/iRowNode';
-import { _last } from '../utils/array';
+import { _EmptyArray, _last } from '../utils/array';
 import { ChangedPath } from '../utils/changedPath';
 import { _warn } from '../validation/logging';
 import type { DragAndDropIcon, DraggingEvent, DropTarget } from './dragAndDropService';
@@ -28,7 +28,7 @@ import { DragSourceType } from './dragAndDropService';
 
 export type RowDropTargetPosition = 'above' | 'inside' | 'below';
 
-export interface CanDropOnRowCustomResult<TData = any> {
+export interface IsRowValidDropPositionResult<TData = any> {
     /** The rows that are being dropped, can be used to filter the rows. If empty, the operation is aborted. */
     rows?: IRowNode<TData>[] | null;
     /** The position of the rows relative to the target row */
@@ -39,11 +39,13 @@ export interface CanDropOnRowCustomResult<TData = any> {
     target?: IRowNode<TData> | null;
 }
 
-export type CanDropOnRowCallback<TData = any, TContext = any> = (
-    params: RowDropTarget<TData, TContext>
-) => boolean | null | CanDropOnRowCustomResult<TData>;
+export type IsRowValidDropPositionCallback<TData = any, TContext = any> = (
+    params: IsRowValidDropPositionParams<TData, TContext>
+) => IsRowValidDropPositionResult<TData> | null | boolean;
 
-export interface RowDropTarget<TData = any, TContext = any> extends AgGridCommon<TData, TContext> {
+export interface IsRowValidDropPositionParams<TData = any, TContext = any> extends AgGridCommon<TData, TContext> {
+    /** The dragging event that originated this drop operation */
+    draggingEvent: DraggingEvent<TData, TContext> | null;
     /** True if this rows comes from the same grid, false if is coming from another grid */
     sameGrid: boolean;
     /** The position of the rows relative to the target row */
@@ -276,7 +278,7 @@ export class RowDragFeature extends BeanStub implements DropTarget {
                 const rowsDrop = this.managedRowsDrop(draggingEvent, throttleMakeGroup);
                 const target = rowsDrop?.target;
                 const rowDropHighlightSvc = this.beans.rowDropHighlightSvc!;
-                if (target) {
+                if (target && rowsDrop.rows.length) {
                     rowDropHighlightSvc.set(target as RowNode, rowsDrop.position);
                 } else {
                     rowDropHighlightSvc.clear();
@@ -296,7 +298,10 @@ export class RowDragFeature extends BeanStub implements DropTarget {
         return parseInt(_last(rowIndexStr.split('-')), 10);
     }
 
-    private managedRowsDrop(draggingEvent: DraggingEvent, throttleMakeGroup: boolean): RowDropTarget | null {
+    private managedRowsDrop(
+        draggingEvent: DraggingEvent,
+        throttleMakeGroup: boolean
+    ): IsRowValidDropPositionParams | null {
         const { rowNode, rowNodes: rows } = draggingEvent.dragItem;
         const rowsLen = rows?.length;
         const source = rowsLen && (rowNode ?? rows[0]);
@@ -414,9 +419,10 @@ export class RowDragFeature extends BeanStub implements DropTarget {
         }
 
         const position = inside ? 'inside' : above ? 'above' : 'below';
-        const result: RowDropTarget = {
+        const result: IsRowValidDropPositionParams = {
             api: this.beans.gridApi,
             context: this.beans.gridOptions.context,
+            draggingEvent,
             sameGrid,
             position,
             source,
@@ -425,28 +431,36 @@ export class RowDragFeature extends BeanStub implements DropTarget {
             rows,
         };
 
-        const canDropOnRowCallback = gos.get('canDropOnRow');
-
-        if (canDropOnRowCallback) {
-            const canDropResult = canDropOnRowCallback(result);
+        let customPosition = false;
+        const isRowValidDropPosition = gos.get('isRowValidDropPosition');
+        if (isRowValidDropPosition) {
+            const canDropResult = isRowValidDropPosition(result);
             if (!canDropResult) {
-                this.makeGroupThrottleClear();
-                return null; // Nothing to move
+                result.rows = _EmptyArray; // Cannot drop, so no rows
             } else if (typeof canDropResult === 'object') {
                 // Custom result, override the default values
+
                 if (canDropResult.rows !== undefined) {
-                    result.rows = canDropResult.rows ?? [];
+                    result.rows = canDropResult.rows ?? _EmptyArray;
                 }
-                if (canDropResult.position) {
-                    result.position = canDropResult.position;
-                }
+
                 if (canDropResult.newParent !== undefined) {
                     result.newParent = canDropResult.newParent;
                 }
+
                 if (canDropResult.target !== undefined) {
                     result.target = canDropResult.target;
                 }
+
+                if (canDropResult.position) {
+                    customPosition = true;
+                    result.position = canDropResult.position;
+                }
             }
+        }
+
+        if ((!result.newParent || !result.rows.length) && !customPosition) {
+            result.position = above ? 'above' : 'below'; // Remove 'inside' if no new parent
         }
 
         return result;
@@ -734,11 +748,11 @@ export class RowDragFeature extends BeanStub implements DropTarget {
     }
 
     /** Drag and drop. Returns false if at least a row was moved, otherwise true */
-    private dropRows(rowsDrop: RowDropTarget): boolean {
+    private dropRows(rowsDrop: IsRowValidDropPositionParams): boolean {
         return rowsDrop.sameGrid ? this.moveRows(rowsDrop) : this.addRows(rowsDrop);
     }
 
-    private addRows({ position, target, rows }: RowDropTarget): boolean {
+    private addRows({ position, target, rows }: IsRowValidDropPositionParams): boolean {
         const getRowIdFunc = _getRowIdCallback(this.gos);
         const clientSideRowModel = this.clientSideRowModel;
 
@@ -769,7 +783,7 @@ export class RowDragFeature extends BeanStub implements DropTarget {
         });
     }
 
-    private moveRows({ position, target, rows, newParent }: RowDropTarget): boolean {
+    private moveRows({ position, target, rows, newParent }: IsRowValidDropPositionParams): boolean {
         let changed = false;
 
         const clientSideRowModel = this.clientSideRowModel;
