@@ -858,6 +858,12 @@ export class EditService extends BeanStub implements NamedBean, IEditService {
         });
 
         this.bulkRefresh();
+
+        // focus the first cell in the range
+        const cellCtrl = _getCellCtrl(beans, { rowNode, column })!;
+        if (cellCtrl) {
+            cellCtrl.focusCell(true);
+        }
     }
 
     public createCellStyleFeature(cellCtrl: CellCtrl, beans: BeanCollection): CellEditStyleFeature {
