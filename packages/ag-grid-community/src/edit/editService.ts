@@ -64,7 +64,7 @@ const SOURCE_TRANSFORM_KEYS: Set<string> = new Set(Object.keys(SOURCE_TRANSFORM)
 
 const CANCEL_PARAMS: StopEditParams = { cancel: true, source: 'api' };
 
-const CHECK_SIBLING = { checkSiblings: true };
+const COMMIT_PARAMS: StopEditParams = { cancel: false, source: 'api' };
 
 const FORCE_REFRESH = { force: true, suppressFlash: true };
 
@@ -102,7 +102,7 @@ export class EditService extends BeanStub implements NamedBean, IEditService {
                     if (this.isBatchEditing()) {
                         _destroyEditors(beans, this.model.getEditPositions());
                     } else {
-                        this.stopEditing(undefined, CANCEL_PARAMS);
+                        this.stopEditing(undefined, COMMIT_PARAMS);
                     }
                 }
             }
