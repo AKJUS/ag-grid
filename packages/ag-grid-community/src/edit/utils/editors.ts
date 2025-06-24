@@ -297,16 +297,20 @@ export function _syncFromEditor(
     newValue?: any,
     source?: string
 ): void {
+    const { editModelSvc, valueSvc, eventSvc } = beans;
+    if (!editModelSvc) {
+        return;
+    }
     const { rowNode, column } = position;
 
     if (!(rowNode && column)) {
         return;
     }
 
-    const oldValue = beans.valueSvc.getValue(column as AgColumn, rowNode, undefined, 'api');
+    const oldValue = valueSvc.getValue(column as AgColumn, rowNode, undefined, 'api');
     const cellCtrl = _getCellCtrl(beans, position);
     const hasEditor = !!cellCtrl?.comp?.getCellEditor();
-    const prevEditValue = beans.editModelSvc?.getEdit(position)?.newValue;
+    const prevEditValue = editModelSvc?.getEdit(position)?.newValue;
 
     // Only handle undefined, null is used to indicate a cleared cell value
     if (newValue === undefined) {
@@ -314,7 +318,12 @@ export function _syncFromEditor(
     }
 
     // Note: we don't clear the edit state here (even if new===old) as this is also called from the stop editing flow.
-    beans.editModelSvc?.setEdit(position, { newValue, oldValue, state: hasEditor ? 'editing' : 'changed' });
+    editModelSvc.setEdit(position, { newValue, oldValue, state: hasEditor ? 'editing' : 'changed' });
+
+    // re-read the value once it's been through all the formatting and parsing
+    const { value } = valueSvc.getValueForDisplay(column as AgColumn, rowNode, true);
+
+    editModelSvc.getEdit(position)!.newValue = value;
 
     if (prevEditValue === newValue || hasEditor) {
         // If the value hasn't changed or the editor is currently open, we don't need to dispatch an event
@@ -322,7 +331,7 @@ export function _syncFromEditor(
     }
 
     const { rowIndex, rowPinned, data } = rowNode;
-    beans.eventSvc.dispatchEvent({
+    eventSvc.dispatchEvent({
         type: 'cellEditValuesChanged',
         value: newValue,
         colDef: column.getColDef(),
