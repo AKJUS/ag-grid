@@ -5,7 +5,7 @@ import type { EditPosition, EditRowPosition } from '../../interfaces/iEditServic
 import type { IRowNode } from '../../interfaces/iRowNode';
 import type { CellCtrl } from '../../rendering/cell/cellCtrl';
 import { _getRowCtrl } from '../utils/controllers';
-import { _populateModelValidationErrors, _setupEditor } from '../utils/editors';
+import { _populateModelValidationErrors, _setupEditor, _valuesDiffer } from '../utils/editors';
 import type { EditValidationAction, EditValidationResult } from './baseEditStrategy';
 import { BaseEditStrategy } from './baseEditStrategy';
 
@@ -124,20 +124,31 @@ export class FullRowEditStrategy extends BaseEditStrategy {
 
     public override stop(cancel?: boolean): boolean {
         const { rowNode } = this;
-        if (rowNode && !this.model.hasRowEdits({ rowNode })) {
+        if (rowNode && !this.model.hasRowEdits(rowNode)) {
             return false;
         }
 
+        const rowEdits = this.model.getEditRow(rowNode!)!;
+        let hadRowEdits = false;
+        for (const [, edit] of rowEdits) {
+            if (_valuesDiffer(edit)) {
+                hadRowEdits = true;
+                break;
+            }
+        }
+
         // rerun validation, new values might have triggered row validations
-        _populateModelValidationErrors(this.beans, true);
-        if (this.editSvc?.checkNavWithValidation({ rowNode }) === 'block-stop') {
+        _populateModelValidationErrors(this.beans);
+        if (!cancel && this.editSvc?.checkNavWithValidation({ rowNode }) === 'block-stop') {
             return false;
         }
 
         super.stop(cancel);
 
         if (rowNode) {
-            this.dispatchRowEvent({ rowNode }, 'rowValueChanged');
+            if (hadRowEdits) {
+                this.dispatchRowEvent({ rowNode }, 'rowValueChanged');
+            }
             this.dispatchRowEvent({ rowNode }, 'rowEditingStopped');
         }
 
@@ -222,16 +233,15 @@ export class FullRowEditStrategy extends BaseEditStrategy {
 
         if (!rowsMatch) {
             // run validation to gather row-level validation errors
-            _populateModelValidationErrors(this.beans, true);
+            _populateModelValidationErrors(this.beans);
 
             if (this.model.getRowValidationModel().getRowValidationMap().size > 0) {
                 // if there was a previous row validation error, we need to check if that's still the case
-                if (this.editSvc.checkNavWithValidation(prevCell, event, true) === 'block-stop') {
+                if (this.editSvc.checkNavWithValidation(prevCell, event) === 'block-stop') {
                     return true;
                 }
             } else {
-                const rowPreventNavigation =
-                    this.editSvc.checkNavWithValidation(prevCell, event, true) === 'block-stop';
+                const rowPreventNavigation = this.editSvc.checkNavWithValidation(prevCell, event) === 'block-stop';
                 if (rowPreventNavigation) {
                     return true;
                 }
@@ -246,11 +256,6 @@ export class FullRowEditStrategy extends BaseEditStrategy {
             this.setFocusOutOnEditor(prevCell);
         }
 
-        if (!rowsMatch && !preventNavigation) {
-            super.cleanupEditors(nextCell, true);
-            this.editSvc.startEditing(nextCell, { startedEdit: true, event, source, ignoreEventKey: true });
-        }
-
         if (nextEditable && !preventNavigation) {
             if (!nextCell.comp?.getCellEditor()) {
                 // editor missing because it was outside the viewport during creating phase, attempt to create it now
@@ -260,6 +265,11 @@ export class FullRowEditStrategy extends BaseEditStrategy {
             nextCell.focusCell(false, event);
         } else {
             nextCell.focusCell(true, event);
+        }
+
+        if (!rowsMatch && !preventNavigation) {
+            super.cleanupEditors(nextCell, true);
+            this.editSvc.startEditing(nextCell, { startedEdit: true, event, source, ignoreEventKey: true });
         }
 
         prevCell.rowCtrl?.refreshRow({ suppressFlash: true, force: true });

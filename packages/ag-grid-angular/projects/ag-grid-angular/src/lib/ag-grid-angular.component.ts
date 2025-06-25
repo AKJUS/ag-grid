@@ -22,7 +22,6 @@ import type {
     AsyncTransactionsFlushedEvent,
     BodyScrollEndEvent,
     BodyScrollEvent,
-    CanDropOnRowCallback,
     CellClickedEvent,
     CellContextMenuEvent,
     CellDoubleClickedEvent,
@@ -131,6 +130,7 @@ import type {
     IsRowPinnable,
     IsRowPinned,
     IsRowSelectable,
+    IsRowValidDropPositionCallback,
     IsServerSideGroup,
     IsServerSideGroupOpenByDefaultParams,
     LoadingCellRendererSelectorFunc,
@@ -649,7 +649,7 @@ export class AgGridAngular<TData = any, TColDef extends ColDef<TData> = ColDef<a
     @Input() public getFullRowEditValidationErrors: GetFullRowEditValidationErrors | undefined = undefined;
     /** Set to `block` to block the commit of invalid cell edits, keeping editors open.
      */
-    @Input() public cellEditingInvalidCommitType: EditValidationCommitType | undefined = undefined;
+    @Input() public invalidEditValueMode: EditValidationCommitType | undefined = undefined;
     /** Set to `true` to enable Single Click Editing for cells, to start editing with a single click.
      * @default false
      * @agModule `TextEditorModule` / `LargeTextEditorModule` / `NumberEditorModule` / `DateEditorModule` / `CheckboxEditorModule` / `CustomEditorModule` / `SelectEditorModule` / `RichSelectModule`
@@ -1969,10 +1969,10 @@ export class AgGridAngular<TData = any, TColDef extends ColDef<TData> = ColDef<a
      */
     @Input() public isFullWidthRow: ((params: IsFullWidthRowParams<TData>) => boolean) | undefined = undefined;
     /** Called by managed drag and drop when rows are dropped on another row.
-     * The user can cancel the drop by returning `false` or customize the operation by returning a `RowDragDropResult`.
+     * The user can cancel the drop by returning `false` or customize the operation by returning a `IsRowValidDropPositionResult`.
      * @agModule `RowDragModule`
      */
-    @Input() public canDropOnRow: CanDropOnRowCallback<TData> | undefined = undefined;
+    @Input() public isRowValidDropPosition: IsRowValidDropPositionCallback<TData> | undefined = undefined;
 
     /** The tool panel visibility has changed. Fires twice if switching between panels - once with the old panel and once with the new panel.
      */

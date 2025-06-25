@@ -48,7 +48,7 @@ const gridOptions: GridOptions = {
         { field: 'gender' },
         { field: 'age' },
         { field: 'mood' },
-        { field: 'country' },
+        { field: 'country', editable: false },
         { field: 'address', minWidth: 200 },
     ],
     defaultColDef: {
@@ -71,10 +71,33 @@ const gridOptions: GridOptions = {
     onCellValueChanged: (_event: CellValueChangedEvent) => {
         console.log('Cell value changed');
     },
+    editType: 'fullRow',
+    onFirstDataRendered: (params) => {
+        gridApi = params.api;
+        gridApi.startBatchEdit();
+
+        gridApi.startEditingCell({
+            rowIndex: 0,
+            colKey: 'firstName',
+            key: 'Justine',
+        });
+
+        gridApi.startEditingCell({
+            rowIndex: 1,
+            colKey: 'age',
+            key: '101',
+        });
+
+        // Close editors
+        // gridApi!.stopEditing();
+
+        // Commit the batch edit
+        // gridApi!.commitBatchEdit();
+    },
 };
 
 function getEditingCells() {
-    const cells = gridApi!.getEditingCells({ includePending: true });
+    const cells = gridApi!.getEditingCells();
     console.log('Editing cells:', cells);
 }
 

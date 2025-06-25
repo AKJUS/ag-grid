@@ -10,13 +10,14 @@ import {
     RowDragModule,
     ValidationModule,
 } from 'ag-grid-community';
-import type { GridOptions, RowDragEndEvent, RowDragMoveEvent } from 'ag-grid-community';
+import type { GridOptions, RowDragEndEvent, RowDragMoveEvent, ValueFormatterParams } from 'ag-grid-community';
 import { TreeDataModule } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
 
 import { getData } from './data';
 import FileCellRenderer from './fileCellRenderer';
-import { type IFile, moveFiles } from './fileUtils';
+import { moveFiles } from './fileUtils';
+import type { IFile } from './fileUtils';
 import './style.css';
 
 ModuleRegistry.registerModules([
@@ -32,7 +33,9 @@ const STATIC_GRID_OPTIONS: GridOptions<IFile> = {
         { field: 'dateModified' },
         {
             field: 'size',
-            valueFormatter: (params) => (params.value ? params.value + ' MB' : ''),
+            aggFunc: 'sum',
+            valueFormatter: (params: ValueFormatterParams<IFile, number>) =>
+                params.value ? params.value.toFixed(1) + ' MB' : '',
         },
     ],
     autoGroupColumnDef: {

@@ -130,10 +130,11 @@ export {
     DragAndDropIcon,
 } from './dragAndDrop/dragAndDropService';
 export { DragItem } from './interfaces/iDragItem';
-export {
-    CanDropOnRowCallback,
+export type {
+    IsRowValidDropPositionCallback,
+    IsRowValidDropPositionResult,
+    IsRowValidDropPositionParams,
     RowDropTargetPosition,
-    RowDropTarget,
     RowDropZoneParams,
     RowDropZoneEvents,
 } from './dragAndDrop/rowDragFeature';
@@ -405,7 +406,6 @@ export {
     IErrorValidationParams,
     BaseCellEditor,
     GetCellEditorInstancesParams,
-    GetEditingCellsParams,
     EditingCellPosition,
 } from './interfaces/iCellEditor';
 export { AgAbstractCellEditor } from './widgets/agAbstractCellEditor';

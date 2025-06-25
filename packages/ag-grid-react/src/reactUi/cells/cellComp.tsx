@@ -75,7 +75,9 @@ const CellComp = ({
     }, []);
 
     const showTools =
-        renderDetails != null && editDetails == null && (includeSelection || includeDndSource || includeRowDrag);
+        renderDetails != null &&
+        (includeSelection || includeDndSource || includeRowDrag) &&
+        (editDetails == null || !!editDetails.popup);
     const showCellWrapper = forceWrapper || showTools;
 
     const setCellEditorRef = useCallback(
@@ -182,6 +184,7 @@ const CellComp = ({
         return () => {
             cellEditorPromise.then((cellEditor) => {
                 const compGui = cellEditor.getGui();
+                cellCtrl.disableEditorTooltipFeature();
                 context.destroyBean(cellEditor);
                 setCellEditorRef(undefined);
                 setJsEditorComp(undefined);
@@ -407,9 +410,10 @@ const CellComp = ({
     };
 
     const showCellOrEditor = () => {
-        if (editDetails != null) {
-            return jsxEditValue(editDetails, setCellEditorRef, eGui.current!, cellCtrl, jsEditorComp);
-        } else if (renderDetails != null) {
+        const showCellValue = () => {
+            if (renderDetails == null) {
+                return null;
+            }
             return showCellWrapper ? (
                 <span role="presentation" id={`cell-${instanceId}`} className="ag-cell-value" ref={setCellValueRef}>
                     {valueOrCellComp()}
@@ -417,7 +421,25 @@ const CellComp = ({
             ) : (
                 valueOrCellComp()
             );
+        };
+
+        const showEditValue = (details: EditDetails) =>
+            jsxEditValue(details, setCellEditorRef, eGui.current!, cellCtrl, jsEditorComp);
+
+        if (editDetails != null) {
+            if (editDetails.popup) {
+                return (
+                    <>
+                        {showCellValue()}
+                        {showEditValue(editDetails)}
+                    </>
+                );
+            }
+
+            return showEditValue(editDetails);
         }
+
+        return showCellValue();
     };
 
     const renderCell = () => (

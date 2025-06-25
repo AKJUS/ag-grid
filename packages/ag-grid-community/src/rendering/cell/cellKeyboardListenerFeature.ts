@@ -112,12 +112,10 @@ export class CellKeyboardListenerFeature extends BeanStub {
         ) {
             if (rangeSvc && _isCellSelectionEnabled(gos)) {
                 rangeSvc.clearCellRangeCellValues({ dispatchWrapperEvents: true, wrapperEventSource: 'deleteKey' });
-                this.beans.editSvc?.stopEditing(undefined, { source: 'cellClear' });
             } else if (cellCtrl.isCellEditable()) {
                 const { column } = cellCtrl;
                 const emptyValue = this.beans.valueSvc.getDeleteValue(column, rowNode);
                 rowNode.setDataValue(column, emptyValue, 'cellClear');
-                this.beans.editSvc?.stopEditing(undefined, { source: 'cellClear' });
             }
         } else if (!editSvc?.isEditing(cellCtrl, { withOpenEditor: true })) {
             beans.editSvc?.startEditing(cellCtrl, { startedEdit: true, event });
@@ -128,9 +126,26 @@ export class CellKeyboardListenerFeature extends BeanStub {
 
     private onEnterKeyDown(event: KeyboardEvent): void {
         const { cellCtrl, beans } = this;
-        const { editSvc, navigation, gos } = beans;
-        const editing = editSvc?.isEditing(cellCtrl);
-        if (editing) {
+        const { editSvc, navigation } = beans;
+        const cellEditing = editSvc?.isEditing(cellCtrl);
+        const rowNode = cellCtrl.rowNode;
+        const rowEditing = editSvc?.isRowEditing(rowNode);
+
+        const startEditingAction = (cellCtrl: CellCtrl) => {
+            const started = editSvc?.startEditing(cellCtrl, {
+                startedEdit: true,
+                event,
+            });
+            if (started) {
+                // if we started editing, then we need to prevent default, otherwise the Enter action can get
+                // applied to the cell editor. this happened, for example, with largeTextCellEditor where not
+                // preventing default results in a 'new line' character getting inserted in the text area
+                // when the editing was started
+                event.preventDefault();
+            }
+        };
+
+        if (cellEditing || rowEditing) {
             if (this.isCtrlEnter(event)) {
                 // bulk edit, apply currently editing value to all selected cells
                 editSvc?.applyBulkEdit(cellCtrl, beans?.rangeSvc?.getCellRanges() || []);
@@ -138,15 +153,22 @@ export class CellKeyboardListenerFeature extends BeanStub {
             }
 
             // re-run ALL validations, Enter key is used to commit the edit, so we want to ensure it's valid
-            _populateModelValidationErrors(beans, true);
+            _populateModelValidationErrors(beans);
 
-            if (editSvc?.checkNavWithValidation(cellCtrl, event, gos.get('editType') === 'fullRow') === 'block-stop') {
+            if (editSvc?.checkNavWithValidation(cellCtrl, event) === 'block-stop') {
                 return;
             }
 
-            editSvc?.stopEditing(cellCtrl, {
-                event,
-            });
+            if (editSvc?.isEditing(cellCtrl, { withOpenEditor: true })) {
+                editSvc?.stopEditing(cellCtrl, {
+                    event,
+                });
+            } else if (rowEditing && !cellCtrl.isCellEditable()) {
+                // must be on a read only cell
+                editSvc?.stopEditing({ rowNode }, { event });
+            } else {
+                startEditingAction(cellCtrl);
+            }
         } else {
             if (beans.gos.get('enterNavigatesVertically')) {
                 const key = event.shiftKey ? KeyCode.UP : KeyCode.DOWN;
@@ -160,17 +182,7 @@ export class CellKeyboardListenerFeature extends BeanStub {
                     editSvc.revertSingleCellEdit(cellCtrl, true);
                 }
 
-                const started = editSvc?.startEditing(cellCtrl, {
-                    startedEdit: true,
-                    event,
-                });
-                if (started) {
-                    // if we started editing, then we need to prevent default, otherwise the Enter action can get
-                    // applied to the cell editor. this happened, for example, with largeTextCellEditor where not
-                    // preventing default results in a 'new line' character getting inserted in the text area
-                    // when the editing was started
-                    event.preventDefault();
-                }
+                startEditingAction(cellCtrl);
             }
         }
     }
@@ -218,6 +230,11 @@ export class CellKeyboardListenerFeature extends BeanStub {
             return;
         }
 
+        if (editSvc?.isEditing(cellCtrl, { withOpenEditor: true })) {
+            // if we have an open editor, then we don't want to process the character on the cell
+            return;
+        }
+
         const key = event.key;
         if (key === KeyCode.SPACE) {
             this.onSpaceKeyDown(event);
@@ -247,7 +264,7 @@ export class CellKeyboardListenerFeature extends BeanStub {
         const { gos, editSvc } = this.beans;
         const { rowNode } = this.cellCtrl;
 
-        if (!editSvc?.isEditing(this.cellCtrl) && _isRowSelection(gos)) {
+        if (!editSvc?.isEditing(this.cellCtrl, { withOpenEditor: true }) && _isRowSelection(gos)) {
             this.beans.selectionSvc?.handleSelectionEvent(event, rowNode, 'spaceKey');
         }
 

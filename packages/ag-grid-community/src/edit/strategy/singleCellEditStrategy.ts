@@ -1,7 +1,7 @@
 import type { BeanName } from '../../context/context';
 import type { AgColumn } from '../../entities/agColumn';
 import { _getRowNode } from '../../entities/positionUtils';
-import type { CellFocusedEvent, CommonCellFocusParams } from '../../events';
+import type { CellFocusClearedEvent, CellFocusedEvent, CommonCellFocusParams } from '../../events';
 import type { Column } from '../../interfaces/iColumn';
 import type { EditPosition, EditRowPosition } from '../../interfaces/iEditService';
 import type { IRowNode } from '../../interfaces/iRowNode';
@@ -30,10 +30,6 @@ export class SingleCellEditStrategy extends BaseEditStrategy {
         const { rowNode, column } = position || {};
 
         if ((!this.rowNode || !this.column) && rowNode && column) {
-            return null;
-        }
-
-        if (!rowNode && !column && this.rowNode && this.column) {
             return null;
         }
 
@@ -78,7 +74,7 @@ export class SingleCellEditStrategy extends BaseEditStrategy {
         return true;
     }
 
-    public override onCellFocusChanged(event: CellFocusedEvent<any, any>): void {
+    public override onCellFocusChanged(event: CellFocusedEvent | CellFocusClearedEvent): void {
         const { colModel, editSvc } = this.beans;
         const { rowIndex, column, rowPinned } = event;
         const rowNode = _getRowNode(this.beans, { rowIndex: rowIndex!, rowPinned });
@@ -94,7 +90,10 @@ export class SingleCellEditStrategy extends BaseEditStrategy {
             }
         }
 
-        if (editSvc?.isEditing({ rowNode, column: curCol as AgColumn }, { withOpenEditor: true })) {
+        if (
+            editSvc?.isEditing({ rowNode, column: curCol as AgColumn }, { withOpenEditor: true }) &&
+            event.type === 'cellFocused'
+        ) {
             // editor is already active, so we don't need to do anything
             return;
         }
@@ -168,16 +167,15 @@ export class SingleCellEditStrategy extends BaseEditStrategy {
 
         if (!rowsMatch) {
             // run validation to gather row-level validation errors
-            _populateModelValidationErrors(this.beans, true);
+            _populateModelValidationErrors(this.beans);
 
             if (this.model.getRowValidationModel().getRowValidationMap().size > 0) {
                 // if there was a previous row validation error, we need to check if that's still the case
-                if (this.editSvc.checkNavWithValidation(prevCell, event, true) === 'block-stop') {
+                if (this.editSvc.checkNavWithValidation(prevCell, event) === 'block-stop') {
                     return true;
                 }
             } else {
-                const rowPreventNavigation =
-                    this.editSvc.checkNavWithValidation(prevCell, event, true) === 'block-stop';
+                const rowPreventNavigation = this.editSvc.checkNavWithValidation(prevCell, event) === 'block-stop';
                 if (rowPreventNavigation) {
                     return true;
                 }
@@ -198,12 +196,13 @@ export class SingleCellEditStrategy extends BaseEditStrategy {
         }
 
         if (nextEditable && !preventNavigation) {
+            // need to focus the cell before setting the editor, otherwise the focus handler won't cause previous editor cleanups
+            nextCell.focusCell(false, event);
             if (!nextCell.comp?.getCellEditor()) {
                 // editor missing because it was outside the viewport during creating phase, attempt to create it now
                 _setupEditor(this.beans, nextCell, undefined, event, true);
             }
             this.setFocusInOnEditor(nextCell);
-            nextCell.focusCell(false, event);
         } else {
             if (preventNavigation && this.model.getCellValidationModel().getCellValidation(prevCell)) {
                 return true;
