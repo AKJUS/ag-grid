@@ -1,5 +1,3 @@
-import path from 'path';
-
 import test, { TestCase } from '../benchmarking';
 import { waitFor } from '../playwright.utils';
 
@@ -17,7 +15,7 @@ test(`Performance Test - Compare performance of setting data`, {
     testCases: frameworks.map(
         (framework) =>
             ({
-                name: 'Set data (lots): staging vs prod',
+                name: 'Scheduled: Set data (lots): staging vs prod',
                 framework,
                 control: { version: 'prod', url: localLotsOfCells, shouldInjectScript: true },
                 variant: { version: 'staging', url: localLotsOfCells, shouldInjectScript: true },
