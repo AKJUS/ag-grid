@@ -1,0 +1,195 @@
+name: Doc Tests 
+description: Testing of AG Grid Examples
+
+env:
+    NX_NO_CLOUD: true
+    CI: true
+    DEFAULT_RETENTION_DAYS: 30
+
+on:
+    workflow_dispatch:
+        inputs:
+            frameworks:
+                description: 'Frameworks to test'
+                type: 'choice'
+                required: true
+                default: 'vanilla,typescript,reactFunctional,reactFunctionalTs,angular,vue3'
+                options:
+                    - vanilla
+                    - typescript
+                    - reactFunctional
+                    - reactFunctionalTs
+                    - angular
+                    - vue3
+    schedule:
+        - cron: '30 2 * * *' # Run daily at 2:30am UTC
+
+jobs:
+    # Run all framework tasks in parallel
+    test-demos:
+        name: Test Doc Demos
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 1
+
+            - name: Install Playwright Browsers
+              working-directory: testing/ag-grid-docs
+              run: npm install && npx playwright install --with-deps chromium firefox webkit --only-shell
+
+            - name: Demo Pages
+              working-directory: testing/ag-grid-docs
+              run: npx playwright test ag-grid-demos.spec.ts
+
+            - name: Upload Test Report
+              id: upload-report
+              uses: actions/upload-artifact@v4
+              if: ${{ !cancelled() }}
+              with:
+                name: playwright-report-demos
+                path: reports/
+                retention-days: ${{env.DEFAULT_RETENTION_DAYS}}
+
+    download-examples:
+      name: Download all-examples.json
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 1
+
+        - name: Download all-examples-cached.json
+          run: |
+            mkdir -p ./e2e/config
+            curl https://grid-staging.ag-grid.com/debug/all-examples.json > ./testing/ag-grid-docs/e2e/config/all-examples-cached.json
+
+        - name: Cache all-examples-cached.json
+          uses: actions/cache@v4
+          with:
+            path: ./testing/ag-grid-docs/e2e/config/all-examples-cached.json
+            key: all-examples-${{ hashFiles('./testing/ag-grid-docs/e2e/config/all-examples-cached.json') }}
+
+    test-vanilla:
+        if: contains(github.event.inputs.frameworks, 'vanilla')
+        name: Test Vanilla Examples
+        needs: download-examples
+        runs-on: ubuntu-latest
+        strategy:
+          fail-fast: false
+          matrix:
+            shardIndex: [1]
+            shardTotal: [1]
+        steps:
+          - uses: actions/checkout@v4
+          - uses: ./.github/actions/test-framework-examples
+            with:
+              framework: vanilla
+
+    test-typescript:
+        if: contains(github.event.inputs.frameworks, 'typescript')
+        name: Test Typescript Examples
+        needs: download-examples
+        runs-on: ubuntu-latest
+        strategy:
+          fail-fast: false
+          matrix:
+            shardIndex: [1]
+            shardTotal: [1]
+        steps:
+          - uses: actions/checkout@v4
+          - uses: ./.github/actions/test-framework-examples
+            with:
+              framework: typescript
+
+    test-react-functional:
+        if: contains(github.event.inputs.frameworks, 'reactFunctional')
+        name: Test React Examples
+        needs: download-examples
+        runs-on: ubuntu-latest
+        strategy:
+          fail-fast: false
+          matrix:
+            shardIndex: [1]
+            shardTotal: [1]
+        steps:
+          - uses: actions/checkout@v4
+          - uses: ./.github/actions/test-framework-examples
+            with:
+              framework: reactFunctional
+
+    test-react-functional-ts:
+        if: contains(github.event.inputs.frameworks, 'reactFunctionalTs')
+        name: Test React TS Examples
+        needs: download-examples
+        runs-on: ubuntu-latest
+        strategy:
+          fail-fast: false
+          matrix:
+            shardIndex: [1]
+            shardTotal: [1]
+        steps:
+          - uses: actions/checkout@v4
+          - uses: ./.github/actions/test-framework-examples
+            with:
+              framework: reactFunctionalTs
+
+    test-vue3:
+        if: contains(github.event.inputs.frameworks, 'vue3')
+        name: Test Vue Examples
+        needs: download-examples
+        runs-on: ubuntu-latest
+        strategy:
+          fail-fast: false
+          matrix:
+            shardIndex: [1, 2]
+            shardTotal: [2]
+        steps:
+          - uses: actions/checkout@v4
+          - uses: ./.github/actions/test-framework-examples
+            with:
+              framework: vue3              
+
+    test-angular:
+        if: contains(github.event.inputs.frameworks, 'angular')
+        name: Test Angular Examples
+        needs: download-examples
+        runs-on: ubuntu-latest
+        strategy:
+          fail-fast: false
+          matrix:
+            shardIndex: [1, 2, 3, 4]
+            shardTotal: [4]
+        steps:
+          - uses: actions/checkout@v4
+          - uses: ./.github/actions/test-framework-examples
+            with:
+              framework: angular
+
+    publish-reports:
+      if: always()
+      needs:
+        - test-demos
+        - test-react-functional
+        - test-react-functional-ts
+        - test-angular
+        - test-typescript
+        - test-vanilla
+        - test-vue3
+      runs-on: ubuntu-latest
+      steps:
+        - name: Download all test reports
+          uses: actions/download-artifact@v4
+          with:
+            path: combined-reports
+
+        - name: Publish Combined Test Report
+          uses: ctrf-io/github-test-reporter@v1
+          with:
+            report-path: 'combined-reports/**/*.json'
+            summary-report: true
+            failed-report: true
+            flaky-report: true
+            skipped-report: true
