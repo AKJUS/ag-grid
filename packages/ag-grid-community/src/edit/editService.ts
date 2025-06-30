@@ -11,6 +11,7 @@ import { _addGridCommonParams, _isClientSideRowModel } from '../gridOptionsUtils
 import type { CellRange, IRangeService } from '../interfaces/IRangeService';
 import type { EditStrategyType } from '../interfaces/editStrategyType';
 import type { EditingCellPosition, ICellEditorParams, ICellEditorValidationError } from '../interfaces/iCellEditor';
+import type { CellPosition } from '../interfaces/iCellPosition';
 import type { RefreshCellsParams } from '../interfaces/iCellsParams';
 import type { Column } from '../interfaces/iColumn';
 import type { EditMap, EditRow, EditValue, GetEditsParams, IEditModelService } from '../interfaces/iEditModelService';
@@ -28,9 +29,9 @@ import type {
 import type { IRowNode } from '../interfaces/iRowNode';
 import type { IRowStyleFeature } from '../interfaces/iRowStyleFeature';
 import type { UserCompDetails } from '../interfaces/iUserCompDetails';
-import type { CellPosition } from '../main-umd-noStyles';
 import { CellCtrl } from '../rendering/cell/cellCtrl';
 import type { RowCtrl } from '../rendering/row/rowCtrl';
+import { _batchCall } from '../utils/function';
 import type { ValueService } from '../valueService/valueService';
 import { PopupEditorWrapper } from './cellEditors/popupEditorWrapper';
 import type { BaseEditStrategy } from './strategy/baseEditStrategy';
@@ -525,14 +526,17 @@ export class EditService extends BeanStub implements NamedBean, IEditService {
 
     public checkNavWithValidation(
         position?: EditPosition,
-        event?: Event | CellFocusedEvent
+        event?: Event | CellFocusedEvent,
+        focus: boolean = true
     ): EditNavOnValidationResult {
         if (this.hasValidationErrors(position)) {
             const cellCtrl = _getCellCtrl(this.beans, position);
             if (this.cellEditingInvalidCommitBlocks()) {
                 (event as Event)?.preventDefault?.();
-                !cellCtrl?.hasBrowserFocus() && cellCtrl?.focusCell();
-                cellCtrl?.comp?.getCellEditor()?.focusIn?.();
+                if (focus) {
+                    !cellCtrl?.hasBrowserFocus() && cellCtrl?.focusCell();
+                    cellCtrl?.comp?.getCellEditor()?.focusIn?.();
+                }
                 return 'block-stop';
             }
 
@@ -935,5 +939,26 @@ export class EditService extends BeanStub implements NamedBean, IEditService {
         const label = translate('ariaPendingChange', 'Pending Change');
 
         this.beans.ariaAnnounce?.announceValue(label, 'pendingChange');
+    }
+
+    allowedFocusTargetOnValidation(cellPosition: EditPosition): CellCtrl | undefined {
+        const incomingCellCtrl = _getCellCtrl(this.beans, cellPosition);
+
+        if (this.checkNavWithValidation(undefined, undefined, false) === 'block-stop') {
+            // if we are blocking the navigation, we don't allow focus change out of the editor
+            const map = this.model.getCellValidationModel().getCellValidationMap();
+            const rowNode = map.keys().next()?.value;
+            const column = map.get(rowNode)?.keys().next()?.value;
+            const cellCtrl = _getCellCtrl(this.beans, { rowNode, column });
+
+            if (cellCtrl && cellCtrl !== incomingCellCtrl) {
+                // if we are blocking the navigation, we set the focus back to the editor
+                _batchCall(() => this.strategy?.setFocusInOnEditor(cellCtrl));
+            }
+
+            return cellCtrl;
+        }
+
+        return incomingCellCtrl;
     }
 }
