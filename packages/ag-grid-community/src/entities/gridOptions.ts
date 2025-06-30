@@ -126,6 +126,7 @@ import type {
 } from '../interfaces/exportParams';
 import type { GridState } from '../interfaces/gridState';
 import type { IAdvancedFilterBuilderParams } from '../interfaces/iAdvancedFilterBuilderParams';
+import type { IAdvancedFilterParams } from '../interfaces/iAdvancedFilterParams';
 import type { AlignedGrid } from '../interfaces/iAlignedGrid';
 import type {
     FillOperationParams,
@@ -704,6 +705,11 @@ export interface GridOptions<TData = any> {
      * @agModule `AdvancedFilterModule`
      */
     advancedFilterBuilderParams?: IAdvancedFilterBuilderParams;
+    /**
+     * Customise the parameters passed to the Advanced Filter
+     * @agModule `AdvancedFilterModule`
+     */
+    advancedFilterParams?: IAdvancedFilterParams;
     /**
      * @deprecated As of v34, advanced filter no longer uses function evaluation, so this option has no effect.
      * @default true
