@@ -1,11 +1,12 @@
-name: Doc Tests 
+name: Doc Tests
 description: Testing of AG Grid Examples
 
 env:
     NX_NO_CLOUD: true
     CI: true
     DEFAULT_RETENTION_DAYS: 30
-
+    COMMIT_SHA_FILE: ./commit-sha.txt
+    SLACK_FILE: ./slack.json
 on:
     workflow_dispatch:
         inputs:
@@ -39,6 +40,11 @@ on:
                 type: boolean
                 required: true
                 default: true
+            notify:
+              description: 'Notify Slack channel'
+              type: boolean
+              default: true
+              required: true
     schedule:
         - cron: '30 2 * * *' # Run daily at 2:30am UTC
 
@@ -168,7 +174,7 @@ jobs:
           - uses: actions/checkout@v4
           - uses: ./.github/actions/test-framework-examples
             with:
-              framework: vue3              
+              framework: vue3
 
     test-angular:
         if: ${{ github.event.inputs.skip_angular != 'true' }}
@@ -204,10 +210,63 @@ jobs:
             path: combined-reports
 
         - name: Publish Combined Test Report
-          uses: ctrf-io/github-test-reporter@v1
+          id: ctrf
+          uses: sdwvit/github-test-reporter@v1.0.15report6
           with:
             report-path: 'combined-reports/**/*.json'
             summary-report: true
             failed-report: true
             flaky-report: true
             skipped-report: true
+
+        - uses: actions/checkout@v4
+          with:
+            fetch-depth: 1
+
+        - name: Get previous run commit SHA
+          if: ${{ inputs.notify }}
+          id: prev-commit-sha
+          uses: actions/cache/restore@v4
+          with:
+            path: ${{ env.COMMIT_SHA_FILE }}
+            key: doc-tests-prev-commit
+
+        - name: Convert ctrf output to Slack message blocks and write git sha
+          if: ${{ inputs.notify }}
+          env:
+            CTRF_REPORT: ${{ steps.ctrf.outputs.report }}
+            JOB_NAME: 'Documentation Tests'
+            JOB_ID: ${{ github.run_id }}
+            BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+            COMMIT_SHA: ${{ github.sha }}
+            COMMIT_SHA_FILE: ${{ env.COMMIT_SHA_FILE }}
+            REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+            SLACK_CHANNEL: '#ci-grid-gate'
+            SLACK_ICON: 'https://avatars.slack-edge.com/2020-11-25/1527503386626_319578f21381f9641cd8_192.png'
+            SLACK_USERNAME: 'ag-grid CI'
+          run: |
+            node ./.github/actions/slack-integration/ctrf-markdown-to-slack-blocks.mjs
+            echo 'SLACK_FILE:'
+            cat $SLACK_FILE
+            echo ':SLACK_FILE'
+            {
+              echo 'SLACK_MESSAGE_BLOCKS<<EOF'
+              cat $SLACK_FILE
+              echo 'EOF'
+            } >> $GITHUB_ENV
+            echo ${{ github.sha }} > ${{ env.COMMIT_SHA_FILE }}
+
+        - name: Slack Notification
+          if: ${{ inputs.notify }}
+          continue-on-error: true
+          uses: ./.github/actions/slack-integration
+          with:
+            SLACK_WEBHOOK: ${{ secrets.CI_GATE_WEBHOOK }}
+            SLACK_MESSAGE_BLOCKS: ${{ env.SLACK_MESSAGE_BLOCKS }}
+
+        - name: Save this run commit SHA
+          if: ${{ inputs.notify }}
+          uses: actions/cache/save@v4
+          with:
+            path: ${{ env.COMMIT_SHA_FILE }}
+            key: ${{ steps.prev-commit-sha.outputs.cache-primary-key }}
