@@ -1,10 +1,23 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import styles from '../../pages-styles/return-to-service.module.scss';
+import styles from '../../pages-styles/return-to-support.module.scss';
 import { Icon } from '@ag-website-shared/components/icon/Icon';
 import FlipCountdown from '@components/campaigns-components/FlipCountdown';
+import RenewNowButton from '@components/campaigns-components/RenewNowButton';
 import { urlWithBaseUrl } from '@utils/urlWithBaseUrl';
 import ImageCarousel from '@components/campaigns-components/ImageCarousel';
+
+// Tracking / Analytics
+const utmSource = 'ag-grid.com';
+const utmMedium = 'marketing-campaign-landing-page';
+const utmCampaign = 'return-to-support-campaign';
+const utm = `?utm_source=${utmSource}&utm_medium=${utmMedium}&utm_campaign=${utmCampaign}`;
+
+// Mailto Content
+const mailtoAddress = 'info@ag-grid.com';
+const mailtoSubject = 'Return To Support Offer';
+const mailtoBody = '';
+const mailto = `mailto:${mailtoAddress}?subject=${encodeURIComponent(mailtoSubject)}&body=${encodeURIComponent(mailtoBody)}`;
 ---
 
 <!-- Oswald font -->
@@ -35,9 +48,13 @@ import ImageCarousel from '@components/campaigns-components/ImageCarousel';
 
                     <FlipCountdown client:only days={60} />
                 </div>
-                <a href="mailto:info@ag-grid.com" class={`button ${styles.button}`}
-                    >Renew now <Icon name="chevronRight" /></a
-                >
+                <RenewNowButton
+                    href={mailto}
+                    className={`button ${styles.button}`}
+                    plausibleEventType="renew-header-cta"
+                    text="Renew Now"
+                    client:load
+                />
             </div>
         </div>
 
@@ -48,9 +65,14 @@ import ImageCarousel from '@components/campaigns-components/ImageCarousel';
                     Pick up where you left off and enjoy the full benefits of AG Grid at today's prices. In future,
                     renewing once you are out of contract will incur back pay and reinstatement charges.
                 </p>
-                <a href="mailto:info@ag-grid.com" class={`button-tertiary ${styles.button}`}
-                    >Contact us at info@ag-grid.com <Icon name="chevronRight" /></a
-                >
+
+                <RenewNowButton
+                    href={mailto}
+                    className={`button-tertiary ${styles.button}`}
+                    plausibleEventType="renew-body-cta"
+                    text="Contact us at info@ag-grid.com"
+                    client:load
+                />
             </div>
 
             <div class={styles.rtsBenefitsTableWrapper}>
@@ -58,7 +80,7 @@ import ImageCarousel from '@components/campaigns-components/ImageCarousel';
                     <thead>
                         <tr>
                             <th></th>
-                            <th className={styles.renewedSupportTitle}>Renewed Support & Maintenance</th>
+                            <th class={styles.renewedSupportTitle}>Renewed Support & Maintenance</th>
                             <th>Lapsed Support & Maintenance</th>
                         </tr>
                     </thead>
@@ -144,32 +166,38 @@ import ImageCarousel from '@components/campaigns-components/ImageCarousel';
             <div class={styles.sectionTitle}>
                 <h2>Latest releases</h2>
                 <p>Here's what you've missed since you've been gone</p>
-                <a href="#" class={`button-tertiary ${styles.button}`}
+                <a href={urlWithBaseUrl(`/whats-new/${utm}`)} target="_blank" class={`button-tertiary ${styles.button}`}
                     >View recent releases <Icon name="chevronRight" /></a
                 >
             </div>
             <div class={styles.rtsReleaseCards}>
                 <div class={styles.rtsReleaseCard}>
-                    <img src={urlWithBaseUrl(`images/campaigns/33.2.png`)} class={styles.rtsReleaseImage} />
-                    <h3>New In 33.2: Find</h3>
-                    <p>Instantly search and locate data using the powerful new in-grid Find feature</p>
+                    <a href=`https://blog.ag-grid.com/whats-new-in-ag-grid-33-2/${utm}` target="_blank">
+                        <img src={urlWithBaseUrl(`images/campaigns/33.2.png`)} class={styles.rtsReleaseImage} />
+                        <h3>33.2: Find</h3>
+                        <p>Instantly search and locate data using the powerful new in-grid Find feature</p>
+                    </a>
                 </div>
 
                 <div class={styles.rtsReleaseCard}>
-                    <img src={urlWithBaseUrl(`images/campaigns/33.3.png`)} class={styles.rtsReleaseImage} />
-                    <h3>New In 33.3: Row Pinning</h3>
-                    <p>
-                        Bring a familiar, spreadsheet-style experience to your users with row numbers, resizable row
-                        heights, and customizable header columns.
-                    </p>
+                    <a href=`https://blog.ag-grid.com/whats-new-in-ag-grid-33-3/${utm}` target="_blank">
+                        <img src={urlWithBaseUrl(`images/campaigns/33.3.png`)} class={styles.rtsReleaseImage} />
+                        <h3>33.3: Row Pinning</h3>
+                        <p>
+                            Bring a familiar, spreadsheet-style experience to your users with row numbers, resizable row
+                            heights, and customizable header columns.
+                        </p>
+                    </a>
                 </div>
                 <div class={styles.rtsReleaseCard}>
-                    <img src={urlWithBaseUrl(`images/campaigns/34.png`)} class={styles.rtsReleaseImage} />
-                    <h3>New In 34: Filter Tool Panel</h3>
-                    <p>
-                        Take control of data filtering with the redesigned Filters Tool Panel, faster, clearer, and more
-                        intuitive than ever.
-                    </p>
+                    <a href=`https://blog.ag-grid.com/whats-new-in-ag-grid-34/${utm}` target=" _blank">
+                        <img src={urlWithBaseUrl(`images/campaigns/34.png`)} class={styles.rtsReleaseImage} />
+                        <h3>34: Filter Tool Panel</h3>
+                        <p>
+                            Take control of data filtering with the redesigned Filters Tool Panel, faster, clearer, and
+                            more intuitive than ever.
+                        </p>
+                    </a>
                 </div>
             </div>
         </section>
@@ -178,15 +206,15 @@ import ImageCarousel from '@components/campaigns-components/ImageCarousel';
             <h2>Trusted by developers worldwide</h2>
             <div class={styles.rtsTrustedQuotes}>
                 <div class={styles.rtsTrustedQuote}>
-                    <p>The flexibility provided by AG Grid and your support is unmatched.</p>
+                    <p>"The flexibility provided by AG Grid and your support is unmatched."</p>
                     <span>Dizparc – IT Services, EMEA</span>
                 </div>
                 <div class={styles.rtsTrustedQuote}>
-                    <p>Amazing software! Used it for years and it has been great.</p>
+                    <p>"Amazing software! Used it for years and it has been great."</p>
                     <span>PwC – Global Professional Services Firm</span>
                 </div>
                 <div class={styles.rtsTrustedQuote}>
-                    <p>Keep up the great work, it's still the best grid in the world</p>
+                    <p>"Keep up the great work, it's still the best grid in the world."</p>
                     <span>Developer on X</span>
                 </div>
             </div>
@@ -195,7 +223,7 @@ import ImageCarousel from '@components/campaigns-components/ImageCarousel';
         <section class={styles.rtsChartsCtaSection}>
             <div class={styles.rtsChartsCtaContent}>
                 <h2>It's time to try AG Charts</h2>
-                <a href="https://ag-grid.com/charts" class={`button-primary ${styles.button}`}
+                <a href=`https://www.ag-grid.com/charts${utm}` target="_blank" class={`button-primary ${styles.button}`}
                     >Get started with charts <Icon name="chevronRight" /></a
                 >
             </div>
@@ -207,9 +235,14 @@ import ImageCarousel from '@components/campaigns-components/ImageCarousel';
         <section class={styles.rtsRenewSection} id="renew">
             <div class={styles.rtsRenewLeft}>
                 <h2>Ready to renew?</h2>
-                <a href="mailto:info@ag-grid.com" class={`button ${styles.button}`}
-                    >Renew now <Icon name="chevronRight" /></a
-                >
+
+                <RenewNowButton
+                    href={mailto}
+                    className={`button ${styles.button}`}
+                    plausibleEventType="renew-footer-cta"
+                    text="Renew now"
+                    client:load
+                />
             </div>
             <div class={styles.rtsRenewRight}>
                 <div class={styles.rtsRenewContent}>
