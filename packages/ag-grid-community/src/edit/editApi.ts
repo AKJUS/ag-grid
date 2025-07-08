@@ -1,7 +1,7 @@
 import type { StartEditingCellParams } from '../api/gridApi';
 import { ensureColumnVisible, ensureIndexVisible } from '../api/scrollApi';
 import type { BeanCollection } from '../context/context';
-import { _getCellByPosition, _getRowNode } from '../entities/positionUtils';
+import { _getRowNode } from '../entities/positionUtils';
 import type { RowNode } from '../entities/rowNode';
 import type { EditingCellPosition, ICellEditorValidationError } from '../interfaces/iCellEditor';
 import type { CellPosition } from '../interfaces/iCellPosition';
