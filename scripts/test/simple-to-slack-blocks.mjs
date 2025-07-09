@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-const rawReportFile = process.env.CTRF_REPORT_FILE || '';
+const isSuccess = process.env.IS_SUCCESS === 'true';
 const jobID = process.env.JOB_ID || '';
 const jobName = process.env.JOB_NAME || '';
 const repoUrl = process.env.REPO_URL || '';
@@ -11,30 +11,9 @@ const icon_url = process.env.SLACK_ICON || '';
 const currentCommitSha = process.env.COMMIT_SHA || '';
 const previousCommitShaFile = process.env.COMMIT_SHA_FILE || './commit-sha.txt';
 const slackFile = process.env.SLACK_FILE || './slack.json';
+const lastFailedStep = process.env.LAST_FAILED_STEP || '';
 
-const jobUrl = `${repoUrl}/actions/runs/${jobID}`
-
-let rawReport;
-
-try {
-    rawReport = fs.readFileSync(rawReportFile, 'utf8').trim();
-    if (!rawReport) {
-        throw new Error(`Report file ${rawReportFile} is empty.`);
-    }
-} catch (error) {
-    console.error(`Failed to read CTRF report from ${rawReportFile}:`, error);
-    process.exit(1);
-}
-
-console.log('Converting CTRF report to Slack blocks...');
-let parsedReport;
-try {
-    parsedReport = JSON.parse(rawReport).results.summary;
-} catch (error) {
-    console.error('Failed to parse CTRF report:', rawReport, error);
-    process.exit(1);
-}
-const isSuccess = parsedReport.extra?.result === 'passed' || parsedReport.failed === 0;
+const jobUrl = `${repoUrl}/actions/runs/${jobID}`;
 
 let previousCommitSha = '';
 try {
@@ -42,15 +21,9 @@ try {
 } catch (error) {
     console.error(`Failed to read previous commit SHA from ${previousCommitShaFile}:`, error);
 }
+const headerTemplate = `${isSuccess ? '✅' : '❌'} AgGrid / ${slackLink(`${jobName} #${jobID}`, jobUrl)} run (on ${branchName}) ${isSuccess ? bold('is successful') : `${bold('failed')} at step ${inlineCode(lastFailedStep)}`}`;
 
-const headerTemplate = `${isSuccess ? '✅' : '❌'} AgGrid / ${slackLink(`${jobName} #${jobID}`, jobUrl)} run (on ${branchName}) ${bold(isSuccess ? 'is successful' : 'failed')}`;
-
-const statsString = ['failed', 'passed', 'skipped']
-    .filter((n) => parsedReport[n])
-    .map(renderStat)
-    .join(', ');
-const statsTemplate = `Status: Tests ${statsString}`;
-const blocks = [section(headerTemplate), context(statsTemplate), getGitDiffLink()];
+const blocks = [section(headerTemplate), getGitDiffLink()];
 const slackMsg = getSlackMessage(blocks);
 fs.writeFileSync(slackFile, `${JSON.stringify(slackMsg)}\n`, 'utf8');
 
@@ -66,16 +39,16 @@ function bold(text) {
     return `*${text}*`;
 }
 
+function inlineCode(text) {
+    return `\`${text}\``;
+}
+
 function section(text) {
     return { type: 'section', text: { type: 'mrkdwn', text } };
 }
 
 function getSlackMessage(blocks) {
     return { channel, username, icon_url, blocks };
-}
-
-function renderStat(statKey) {
-    return `${statKey}: ${parsedReport[statKey]}${statKey === 'failed' ? ` (${parsedReport.extra?.failRateChange} new)` : ''}`;
 }
 
 function getGitDiffLink() {
@@ -88,9 +61,6 @@ function getGitDiffLink() {
     }
 
     return section(
-        slackLink(
-            'Git diff',
-            `${repoUrl}/compare/${previousCommitSha.slice(0, 7)}...${currentCommitSha.slice(0, 7)}`
-        )
+        slackLink('Git diff', `${repoUrl}/compare/${previousCommitSha.slice(0, 7)}...${currentCommitSha.slice(0, 7)}`)
     );
 }
