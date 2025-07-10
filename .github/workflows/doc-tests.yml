@@ -56,12 +56,12 @@ on:
                 default: true
                 required: true
             force_jira_ticket:
-                description: 'Force create a Jira ticket even'
+                description: 'Force create a Jira ticket even if the run is not scheduled'
                 type: boolean
                 default: false
                 required: true
-    schedule:
-        - cron: '30 2 * * *' # Run daily at 2:30am UTC
+    #schedule:
+    #    - cron: '30 2 * * *' # Run daily at 2:30am UTC
 
 jobs:
     # Run all framework tasks in parallel
@@ -282,15 +282,15 @@ jobs:
         - name: Load files into environment
           continue-on-error: true
           run: |
+            if [ -f ${{ env.PREV_COMMIT_SHA_FILE }} ]; then
             {
-              if [ -f ${{ env.PREV_COMMIT_SHA_FILE }} ]; then
-                echo 'PREV_COMMIT_SHA<<EOF'
-                cat ${{ env.PREV_COMMIT_SHA_FILE }}
-                echo 'EOF'
-              else
-                echo 'PREV_COMMIT_SHA_FILE not found'
-              fi
+               echo 'PREV_COMMIT_SHA<<EOF'
+               cat ${{ env.PREV_COMMIT_SHA_FILE }}
+               echo 'EOF'
             } >> $GITHUB_ENV
+            else
+              echo 'PREV_COMMIT_SHA_FILE not found'
+            fi
 
         - name: Slack Notification
           if: ${{ github.event_name == 'schedule' || inputs.notify }}
