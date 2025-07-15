@@ -9005,61 +9005,61 @@ adm-zip@^0.5.10:
   resolved "http://52.50.158.57:4873/adm-zip/-/adm-zip-0.5.16.tgz#0b5e4c779f07dedea5805cdccb1147071d94a909"
   integrity sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==
 
-ag-charts-angular@12.0.2-beta.20250708.1354:
-  version "12.0.2-beta.20250708.1354"
-  resolved "http://52.50.158.57:4873/ag-charts-angular/-/ag-charts-angular-12.0.2-beta.20250708.1354.tgz#3e7966e8e6378c3a3bffce9b45f4040437598a0c"
-  integrity sha512-qTKqrvudMdrwaPkxBJUQJflcckw8JqnXOwtgT+ZQ8fNuezqkQgyf9vbPNsehHwLzi4q7D2oBvVphkXOW0wlMyg==
+ag-charts-angular@12.0.2:
+  version "12.0.2"
+  resolved "https://registry.yarnpkg.com/ag-charts-angular/-/ag-charts-angular-12.0.2.tgz#47f821bb95db0f94570a17a1c7b7ff1b5ef93021"
+  integrity sha512-BEaqq4vk28bNbESESvSwGKxPYnbbwuxpk5yyrGgWHBU2lHXfuVAAaCLalBJ6UjU//P+hp6SeaBBy8eLxYOMf8g==
   dependencies:
-    ag-charts-community "12.0.2-beta.20250708.1354"
+    ag-charts-community "12.0.2"
     tslib "^2.3.0"
 
-ag-charts-community@12.0.2-beta.20250708.1354:
-  version "12.0.2-beta.20250708.1354"
-  resolved "http://52.50.158.57:4873/ag-charts-community/-/ag-charts-community-12.0.2-beta.20250708.1354.tgz#de7424a087eb032113e1d2749abab97328ac4d84"
-  integrity sha512-wd8rPAXbjy8vFxFx1dsxWcGd+ezUcUPG8FT7YAyknX/W/eItgi98xRNKomFSX8DIJ/eDhm46uFG945O43F4B6w==
+ag-charts-community@12.0.2:
+  version "12.0.2"
+  resolved "https://registry.yarnpkg.com/ag-charts-community/-/ag-charts-community-12.0.2.tgz#4b6e342ce6ea1be65f65a30ddfb81d789b4d0773"
+  integrity sha512-ew6f1FD2ow4X5E3165OZrPz08Yh+pkFvvZOZYXtcABCiZtjzY4mE4zTh7+ZOBQ6utMe7p60T7epI0qlU1ngkmQ==
   dependencies:
-    ag-charts-core "12.0.2-beta.20250708.1354"
-    ag-charts-locale "12.0.2-beta.20250708.1354"
-    ag-charts-types "12.0.2-beta.20250708.1354"
+    ag-charts-core "12.0.2"
+    ag-charts-locale "12.0.2"
+    ag-charts-types "12.0.2"
 
-ag-charts-core@12.0.2-beta.20250708.1354:
-  version "12.0.2-beta.20250708.1354"
-  resolved "http://52.50.158.57:4873/ag-charts-core/-/ag-charts-core-12.0.2-beta.20250708.1354.tgz#f16bb98e24091b96034aff94f75abd88b27b3788"
-  integrity sha512-yAuQjzGnc4ufQZ/5lHGmjSXhZzld66362LK/a11sEvf9GOq6Runk1Co2WBnoFNZY3huLT3rbE9lTfsyYd8K0vA==
+ag-charts-core@12.0.2:
+  version "12.0.2"
+  resolved "https://registry.yarnpkg.com/ag-charts-core/-/ag-charts-core-12.0.2.tgz#6d1b3e6a29962c4498022eabbfeab8feb8ef4362"
+  integrity sha512-gIZW46N1MSiZoOnrmf0OIO1v1DibGTefntTWadYG68/nHBxeoV8jsPLfTMplUnPhGvzdQXWxXyvB9q9KKYV+0w==
   dependencies:
-    ag-charts-types "12.0.2-beta.20250708.1354"
+    ag-charts-types "12.0.2"
 
-ag-charts-enterprise@12.0.2-beta.20250708.1354:
-  version "12.0.2-beta.20250708.1354"
-  resolved "http://52.50.158.57:4873/ag-charts-enterprise/-/ag-charts-enterprise-12.0.2-beta.20250708.1354.tgz#52ae81d284fb1cd6e8222b7395364136e6b54716"
-  integrity sha512-731AjP2sfRFlDNOFtXMJobpbO8zbDbTr5Ji59DaO4qODgOaux7MKGtRHnR/d/Tv7wprqBG31mQDjgwFftgHTCQ==
+ag-charts-enterprise@12.0.2:
+  version "12.0.2"
+  resolved "https://registry.yarnpkg.com/ag-charts-enterprise/-/ag-charts-enterprise-12.0.2.tgz#e191c632319f997beee11a6d6882de080c7efc75"
+  integrity sha512-R/wltmyWlIQdk4C4VVJSkGY7Lb1eVkfIkdaddzY4ehwPCdEbFVMne7l5EkHYp00gY8vYsoTxhjTa/BMG+4TPDQ==
   dependencies:
-    ag-charts-community "12.0.2-beta.20250708.1354"
-    ag-charts-core "12.0.2-beta.20250708.1354"
+    ag-charts-community "12.0.2"
+    ag-charts-core "12.0.2"
 
-ag-charts-locale@12.0.2-beta.20250708.1354:
-  version "12.0.2-beta.20250708.1354"
-  resolved "http://52.50.158.57:4873/ag-charts-locale/-/ag-charts-locale-12.0.2-beta.20250708.1354.tgz#3b0200e2f93c268a1a8ca832920b58a8429af041"
-  integrity sha512-OR2Nd8OoQqQgSczxkqJ7i2x3BTJF5VsXg5UOrnmykkVPhP8AwYmcTiT+19ZlUMIrCtj0J7yRnROhI9VoQ/bWXA==
+ag-charts-locale@12.0.2:
+  version "12.0.2"
+  resolved "https://registry.yarnpkg.com/ag-charts-locale/-/ag-charts-locale-12.0.2.tgz#ae9980c9a654191165883056a2127f28065784c9"
+  integrity sha512-uiMdNQL7aaOSBaIPpyiVKLLddGTo0pT/dRX46Ra3ywglsfPHT9dsM22GAnHl/njVrGD66RewT+N2FGpMZj2rGA==
 
-ag-charts-react@12.0.2-beta.20250708.1354:
-  version "12.0.2-beta.20250708.1354"
-  resolved "http://52.50.158.57:4873/ag-charts-react/-/ag-charts-react-12.0.2-beta.20250708.1354.tgz#3c3068055062a5e4ab8a12fc2c80fe9533241073"
-  integrity sha512-bZ3oRztUzBsaQwGZknArx5mfrin2gj9hlgW/3NDAxJlUkwG+bWNNh4lawrOkfYFqhzCDCVhvTfCmRPUQBW+nuA==
+ag-charts-react@12.0.2:
+  version "12.0.2"
+  resolved "https://registry.yarnpkg.com/ag-charts-react/-/ag-charts-react-12.0.2.tgz#6e3c0d4a67c274b7cd25cbb278a0f26fb84e0da1"
+  integrity sha512-V4otOv3lsUTYWZLEhzQknLVkp/jHtqJNK41xrDHUho99VHOBrCbQxi/oKIEQijGASoA/iYH0xF7cEGqzizp8PQ==
   dependencies:
-    ag-charts-community "12.0.2-beta.20250708.1354"
+    ag-charts-community "12.0.2"
 
-ag-charts-types@12.0.2-beta.20250708.1354:
-  version "12.0.2-beta.20250708.1354"
-  resolved "http://52.50.158.57:4873/ag-charts-types/-/ag-charts-types-12.0.2-beta.20250708.1354.tgz#09e0b35e34422c658825b06f00674073da261e7d"
-  integrity sha512-bBUxAD6vkSCBrfXzyLWtvMtLECWVsxZ9UGtQinaRTMrZfEjaO/vvI8uMxf3nDXfTLt503mnCxHvqbXmqULDVHA==
+ag-charts-types@12.0.2:
+  version "12.0.2"
+  resolved "https://registry.yarnpkg.com/ag-charts-types/-/ag-charts-types-12.0.2.tgz#7796ac5d717f073145710e7318d22f7fafe6687a"
+  integrity sha512-AWM1Y+XW+9VMmV3AbzdVEnreh/I2C9Pmqpc2iLmtId3Xbvmv7O56DqnuDb9EXjK5uPxmyUerTP+utL13UGcztw==
 
-ag-charts-vue3@12.0.2-beta.20250708.1354:
-  version "12.0.2-beta.20250708.1354"
-  resolved "http://52.50.158.57:4873/ag-charts-vue3/-/ag-charts-vue3-12.0.2-beta.20250708.1354.tgz#32ac542eedeef5460bf76f02bd26ac75df6a78ce"
-  integrity sha512-G66DxGa1Tv2a7JuMicVbIxN07j7WNKroopaz7NDHYrBW8e4aauRb33jqS0wFBLJPGRQCmlaJUk5H8zyz3tZ/Ew==
+ag-charts-vue3@12.0.2:
+  version "12.0.2"
+  resolved "https://registry.yarnpkg.com/ag-charts-vue3/-/ag-charts-vue3-12.0.2.tgz#592cbacece31b6bbec7a87bf9dd35f71195b5f09"
+  integrity sha512-QovdtmuwB+xtSgtOt9p0y55yJwyj/45Ksle0VPNHdLaj2hm4XXgWvmsEErK6kl5jt78r4oMj9JHMENSL2m0AfQ==
   dependencies:
-    ag-charts-community "12.0.2-beta.20250708.1354"
+    ag-charts-community "12.0.2"
 
 agent-base@6, agent-base@^6.0.2:
   version "6.0.2"
