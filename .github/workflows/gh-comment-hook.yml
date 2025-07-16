@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  benchmark:
+  expand-jira-links:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
