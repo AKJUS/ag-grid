@@ -29,7 +29,7 @@ const COLUMN_DEFS = [
                 const latestFixVersion = fixVersionsArr.length - 1;
                 const fixVersion = fixVersionsArr[latestFixVersion];
                 if (fixVersion.toUpperCase() === 'NEXT') {
-                    return 'Scheduled';
+                    return `Scheduled for ${fixVersion}`;
                 } else {
                     return fixVersion;
                 }
