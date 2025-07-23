@@ -837,6 +837,7 @@ export {
     _createCellId,
     _isRowBefore,
     _isSameRow,
+    _getLastRow,
     _getRowNode,
     _getCellByPosition,
     _getRowAbove,
