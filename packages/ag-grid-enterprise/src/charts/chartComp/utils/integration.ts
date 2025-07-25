@@ -19,7 +19,7 @@ export function deproxy(chartOrProxy: AgChartInstance<AgChartInstanceOptions>): 
 // AVOID ADDING MORE DEPENDENCIES ON THESE PRIVATE APIS.
 
 export interface AgChartActual extends AgChartInstance {
-    title?: AgChartCaptionOptions;
+    title: { node: { getPlainText: () => string } };
     width: number;
     height: number;
     series: {
