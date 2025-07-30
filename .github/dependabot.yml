@@ -1,36 +1,26 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
-    directory: "/packages/ag-grid-docs"
-    schedule:
-      interval: "daily"
-
-  - package-ecosystem: "npm"
     directory: "/packages/ag-grid-angular"
     schedule:
-      interval: "daily"
+      interval: "monthly"
 
   - package-ecosystem: "npm"
     directory: "/packages/ag-grid-community"
     schedule:
-      interval: "daily"
+      interval: "monthly"
 
   - package-ecosystem: "npm"
     directory: "/packages/ag-grid-enterprise"
     schedule:
-      interval: "daily"
+      interval: "monthly"
 
   - package-ecosystem: "npm"
     directory: "/packages/ag-grid-react"
     schedule:
-      interval: "daily"
+      interval: "monthly"
 
   - package-ecosystem: "npm"
     directory: "/packages/ag-grid-vue3"
     schedule:
-      interval: "daily"
-
-
-
-
-
+      interval: "monthly"
