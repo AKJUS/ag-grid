@@ -6,13 +6,6 @@ on:
   push:
     branches: [ "latest" ]
 
-env:
-  PREV_COMMIT_SHA_FILE: ./commit-sha.txt
-  CTRF_FILE: ./ctrf-report.json
-  SLACK_CHANNEL: '#ci-grid-gate'
-  AG_LIBRARY: grid
-  THRESHOLD: 7.1
-
 permissions: read-all
 
 jobs:
@@ -53,7 +46,7 @@ jobs:
       - name: "Check Results"
         id: check_results
         run: |
-          node external/ag-shared/scripts/ossf-scorecard/getAndCheckResults.mjs ${{ env.AG_LIBRARY }} ${{ env.THRESHOLD }}
+          node external/ag-shared/scripts/ossf-scorecard/getAndCheckResults.mjs grid 7.1
 
       - name: Get previous run commit SHA
         id: prev-commit-sha
@@ -62,16 +55,16 @@ jobs:
           restore-keys: |
             scorecard-prev-commit-
             scorecard-prev-commit-${{ github.ref }}
-          path: ${{ env.PREV_COMMIT_SHA_FILE }}
+          path: ./commit-sha.txt
           key: scorecard-prev-commit-${{ github.ref }}-${{ github.sha }}
 
       - name: Load files into environment
         continue-on-error: true
         run: |
-          if [ -f ${{ env.PREV_COMMIT_SHA_FILE }} ]; then
+          if [ -f ./commit-sha.txt ]; then
           {
              echo 'PREV_COMMIT_SHA<<EOF'
-             cat ${{ env.PREV_COMMIT_SHA_FILE }}
+             cat ./commit-sha.txt
              echo 'EOF'
           } >> $GITHUB_ENV
           else
@@ -81,10 +74,10 @@ jobs:
       - name: Slack Notification
         uses: ./external/ag-shared/github/actions/slack-integration
         with:
-          AG_LIBRARY: ${{ env.AG_LIBRARY }}
-          CTRF_REPORT_FILE: ${{ env.CTRF_FILE }}
+          AG_LIBRARY: grid
+          CTRF_REPORT_FILE: ./ctrf-report.json
           SLACK_BOT_OAUTH_TOKEN: ${{ secrets.SLACK_BOT_OAUTH_TOKEN }}
-          SLACK_CHANNEL: ${{ env.SLACK_CHANNEL }}
-          PREV_COMMIT_SHA: ${{ env.PREV_COMMIT_SHA }}
+          SLACK_CHANNEL: '#ci-grid-gate'
+          PREV_COMMIT_SHA: ./commit-sha.txt
           CURRENT_COMMIT_SHA: ${{ github.sha }}
           IS_SUCCESS: ${{ needs.check_results.result != '0' }}
