@@ -41,4 +41,4 @@ jobs:
           SLACK_CHANNEL: ${{ env.SLACK_CHANNEL }}
 #          PREV_COMMIT_SHA: ${{ env.PREV_COMMIT_SHA }}
 #          CURRENT_COMMIT_SHA: ${{ github.sha }}
-          IS_SUCCESS: ${{ needs.check_results.result != '0' }}
+          IS_SUCCESS: ${{ check_results.result != '0' }}
