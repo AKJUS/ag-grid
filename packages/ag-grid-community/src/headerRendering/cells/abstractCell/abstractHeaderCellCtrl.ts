@@ -195,8 +195,8 @@ export abstract class AbstractHeaderCellCtrl<
 
         const startMeasuring = () => {
             isMeasuring = true;
-            measureHeight(0);
             this.comp.toggleCss('ag-header-cell-auto-height', true);
+            measureHeight(0); // ensure measuring after the class has added, otherwise will measure incorrect height
             stopResizeObserver = _observeResize(this.beans, wrapperElement, () => measureHeight(0));
         };
 
