@@ -31,7 +31,7 @@ export class HeaderFilterCellCtrl extends AbstractHeaderCellCtrl<IHeaderFilterCe
     private destroySyncListener: () => null;
     private destroyFilterChangedListener: () => null;
 
-    public setComp(
+    public override wireComp(
         comp: IHeaderFilterCellComp,
         eGui: HTMLElement,
         eButtonShowMainFilter: HTMLElement,

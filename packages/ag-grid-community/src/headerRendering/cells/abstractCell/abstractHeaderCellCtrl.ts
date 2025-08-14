@@ -50,6 +50,7 @@ export abstract class AbstractHeaderCellCtrl<
     public lastFocusEvent: KeyboardEvent | null = null;
 
     protected dragSource: DragSource | null = null;
+    protected reAttemptToFocus: boolean = false;
 
     protected abstract resizeHeader(delta: number, shiftKey: boolean): void;
     protected abstract getHeaderClassParams(): HeaderClassParams;
@@ -71,6 +72,31 @@ export abstract class AbstractHeaderCellCtrl<
             overlayExclusiveChanged: refreshTabIndex,
         });
     }
+
+    public setComp(
+        comp: TComp,
+        eGui: HTMLElement,
+        eResize: HTMLElement,
+        eHeaderCompWrapper: HTMLElement,
+        compBean: BeanStub<any> | undefined
+    ): void {
+        this.wireComp(comp, eGui, eResize, eHeaderCompWrapper, compBean);
+
+        // Post SetComp
+        // Actions that need to be done after the component is setup and all the features and listeners are wired
+        if (this.reAttemptToFocus) {
+            this.reAttemptToFocus = false;
+            this.focus(this.lastFocusEvent ?? undefined);
+        }
+    }
+
+    protected abstract wireComp(
+        comp: TComp,
+        eGui: HTMLElement,
+        eResize: HTMLElement,
+        eHeaderCompWrapper: HTMLElement,
+        compBean: BeanStub<any> | undefined
+    ): void;
 
     protected shouldStopEventPropagation(event: KeyboardEvent): boolean {
         const { headerRowIndex, column } = this.beans.focusSvc.focusedHeader!;
@@ -362,13 +388,19 @@ export abstract class AbstractHeaderCellCtrl<
     }
 
     public focus(event?: KeyboardEvent): boolean {
-        const { eGui } = this;
-        if (!eGui) {
+        if (!this.isAlive()) {
             return false;
         }
 
-        this.lastFocusEvent = event || null;
-        eGui.focus();
+        const { eGui } = this;
+
+        if (!eGui) {
+            this.reAttemptToFocus = true;
+        } else {
+            eGui.focus();
+            this.lastFocusEvent = event || null;
+        }
+
         return true;
     }
 

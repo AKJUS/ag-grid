@@ -39,7 +39,7 @@ export class HeaderGroupCellCtrl extends AbstractHeaderCellCtrl<
     private displayName: string | null;
     private tooltipFeature: TooltipFeature | undefined;
 
-    public setComp(
+    public override wireComp(
         comp: IHeaderGroupCellComp,
         eGui: HTMLElement,
         eResize: HTMLElement,

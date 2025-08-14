@@ -60,7 +60,7 @@ export class HeaderCellCtrl extends AbstractHeaderCellCtrl<IHeaderCellComp, AgCo
     private ariaDescriptionProperties = new Map<HeaderAriaDescriptionKey, string>();
     private tooltipFeature: TooltipFeature | undefined;
 
-    public setComp(
+    public override wireComp(
         comp: IHeaderCellComp,
         eGui: HTMLElement,
         eResize: HTMLElement,
