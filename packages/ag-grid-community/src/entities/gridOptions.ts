@@ -4,7 +4,7 @@
 import type { AgChartTheme, AgChartThemeOverrides } from 'ag-charts-types';
 
 import type { Theme } from '../agStack/theming/theme';
-import type { IsRowValidDropPositionCallback } from '../dragAndDrop/rowDragFeature';
+import type { IsRowValidDropPositionCallback } from '../dragAndDrop/rowDragTypes';
 import type { AgPublicEventType } from '../eventTypes';
 import type {
     AdvancedFilterBuilderVisibleChangedEvent,
@@ -2629,7 +2629,7 @@ export interface GridOptions<TData = any> {
     onRowDragCancel?(event: RowDragCancelEvent<TData>): void;
 
     /**
-     * Called by managed drag and drop when rows are dropped on another row.
+     * Called by drag and drop when rows are dragged over another row to conditionally prevent dropping the dragged row on the hovered row.
      * The user can cancel the drop by returning `false` or customize the operation by returning a `IsRowValidDropPositionResult`.
      * @agModule `RowDragModule`
      */
