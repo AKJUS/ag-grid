@@ -58,7 +58,7 @@
     "bent": "^7.2.0",
     "cssnano": "^7.0.5",
     "dependency-cruiser": "^13.1.5",
-    "esbuild": "^0.19.2",
+    "esbuild": "^0.25.0",
     "esbuild-plugin-umd-wrapper": "^2.0.0",
     "eslint": "^9.2.0",
     "eslint-config-prettier": "^9.1.0",
@@ -89,8 +89,8 @@
     "tsx": "4.8.2",
     "typescript": "~5.2.2",
     "typescript-eslint": "^7.9.0",
-    "vite": "~5.4.19",
-    "vitest": "2.1.6"
+    "vite": "~6.1.6",
+    "vitest": "2.1.9"
   },
   "workspaces": {
     "packages": [
