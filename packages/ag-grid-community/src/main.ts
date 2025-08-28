@@ -880,7 +880,7 @@ export {
     _FindApi,
     _BatchEditApi,
 } from './api/gridApi';
-export { _getClientSideRowModel, _getServerSideRowModel } from './api/rowModelApiUtils';
+export { _getClientSideRowModel, _getViewportRowModel, _getServerSideRowModel } from './api/rowModelApiUtils';
 export { AgEventType, AgPublicEventType, _GET_ALL_EVENTS, _PUBLIC_EVENTS } from './eventTypes';
 export { _PUBLIC_EVENT_HANDLERS_MAP } from './publicEventHandlersMap';
 export type { FocusService } from './focusService';
@@ -1312,8 +1312,10 @@ export {
 } from './selection/rowSelectionModule';
 export {
     CsrmSsrmSharedApiModule as _CsrmSsrmSharedApiModule,
+    RowModelSharedApiModule as _RowModelSharedApiModule,
     SsrmInfiniteSharedApiModule as _SsrmInfiniteSharedApiModule,
 } from './api/sharedApiModule';
+export { onRowHeightChanged, resetRowHeights } from './api/rowModelSharedApi';
 export { SharedMenuModule as _SharedMenuModule } from './misc/menu/sharedMenuModule';
 export { SortModule as _SortModule } from './sort/sortModule';
 export { AlignedGridsModule } from './alignedGrids/alignedGridsModule';
