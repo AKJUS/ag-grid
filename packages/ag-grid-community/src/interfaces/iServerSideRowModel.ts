@@ -1,4 +1,3 @@
-import type { RowNode } from '../entities/rowNode';
 import type { ServerSideGroupLevelState } from './IServerSideStore';
 import type { IRowModel } from './iRowModel';
 import type { IRowNode } from './iRowNode';
@@ -9,7 +8,6 @@ export interface IServerSideRowModel<TData = any> extends IRowModel {
     refreshStore(params?: RefreshServerSideParams): void;
     getStoreState(): ServerSideGroupLevelState[];
     retryLoads(): void;
-    forEachNodeTransactional(cb: (rowNode: RowNode, index?: number) => void): void;
     setDatasource(datasource: IServerSideDatasource<TData>): void;
     forEachNodeAfterFilterAndSort(
         callback: (node: IRowNode<TData>, index: number) => void,

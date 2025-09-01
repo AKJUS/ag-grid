@@ -967,7 +967,6 @@ export {
     CellSelectionCellState,
     RangeSelectionCellState,
     RangeSelectionState,
-    RowGroupExpansionState,
     RowGroupState,
     RowPinningState,
     ScrollState,
@@ -982,7 +981,7 @@ export { convertColumnGroupState, convertColumnState } from './misc/state/stateU
 // uncatalogued
 export { IRowModel, RowBounds, RowModelType } from './interfaces/iRowModel';
 export { ISelectionService, ISetNodesSelectedParams } from './interfaces/iSelectionService';
-export { IExpansionService } from './interfaces/iExpansionService';
+export { IExpansionService, RowGroupExpansionState, RowGroupBulkExpansionState } from './interfaces/iExpansionService';
 export { ServerSideRowSelectionState, ServerSideRowGroupSelectionState } from './interfaces/selectionState';
 export { IServerSideSelectionState, IServerSideGroupSelectionState } from './interfaces/iServerSideSelection';
 export { IAggFuncService } from './interfaces/iAggFuncService';
