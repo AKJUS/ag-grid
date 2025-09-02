@@ -748,6 +748,11 @@ export class ClientSideRowModel extends BeanStub implements IClientSideRowModel,
                     return;
                 }
                 started = true;
+
+                // When the first and last node are the same we're already finished
+                if (lastInRange === firstInRange) {
+                    finished = true;
+                }
             }
 
             // only select leaf nodes if groupsSelectChildren
