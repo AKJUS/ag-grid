@@ -59,11 +59,11 @@
     }
     position: fixed;
     z-index: 1000;
-    top: 0;
+    top: 54px;
     bottom: 0;
     width: 300px;
     display: flex;
-    transform: translateX(-342px);
+    transform: translateX(-344px);
     transition: transform 0.3s ease-in-out;
 }
 
