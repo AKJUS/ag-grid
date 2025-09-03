@@ -12,7 +12,7 @@ import {
     type ToolPanelDef,
     ValidationModule,
 } from 'ag-grid-community';
-import { ColumnsToolPanelModule, FiltersToolPanelModule, SetFilterModule } from 'ag-grid-enterprise';
+import { ColumnsToolPanelModule, NewFiltersToolPanelModule, SetFilterModule } from 'ag-grid-enterprise';
 import { AgGridVue } from 'ag-grid-vue3';
 
 // Import data interface
@@ -24,7 +24,7 @@ ModuleRegistry.registerModules([
     NumberFilterModule,
     ClientSideRowModelModule,
     ColumnsToolPanelModule,
-    FiltersToolPanelModule,
+    NewFiltersToolPanelModule,
     SetFilterModule,
     TextFilterModule,
     ...(process.env.NODE_ENV !== 'production' ? [ValidationModule] : []),
@@ -40,8 +40,8 @@ const VueExample = defineComponent({
         <div style="height: 100%">
             <div id="wrapper" class="example-wrapper">
                 <div class="example-header">
-                    <button @click="openPopup">Open Columns Panel</button>
-                    <button @click="openDrawer">Open Filters Panel</button>
+                    <button @click="openPopup">Open Columns Tool Panel</button>
+                    <button @click="openDrawer">Open Filters Tool Panel</button>
                 </div>
                 <ag-grid-vue
                     style="width: 100%; height: 100%"
@@ -52,6 +52,7 @@ const VueExample = defineComponent({
                     :autoGroupColumnDef="autoGroupColumnDef"
                     :sideBar="sideBar"
                     :rowData="rowData"
+                    :enableFilterHandlers="true"
                 ></ag-grid-vue>
             </div>
 
@@ -81,7 +82,6 @@ const VueExample = defineComponent({
         const popupRef = useTemplateRef<HTMLElement>('popup');
         const popupContentRef = useTemplateRef<HTMLElement>('popupContent');
         const gridApi = shallowRef<GridApi<IOlympicData> | null>(null);
-        const popupParent = ref<HTMLElement | null>(document.body);
         const columnDefs = ref<ColDef[]>([
             { field: 'athlete', filter: 'agTextColumnFilter', minWidth: 200 },
             { field: 'country', minWidth: 180 },
@@ -102,19 +102,15 @@ const VueExample = defineComponent({
             toolPanelParams: { suppressRowGroups: true, suppressValues: true, suppressPivotMode: true },
             parent: popupContentRef.value,
         });
-        /*        watchEffect(() => {
-            if (input.value) {
-                input.value.focus()
-            } else {
-                // not mounted yet, or the element was unmounted (e.g. by v-if)
-            }
-        })*/
+
+        let popupParent = shallowRef(document.body);
+
         const filtersToolPanel = ref<ToolPanelDef>({
             id: 'filters',
             labelDefault: 'Drawer',
             labelKey: 'filters',
             iconKey: 'filter',
-            toolPanel: 'agFiltersToolPanel',
+            toolPanel: 'agNewFiltersToolPanel',
         });
         const sideBar = ref<SideBarDef | string | string[] | boolean | null>({
             toolPanels: [columnsToolPanel.value, filtersToolPanel.value],
@@ -160,6 +156,7 @@ const VueExample = defineComponent({
             columnsToolPanel.value.parent = popupContentRef.value;
             filtersToolPanel.value.parent = drawerContentRef.value;
         });
+
         return {
             gridApi,
             popupParent,
