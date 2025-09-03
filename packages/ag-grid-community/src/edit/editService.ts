@@ -724,7 +724,7 @@ export class EditService extends BeanStub implements NamedBean, IEditService {
         const newValue = preferEditor ? edit?.editorValue ?? edit?.pendingValue : edit?.pendingValue;
 
         return newValue === UNEDITED || !edit
-            ? this.valueSvc.getValue(column as AgColumn, rowNode, true, 'api')
+            ? edit?.sourceValue ?? this.valueSvc.getValue(column as AgColumn, rowNode, false, 'api')
             : newValue;
     }
 
