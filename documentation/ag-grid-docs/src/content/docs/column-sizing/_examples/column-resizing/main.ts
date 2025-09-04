@@ -45,16 +45,11 @@ const gridOptions: GridOptions<IOlympicData> = {
         type: 'fitCellContents',
         defaultMaxWidth: 150,
         defaultMinWidth: 80,
+        hideUntilContent: true,
     },
 };
-
 function autoSizeAll(skipHeader: boolean) {
-    const colIds: string[] = [];
-    gridApi!.getColumns()!.forEach((column) => {
-        colIds.push(column.getId());
-    });
-
-    gridApi!.autoSizeColumns({ colIds, skipHeader, defaultMaxWidth: 150, defaultMinWidth: 80 });
+    gridApi!.autoSizeColumns({ skipHeader, defaultMaxWidth: 150, defaultMinWidth: 80 });
 }
 
 // setup the grid after the page has finished loading
