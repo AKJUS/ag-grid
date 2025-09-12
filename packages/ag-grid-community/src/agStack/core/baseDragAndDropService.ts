@@ -129,7 +129,8 @@ export abstract class BaseDragAndDropService<
         this.dragItem = dragSource.getDragItem();
 
         dragSource.onDragStarted?.();
-        this.createAndUpdateDragImageComp(dragSource);
+        const pointerCaptured = typeof PointerEvent !== 'undefined' && mouseEvent instanceof PointerEvent;
+        this.createAndUpdateDragImageComp(dragSource, pointerCaptured);
     }
 
     private onDragStop(mouseEvent: MouseEvent): void {
@@ -360,7 +361,7 @@ export abstract class BaseDragAndDropService<
         }
     }
 
-    private createAndUpdateDragImageComp(dragSource: TDragSource): void {
+    private createAndUpdateDragImageComp(dragSource: TDragSource, pointerCaptured: boolean): void {
         const promise = this.createDragImageComp(dragSource) ?? null;
 
         this.dragImageCompPromise = promise;
@@ -380,18 +381,21 @@ export abstract class BaseDragAndDropService<
             }
 
             if (dragImageComp) {
-                this.appendDragImageComp(dragImageComp);
+                this.appendDragImageComp(dragImageComp, pointerCaptured);
                 this.updateDragImageComp();
             }
         });
     }
 
-    private appendDragImageComp(component: IComponent<any> & IDragAndDropImage): void {
+    private appendDragImageComp(component: IComponent<any> & IDragAndDropImage, pointerCaptured: boolean): void {
         const eGui = component.getGui();
         const style = eGui.style;
 
-        style.setProperty('position', 'absolute');
-        style.setProperty('z-index', '9999');
+        style.position = 'absolute';
+        style.zIndex = '9999';
+        if (pointerCaptured) {
+            style.pointerEvents = 'none';
+        }
 
         this.gos.setInstanceDomData(eGui);
         this.beans.environment.applyThemeClasses(eGui);
