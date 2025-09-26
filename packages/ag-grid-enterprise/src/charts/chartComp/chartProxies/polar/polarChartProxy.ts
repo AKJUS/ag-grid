@@ -1,8 +1,4 @@
-import type {
-    AgPolarAxisOptions,
-    AgPolarChartOptions,
-    AgPolarSeriesOptions,
-} from 'ag-charts-types';
+import type { AgPolarAxisOptions, AgPolarChartOptions, AgPolarSeriesOptions } from 'ag-charts-types';
 
 import type { SeriesGroupType } from 'ag-grid-community';
 
