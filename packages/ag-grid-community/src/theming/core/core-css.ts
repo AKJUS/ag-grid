@@ -382,6 +382,11 @@ interface CoreThemeParams extends SharedThemeParams {
     panelBackgroundColor: ColorValue;
 
     /**
+     * The height of the title bar of panels and dialogs such as the integrated charts panel and the advanced filter builder.
+     */
+    panelTitleBarHeight: LengthValue;
+
+    /**
      * Background color for the title bar of panels and dialogs such as the integrated charts and the advanced filter builder.
      */
     panelTitleBarBackgroundColor: ColorValue;
@@ -873,6 +878,7 @@ export const coreDefaults: Readonly<Omit<CoreThemeParams, keyof SharedThemeParam
         color: foregroundMix(0.2),
     },
     panelBackgroundColor: backgroundColor,
+    panelTitleBarHeight: { ref: 'headerHeight' },
     panelTitleBarBackgroundColor: {
         ref: 'headerBackgroundColor',
     },
