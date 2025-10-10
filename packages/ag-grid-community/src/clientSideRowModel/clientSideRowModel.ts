@@ -623,7 +623,6 @@ export class ClientSideRowModel extends BeanStub implements IClientSideRowModel,
             const includeThisNode = !rowNode.group || !groupsSelectChildren;
             if (includeThisNode) {
                 result.push(rowNode);
-                return;
             }
         });
 

@@ -130,6 +130,13 @@ export interface ColGroupDef<TData = any> extends AbstractColDef<TData> {
     mainMenuItems?: (DefaultMenuItem | MenuItemDef<TData>)[] | GetMainMenuItems<TData>;
 }
 
+/** Select a column via:
+ * - the string (colId)
+ * - the colDef object
+ * - the Column instance
+ */
+export type ColKey<TData = any, TValue = any> = string | ColDef<TData, TValue> | Column<TValue>;
+
 export interface IAggFunc<TData = any, TValue = any, TContext = any> {
     (params: IAggFuncParams<TData, TValue, TContext>): any;
 }
