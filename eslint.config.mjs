@@ -32,7 +32,7 @@ export const sonarjsConfig = [
             'sonarjs/no-nested-conditional': 0,
             'sonarjs/pseudo-random': 0,
             'sonarjs/public-static-readonly': 0,
-            'sonarjs/no-redundant-optional': 0,
+            'sonarjs/no-redundant-optional': 1,
             'sonarjs/no-ignored-exceptions': 0,
             'sonarjs/no-alphabetical-sort': 0,
             'sonarjs/no-redundant-boolean': 0,
@@ -55,7 +55,7 @@ export const sonarjsConfig = [
 
             // Unicorn rules, as referenced from the SonarCloud documentation.
             // 'unicorn/prefer-number-properties': 1,
-            // 'unicorn/no-array-for-each': 1,
+            'unicorn/no-array-for-each': 1,
             'unicorn/prefer-export-from': 0,
             'unicorn/prefer-dom-node-remove': 0,
             'unicorn/prefer-math-trunc': 0,
