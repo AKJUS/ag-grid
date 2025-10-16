@@ -521,7 +521,7 @@ export class TreeGroupStrategy<TData = any> extends BeanStub implements IRowGrou
             if (!fullReload && node.treeParent !== null && (node.treeNodeFlags & FLAG_CHANGED) === 0) {
                 continue;
             }
-            const path = getDataPath(node.data!);
+            const path = getDataPath(node.data);
             const pathLen = path?.length;
             if (!pathLen) {
                 _warn(185, { data: node.data });
