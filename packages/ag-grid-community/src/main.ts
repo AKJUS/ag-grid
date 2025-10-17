@@ -78,7 +78,7 @@ export { _unwrapUserComp } from './components/framework/unwrapUserComp';
 export { BeanStub } from './context/beanStub';
 export { Bean, NamedBean } from './context/bean';
 export type { Context } from './context/context';
-export { BeanName, SingletonBean, BeanCollection } from './context/context';
+export { BeanName, SingletonBean, BeanCollection, StatusPanelComponentName } from './context/context';
 
 // AG Stack (public)
 export { VisibleChangedEvent, RefPlaceholder, AgBaseComponent, _isComponent } from './agStack/interfaces/agComponent';
@@ -530,6 +530,13 @@ export { IAdvancedFilterParams } from './interfaces/iAdvancedFilterParams';
 export { IAdvancedFilterService } from './interfaces/iAdvancedFilterService';
 
 export {
+    STRUCTURED_SCHEMA_FEATURES,
+    StructuredSchemaFeature,
+    StructuredSchemaColumnParams,
+    StructuredSchemaParams,
+} from './interfaces/structuredSchemaParams';
+
+export {
     FindMatch,
     IFindService,
     FindOptions,
@@ -878,6 +885,7 @@ export {
     _PinnedRowGridApi,
     _FindApi,
     _BatchEditApi,
+    _AiToolkitGridApi,
 } from './api/gridApi';
 export { _getClientSideRowModel, _getViewportRowModel, _getServerSideRowModel } from './api/rowModelApiUtils';
 export { AgEventType, AgPublicEventType, _GET_ALL_EVENTS, _PUBLIC_EVENTS } from './eventTypes';
