@@ -584,7 +584,7 @@ jobs:
           fetch-depth: 1
 
       - name: SonarQube Analysis Community
-        uses: SonarSource/sonarqube-scan-action@v5.2.0
+        uses: SonarSource/sonarqube-scan-action@v6.0.0
         env:
           SONAR_HOST_URL: https://sonarcloud.io
           SONAR_TOKEN: ${{ secrets.SONAR_COMMUNITY_LOGIN }}
@@ -609,7 +609,7 @@ jobs:
           fetch-depth: 1
 
       - name: SonarQube Analysis Enterprise
-        uses: SonarSource/sonarqube-scan-action@v5.2.0
+        uses: SonarSource/sonarqube-scan-action@v6.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_ENTERPRISE_LOGIN }}
           SONAR_HOST_URL: https://sonarcloud.io
