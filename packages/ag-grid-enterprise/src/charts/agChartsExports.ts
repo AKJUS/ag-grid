@@ -1,4 +1,4 @@
-import type { IntegratedModule } from 'ag-charts-community';
+import type { IntegratedModule } from 'ag-charts-types';
 
 import type { NamedBean } from 'ag-grid-community';
 import { BeanStub } from 'ag-grid-community';

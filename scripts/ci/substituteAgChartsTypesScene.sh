@@ -28,7 +28,7 @@ index 915327e8ab8..493c5ac9697 100644
 --- a/packages/ag-grid-enterprise/src/charts/agChartsExports.ts
 +++ b/packages/ag-grid-enterprise/src/charts/agChartsExports.ts
 @@ -1,4 +1,4 @@
--import type { IntegratedModule } from 'ag-charts-community';
+-import type { IntegratedModule } from 'ag-charts-types';
 +import type { AgChartsCommunityModule, IntegratedModule } from 'ag-charts-community';
  
  import type { NamedBean } from 'ag-grid-community';
