@@ -1,10 +1,11 @@
-import type { IntegratedModule } from 'ag-charts-types';
+import type { IntegratedModule } from 'ag-charts-community';
 
 import type { NamedBean } from 'ag-grid-community';
 import { BeanStub } from 'ag-grid-community';
 
 import type { IAgChartsExports } from '../agStack/iAgChartsExports';
 
+/** MAKE SURE TO UPDATE THE SCRIPT scripts/ci/substituteAgChartsTypesScene.sh WHEN CHANGING THIS FILE */
 type ChartTypes = IntegratedModule;
 
 /** Bean to expose the AG Charts apis from a single location and not require a code dependency on ag-charts-community */
