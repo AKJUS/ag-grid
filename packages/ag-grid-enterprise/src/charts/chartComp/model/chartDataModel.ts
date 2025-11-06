@@ -382,18 +382,10 @@ export class ChartDataModel extends BeanStub {
         const aggFuncDimension = this.suppliedCellRange.columns[0];
 
         dimensionCols.forEach((column) => {
-            const isAutoGroupCol = column.getColId() === 'ag-Grid-AutoColumn';
-
-            let selected = false;
-            if (this.crossFiltering && this.aggFunc) {
-                if (aggFuncDimension.getColId() === column.getColId()) {
-                    selected = true;
-                }
-            } else {
-                selected = isAutoGroupCol
-                    ? true
+            const selected =
+                this.crossFiltering && this.aggFunc
+                    ? aggFuncDimension.getColId() === column.getColId()
                     : (!hasSelectedDimension || supportsMultipleDimensions) && allCols.has(column);
-            }
 
             this.dimensionColState.push({
                 column,
