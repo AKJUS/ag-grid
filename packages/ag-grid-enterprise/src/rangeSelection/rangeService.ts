@@ -32,13 +32,13 @@ import {
     _exists,
     _getAbsoluteRowIndex,
     _getCellCtrlForEventTarget,
+    _getEnableColumnSelection,
     _getFirstRow,
     _getLastRow,
     _getRowAbove,
     _getRowBelow,
     _getRowCtrlForEventTarget,
     _getRowNode,
-    _getSuppressColumnSelection,
     _getSuppressMultiRanges,
     _isCellSelectionEnabled,
     _isDomLayout,
@@ -1265,13 +1265,14 @@ export class RangeService extends BeanStub implements NamedBean, IRangeService {
      */
     public handleColumnSelection(clickedColumn: AgColumn | AgColumnGroup, event: MouseEvent | KeyboardEvent): void {
         const { gos, beans, columnRangeSelectionCtx: ctx, cellRanges } = this;
-        const suppressColumnSelection = _getSuppressColumnSelection(gos);
-        if (suppressColumnSelection) {
+        const enableColumnSelection = _getEnableColumnSelection(gos);
+        if (!enableColumnSelection) {
             return;
         }
 
         const suppressMultiRanges = _getSuppressMultiRanges(gos);
         const hasRanges = cellRanges.length > 0;
+        const isMeta = event.ctrlKey || event.metaKey;
 
         const firstRow = _getFirstRow(beans);
         const lastRow = _getLastRow(beans);
@@ -1300,8 +1301,8 @@ export class RangeService extends BeanStub implements NamedBean, IRangeService {
 
             this.updateRangeRowBoundary({ cellRange: range, boundary: 'end', cellPosition: { column, ...lastRow } });
         } else if (clickedColumn.isColumn) {
-            if (hasRanges && suppressMultiRanges) {
-                this.removeAllCellRanges();
+            if (hasRanges && (suppressMultiRanges || !isMeta)) {
+                this.removeAllCellRanges(true);
             }
             const foundRange = findRangeContainingCols(cellRanges, [clickedColumn], firstRow, lastRow);
 
@@ -1314,8 +1315,8 @@ export class RangeService extends BeanStub implements NamedBean, IRangeService {
             }
             ctx.root = clickedColumn;
         } else {
-            if (hasRanges && suppressMultiRanges) {
-                this.removeAllCellRanges();
+            if (hasRanges && (suppressMultiRanges || !isMeta)) {
+                this.removeAllCellRanges(true);
             }
             // clicked a column group so we want to select all leaf columns of the group
             const leafCols = clickedColumn.getDisplayedLeafColumns();
