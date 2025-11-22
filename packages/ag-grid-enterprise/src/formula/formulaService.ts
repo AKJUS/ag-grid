@@ -7,7 +7,7 @@ import type {
     RowNode,
     _ColumnCollections,
 } from 'ag-grid-community';
-import { BeanStub, _isExpressionString } from 'ag-grid-community';
+import { BeanStub, _convertColumnEventSourceType, _isExpressionString, _warn } from 'ag-grid-community';
 
 import { parseFormula } from './ast/parsers';
 import { colIdFromIndex, colIndexFromId, rowIdFromIndex, rowIndexFromId, serializeFormula } from './ast/serializer';
@@ -105,10 +105,46 @@ export class FormulaService extends BeanStub implements IFormulaService, NamedBe
     public active = false;
 
     public setFormulasActive(cols: _ColumnCollections): void {
-        const active = cols.list.some((col) => col.isAllowFormula());
+        const formulaColumnsPresent = cols.list.some((col) => col.isAllowFormula());
+        const active = formulaColumnsPresent && this.checkForIncompatibleServices(cols);
+
         if (active !== this.active) {
             this.active = active;
+            this.refreshFormulas(true);
         }
+    }
+
+    private checkForIncompatibleServices(cols: _ColumnCollections): boolean {
+        if (this.gos.get('masterDetail')) {
+            _warn(296, { blockedService: 'Master Detail' });
+            return false;
+        }
+
+        if (this.gos.get('treeData')) {
+            _warn(296, { blockedService: 'Tree Data' });
+            return false;
+        }
+
+        if (this.gos.get('enableCellExpressions')) {
+            _warn(296, { blockedService: 'Cell Expressions' });
+            return false;
+        }
+
+        return cols.list.every((col) => {
+            if (col.isAllowPivot() || col.isPivotActive()) {
+                _warn(296, { blockedService: 'Column Pivoting' });
+                return false;
+            }
+            if (col.isAllowRowGroup() || col.isRowGroupActive()) {
+                _warn(296, { blockedService: 'Row Groups' });
+                return false;
+            }
+            if (col.isAllowValue() || col.isValueActive() || col.getAggFunc()) {
+                _warn(296, { blockedService: 'Value Aggregation' });
+                return false;
+            }
+            return true;
+        });
     }
 
     public postConstruct(): void {
@@ -124,6 +160,16 @@ export class FormulaService extends BeanStub implements IFormulaService, NamedBe
                 this.setupColRefMap();
             }
         };
+
+        // there is no need to check for treeData here because the columnModel
+        // already calls `refreshAll` when treeData is updated
+        this.addManagedPropertyListeners(['masterDetail', 'enableCellExpressions'], (e) => {
+            const { colModel } = this.beans;
+            const formulaColumnsPresent = colModel.cols?.list.some((col) => col.isAllowFormula());
+            if (formulaColumnsPresent) {
+                this.beans.colModel.refreshAll(_convertColumnEventSourceType(e.source));
+            }
+        });
 
         this.addManagedListeners(this.beans.eventSvc, {
             modelUpdated: refreshFormulas,
