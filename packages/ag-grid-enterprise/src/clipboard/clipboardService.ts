@@ -570,7 +570,10 @@ export class ClipboardService extends BeanStub implements NamedBean, IClipboardS
                         const isFormula = column.isAllowFormula() && formula?.isFormula(firstRowValues[index]);
 
                         if (isFormula) {
-                            firstRowValues[index] = formula?.updateFormulaByOffset(firstRowValues[index], 'down');
+                            firstRowValues[index] = formula?.updateFormulaByOffset({
+                                value: firstRowValues[index],
+                                rowDelta: 1,
+                            });
                         }
 
                         const firstRowValue = this.processCell(
@@ -1094,7 +1097,11 @@ export class ClipboardService extends BeanStub implements NamedBean, IClipboardS
         const { gos, csvCreator } = this.beans;
 
         const processRowGroupCallback = ({ node, column }: ProcessRowGroupForExportParams) => {
-            const { value, valueFormatted } = this.beans.valueSvc.getValueForDisplay(column as AgColumn, node, true);
+            const { value, valueFormatted } = this.beans.valueSvc.getValueForDisplay({
+                column: column as AgColumn,
+                node,
+                includeValueFormatted: true,
+            });
 
             const val = valueFormatted ?? value ?? '';
             const cb = gos.getCallback('processCellForClipboard');
@@ -1148,7 +1155,7 @@ export class ClipboardService extends BeanStub implements NamedBean, IClipboardS
         canParse?: boolean,
         canFormat?: boolean
     ): T {
-        const valueSvc = this.beans.valueSvc;
+        const { valueSvc, formula } = this.beans;
         if (func) {
             const params: WithoutGridCommon<ProcessCellForExportParams> = {
                 column,
@@ -1169,6 +1176,9 @@ export class ClipboardService extends BeanStub implements NamedBean, IClipboardS
         }
 
         if (canFormat && column.getColDef().useValueFormatterForExport !== false) {
+            if (formula?.isFormula(value)) {
+                return value;
+            }
             return valueSvc.formatValue(column, rowNode ?? null, value) ?? (value as any);
         }
 

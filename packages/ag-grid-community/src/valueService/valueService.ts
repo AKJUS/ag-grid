@@ -89,16 +89,18 @@ export class ValueService extends BeanStub implements NamedBean {
      * The values from this function are not used for sorting, filtering, or aggregation purposes.
      * Handles: groupHideOpenParents, showOpenedGroup and groupSuppressBlankHeader behaviours
      */
-    public getValueForDisplay(
-        column: AgColumn | undefined,
-        node: IRowNode,
-        includeValueFormatted: boolean = false,
-        exporting: boolean = false,
-        source: 'ui' | 'api' = 'ui'
-    ): {
+    public getValueForDisplay(params: {
+        column?: AgColumn;
+        node: IRowNode;
+        includeValueFormatted?: boolean;
+        useRawFormula?: boolean;
+        exporting?: boolean;
+        source?: 'ui' | 'api';
+    }): {
         value: any;
         valueFormatted: string | null;
     } {
+        const { column, node, includeValueFormatted, useRawFormula, exporting, source = 'ui' } = params;
         const { showRowGroupColValueSvc } = this.beans;
         const isFullWidthGroup = !column && node.group;
         const isGroupCol = column?.colDef.showRowGroup;
@@ -149,16 +151,23 @@ export class ValueService extends BeanStub implements NamedBean {
         // in the header when the group is open
         const ignoreAggData = isOpenedGroup && !groupShowsAggData;
         let value = this.getValue(column, node, ignoreAggData, source);
+        let valueToFormat = value;
 
         const { formula } = this.beans;
+        const format = includeValueFormatted && !(exporting && column.colDef.useValueFormatterForExport === false);
         if (column.isAllowFormula() && formula?.isFormula(value)) {
-            value = formula.resolveValue(column, node as RowNode);
+            if (useRawFormula) {
+                value = formula.normaliseFormula(value, true);
+                valueToFormat = formula.resolveValue(column, node as RowNode);
+            } else {
+                value = formula.resolveValue(column, node as RowNode);
+                valueToFormat = value;
+            }
         }
 
-        const format = includeValueFormatted && !(exporting && column.colDef.useValueFormatterForExport === false);
         return {
             value,
-            valueFormatted: format ? this.formatValue(column, node, value) : null,
+            valueFormatted: format ? this.formatValue(column, node, valueToFormat) : null,
         };
     }
 
@@ -287,7 +296,9 @@ export class ValueService extends BeanStub implements NamedBean {
 
     public getDeleteValue(column: AgColumn, rowNode: IRowNode): any {
         if (_exists(column.getColDef().valueParser)) {
-            return this.parseValue(column, rowNode, '', this.getValueForDisplay(column, rowNode).value) ?? null;
+            return (
+                this.parseValue(column, rowNode, '', this.getValueForDisplay({ column, node: rowNode }).value) ?? null
+            );
         }
         return null;
     }
