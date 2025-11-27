@@ -52,7 +52,6 @@ describe('ag-grid grouping with pivot', () => {
                 'pivot_year_2021_profit',
             ],
             printHiddenRows: false, // Don't show hidden rows to see if groups are actually expanded
-            checkDom: true,
         };
 
         const gridRows = new GridRows(api, 'basic pivot', gridRowsOptions);
@@ -94,7 +93,6 @@ describe('ag-grid grouping with pivot', () => {
         const gridRowsOptions: GridRowsOptions = {
             columns: ['ag-Grid-AutoColumn', 'pivot_year_2020_sales', 'pivot_year_2021_sales'],
             printHiddenRows: false,
-            checkDom: true,
         };
 
         const gridRows = new GridRows(api, 'multiple levels with pivot', gridRowsOptions);
@@ -145,7 +143,6 @@ describe('ag-grid grouping with pivot', () => {
                 'pivot_year-quarter_2021_sales',
             ],
             printHiddenRows: false,
-            checkDom: true,
         };
 
         const gridRows = new GridRows(api, 'multiple pivot columns', gridRowsOptions);
@@ -192,24 +189,22 @@ describe('ag-grid grouping with pivot', () => {
         // Test with pivotComparator: columns should be ordered South, North, East (reverse alphabetical)
         const gridRowsOptions: GridRowsOptions = {
             columns: ['ag-Grid-AutoColumn', 'South_sales', 'North_sales', 'East_sales'],
-            printHiddenRows: true,
-            checkDom: true,
         };
 
         let gridRows = new GridRows(api, 'pivot with custom column ordering', gridRowsOptions);
         await gridRows.check(`
             ROOT id:ROOT_NODE_ID 
             ├─┬ LEAF_GROUP collapsed id:row-group-product-Laptop ag-Grid-AutoColumn:"Laptop" 
-            │ ├── LEAF hidden id:1 ag-Grid-AutoColumn:undefined 
-            │ ├── LEAF hidden id:2 ag-Grid-AutoColumn:undefined 
-            │ └── LEAF hidden id:3 ag-Grid-AutoColumn:undefined 
+            │ ├── LEAF hidden id:1 
+            │ ├── LEAF hidden id:2 
+            │ └── LEAF hidden id:3 
             ├─┬ LEAF_GROUP collapsed id:row-group-product-Phone ag-Grid-AutoColumn:"Phone" 
-            │ ├── LEAF hidden id:4 ag-Grid-AutoColumn:undefined 
-            │ ├── LEAF hidden id:5 ag-Grid-AutoColumn:undefined 
-            │ └── LEAF hidden id:6 ag-Grid-AutoColumn:undefined 
+            │ ├── LEAF hidden id:4 
+            │ ├── LEAF hidden id:5 
+            │ └── LEAF hidden id:6 
             └─┬ LEAF_GROUP collapsed id:row-group-product-Tablet ag-Grid-AutoColumn:"Tablet" 
-            · ├── LEAF hidden id:7 ag-Grid-AutoColumn:undefined 
-            · └── LEAF hidden id:8 ag-Grid-AutoColumn:undefined 
+            · ├── LEAF hidden id:7 
+            · └── LEAF hidden id:8 
         `);
 
         // Test sorting by pivot result columns
@@ -222,16 +217,16 @@ describe('ag-grid grouping with pivot', () => {
         await gridRows.check(`
             ROOT id:ROOT_NODE_ID 
             ├─┬ LEAF_GROUP collapsed id:row-group-product-Laptop ag-Grid-AutoColumn:"Laptop" 
-            │ ├── LEAF hidden id:1 ag-Grid-AutoColumn:undefined 
-            │ ├── LEAF hidden id:2 ag-Grid-AutoColumn:undefined 
-            │ └── LEAF hidden id:3 ag-Grid-AutoColumn:undefined 
+            │ ├── LEAF hidden id:1 
+            │ ├── LEAF hidden id:2 
+            │ └── LEAF hidden id:3 
             ├─┬ LEAF_GROUP collapsed id:row-group-product-Phone ag-Grid-AutoColumn:"Phone" 
-            │ ├── LEAF hidden id:4 ag-Grid-AutoColumn:undefined 
-            │ ├── LEAF hidden id:5 ag-Grid-AutoColumn:undefined 
-            │ └── LEAF hidden id:6 ag-Grid-AutoColumn:undefined 
+            │ ├── LEAF hidden id:4 
+            │ ├── LEAF hidden id:5 
+            │ └── LEAF hidden id:6 
             └─┬ LEAF_GROUP collapsed id:row-group-product-Tablet ag-Grid-AutoColumn:"Tablet" 
-            · ├── LEAF hidden id:7 ag-Grid-AutoColumn:undefined 
-            · └── LEAF hidden id:8 ag-Grid-AutoColumn:undefined 
+            · ├── LEAF hidden id:7 
+            · └── LEAF hidden id:8 
         `);
     });
 
@@ -264,8 +259,6 @@ describe('ag-grid grouping with pivot', () => {
 
         const gridRowsOptions: GridRowsOptions = {
             columns: ['salesperson', 'Jan_sales', 'Feb_sales', 'Mar_sales'],
-            printHiddenRows: true,
-            checkDom: true,
         };
 
         let gridRows = new GridRows(api, 'initial pivot data', gridRowsOptions);
@@ -349,8 +342,6 @@ describe('ag-grid grouping with pivot', () => {
                 '2021_expenses',
                 '2021_efficiency',
             ],
-            printHiddenRows: true,
-            checkDom: true,
         };
 
         const gridRows = new GridRows(api, 'pivot with aggregations', gridRowsOptions);
@@ -393,8 +384,6 @@ describe('ag-grid grouping with pivot', () => {
 
         const gridRowsOptions: GridRowsOptions = {
             columns: ['category', 'North_revenue', 'South_revenue', 'East_revenue', 'West_revenue'],
-            printHiddenRows: true,
-            checkDom: true,
         };
 
         let gridRows = new GridRows(api, 'initial pivot columns', gridRowsOptions);
@@ -463,8 +452,6 @@ describe('ag-grid grouping with pivot', () => {
 
         const gridRowsOptions: GridRowsOptions = {
             columns: ['store', 'Jan_sales', 'Feb_sales', 'Mar_sales'],
-            printHiddenRows: true,
-            checkDom: true,
         };
 
         let gridRows = new GridRows(api, 'initial pivot data', gridRowsOptions);
@@ -572,8 +559,6 @@ describe('ag-grid grouping with pivot', () => {
 
         const gridRowsOptions: GridRowsOptions = {
             columns: ['team', 'Q1_score', 'Q1_attempts', 'Q1_average', 'Q2_score', 'Q2_attempts', 'Q2_average'],
-            printHiddenRows: true,
-            checkDom: true,
         };
 
         const gridRows = new GridRows(api, 'custom aggregations in pivot', gridRowsOptions);
@@ -638,8 +623,6 @@ describe('ag-grid grouping with pivot', () => {
                 'Mar_costs',
                 'Mar_profit',
             ],
-            printHiddenRows: true,
-            checkDom: true,
         };
 
         const gridRows = new GridRows(api, 'pivot without grouping', gridRowsOptions);
@@ -685,8 +668,6 @@ describe('ag-grid grouping with pivot', () => {
                 'East_sales',
                 'East_units',
             ],
-            printHiddenRows: true,
-            checkDom: true,
         };
 
         let gridRows = new GridRows(api, 'before filtering', gridRowsOptions);
@@ -784,7 +765,6 @@ describe('ag-grid grouping with pivot', () => {
                 'pivot_quarter_Q2_expenses',
             ],
             printHiddenRows: false, // Only show expanded rows
-            checkDom: true,
         };
 
         const gridRows = new GridRows(api, 'pivot with expanded groups', gridRowsOptions);
@@ -832,7 +812,6 @@ describe('ag-grid grouping with pivot', () => {
         const gridRowsOptions: GridRowsOptions = {
             columns: ['ag-Grid-AutoColumn'], // Just check group structure, not pivot values
             printHiddenRows: false,
-            checkDom: true,
         };
 
         const gridRows = new GridRows(api, 'pivot with column customization', gridRowsOptions);
@@ -877,7 +856,6 @@ describe('ag-grid grouping with pivot', () => {
         const gridRowsOptions: GridRowsOptions = {
             columns: ['ag-Grid-AutoColumn'], // Just test filtering behavior, not specific values
             printHiddenRows: false,
-            checkDom: true,
         };
 
         let gridRows = new GridRows(api, 'before filtering pivot results', gridRowsOptions);
@@ -970,16 +948,9 @@ describe('ag-grid grouping with pivot', () => {
             { id: '4', country: 'United Kingdom', athlete: 'Mo', year: 2012, gold: 2 },
         ]);
 
-        const gridRowsOptions: GridRowsOptions = {
-            columns: true,
-            printHiddenRows: true,
-            checkDom: true,
-            ignoreUndefinedCells: true,
-        };
-
         await asyncSetTimeout(25);
 
-        const beforePivotRows = new GridRows(api, 'custom group columns before pivot', gridRowsOptions);
+        const beforePivotRows = new GridRows(api, 'custom group columns before pivot');
         await beforePivotRows.check(`
             ROOT id:ROOT_NODE_ID countryGroupCol:null athleteGroupCol:null
             ├─┬ filler id:row-group-country-USA countryGroupCol:"USA" athleteGroupCol:null gold:10
@@ -997,7 +968,7 @@ describe('ag-grid grouping with pivot', () => {
         api.setGridOption('pivotMode', true);
         await asyncSetTimeout(25);
 
-        const pivotRows = new GridRows(api, 'custom group columns with pivot enabled', gridRowsOptions);
+        const pivotRows = new GridRows(api, 'custom group columns with pivot enabled');
         await pivotRows.check(`
             ROOT id:ROOT_NODE_ID pivot_year_2008_gold:11 pivot_year_2012_gold:4
             ├─┬ filler id:row-group-country-USA ag-Grid-AutoColumn:"USA" pivot_year_2008_gold:8 pivot_year_2012_gold:2
@@ -1015,7 +986,7 @@ describe('ag-grid grouping with pivot', () => {
         api.setGridOption('pivotMode', false);
         await asyncSetTimeout(25);
 
-        const afterPivotRows = new GridRows(api, 'custom group columns after pivot disabled', gridRowsOptions);
+        const afterPivotRows = new GridRows(api, 'custom group columns after pivot disabled');
         await afterPivotRows.check(`
             ROOT id:ROOT_NODE_ID countryGroupCol:null athleteGroupCol:null
             ├─┬ filler id:row-group-country-USA countryGroupCol:"USA" athleteGroupCol:null gold:10
@@ -1072,7 +1043,6 @@ describe('ag-grid grouping with pivot', () => {
                 ...(pivotResultColumns?.map((col) => col.getColId()) || []),
             ],
             printHiddenRows: false,
-            checkDom: true,
         };
 
         const gridRows = new GridRows(api, 'pivot mode with API validation', gridRowsOptions);
@@ -1150,64 +1120,59 @@ describe('ag-grid grouping with pivot', () => {
             ],
         });
 
-        const gridRowsOptions: GridRowsOptions = {
-            checkDom: true,
-            columns: true,
-        };
-
-        await new GridRows(api, 'initial - only country level expanded', gridRowsOptions).check(`
+        await new GridRows(api, 'initial - only country level expanded').check(`
             ROOT id:ROOT_NODE_ID
             ├─┬ filler collapsed id:row-group-country-Russia ag-Grid-AutoColumn:"Russia" gold:2
             │ ├─┬ LEAF_GROUP collapsed hidden id:row-group-country-Russia-sport-Gymnastics ag-Grid-AutoColumn:"Gymnastics" gold:1
-            │ │ └── LEAF hidden id:0 ag-Grid-AutoColumn:undefined year:2012 country:"Russia" sport:"Gymnastics" gold:1
+            │ │ └── LEAF hidden id:0 year:2012 country:"Russia" sport:"Gymnastics" gold:1
             │ └─┬ LEAF_GROUP collapsed hidden id:row-group-country-Russia-sport-Diving ag-Grid-AutoColumn:"Diving" gold:1
-            │ · └── LEAF hidden id:1 ag-Grid-AutoColumn:undefined year:2000 country:"Russia" sport:"Diving" gold:1
+            │ · └── LEAF hidden id:1 year:2000 country:"Russia" sport:"Diving" gold:1
             └─┬ filler collapsed id:row-group-country-Netherlands ag-Grid-AutoColumn:"Netherlands" gold:3
             · └─┬ LEAF_GROUP collapsed hidden id:row-group-country-Netherlands-sport-Cycling ag-Grid-AutoColumn:"Cycling" gold:3
-            · · └── LEAF hidden id:2 ag-Grid-AutoColumn:undefined year:2000 country:"Netherlands" sport:"Cycling" gold:3
+            · · └── LEAF hidden id:2 year:2000 country:"Netherlands" sport:"Cycling" gold:3
         `);
 
         api.getRowNode('row-group-country-Russia')!.setExpanded(true, undefined, true);
-        await new GridRows(api, 'expand Russia', gridRowsOptions).check(`
+        await new GridRows(api, 'expand Russia').check(`
             ROOT id:ROOT_NODE_ID
             ├─┬ filler id:row-group-country-Russia ag-Grid-AutoColumn:"Russia"
             │ ├─┬ LEAF_GROUP collapsed id:row-group-country-Russia-sport-Gymnastics ag-Grid-AutoColumn:"Gymnastics" gold:1
-            │ │ └── LEAF hidden id:0 ag-Grid-AutoColumn:undefined year:2012 country:"Russia" sport:"Gymnastics" gold:1
+            │ │ └── LEAF hidden id:0 year:2012 country:"Russia" sport:"Gymnastics" gold:1
             │ ├─┬ LEAF_GROUP collapsed id:row-group-country-Russia-sport-Diving ag-Grid-AutoColumn:"Diving" gold:1
-            │ │ └── LEAF hidden id:1 ag-Grid-AutoColumn:undefined year:2000 country:"Russia" sport:"Diving" gold:1
+            │ │ └── LEAF hidden id:1 year:2000 country:"Russia" sport:"Diving" gold:1
             │ └─ footer id:rowGroupFooter_row-group-country-Russia ag-Grid-AutoColumn:"Total Russia" gold:2
             └─┬ filler collapsed id:row-group-country-Netherlands ag-Grid-AutoColumn:"Netherlands" gold:3
             · └─┬ LEAF_GROUP collapsed hidden id:row-group-country-Netherlands-sport-Cycling ag-Grid-AutoColumn:"Cycling" gold:3
-            · · └── LEAF hidden id:2 ag-Grid-AutoColumn:undefined year:2000 country:"Netherlands" sport:"Cycling" gold:3
+            · · └── LEAF hidden id:2 year:2000 country:"Netherlands" sport:"Cycling" gold:3
         `);
 
         api.getRowNode('row-group-country-Russia')!.setExpanded(false, undefined, true);
 
-        await new GridRows(api, 'collapse Russia', gridRowsOptions).check(`
+        await new GridRows(api, 'collapse Russia').check(`
             ROOT id:ROOT_NODE_ID
             ├─┬ filler collapsed id:row-group-country-Russia ag-Grid-AutoColumn:"Russia" gold:2
             │ ├─┬ LEAF_GROUP collapsed hidden id:row-group-country-Russia-sport-Gymnastics ag-Grid-AutoColumn:"Gymnastics" gold:1
-            │ │ └── LEAF hidden id:0 ag-Grid-AutoColumn:undefined year:2012 country:"Russia" sport:"Gymnastics" gold:1
+            │ │ └── LEAF hidden id:0 year:2012 country:"Russia" sport:"Gymnastics" gold:1
             │ └─┬ LEAF_GROUP collapsed hidden id:row-group-country-Russia-sport-Diving ag-Grid-AutoColumn:"Diving" gold:1
-            │ · └── LEAF hidden id:1 ag-Grid-AutoColumn:undefined year:2000 country:"Russia" sport:"Diving" gold:1
+            │ · └── LEAF hidden id:1 year:2000 country:"Russia" sport:"Diving" gold:1
             └─┬ filler collapsed id:row-group-country-Netherlands ag-Grid-AutoColumn:"Netherlands" gold:3
             · └─┬ LEAF_GROUP collapsed hidden id:row-group-country-Netherlands-sport-Cycling ag-Grid-AutoColumn:"Cycling" gold:3
-            · · └── LEAF hidden id:2 ag-Grid-AutoColumn:undefined year:2000 country:"Netherlands" sport:"Cycling" gold:3
+            · · └── LEAF hidden id:2 year:2000 country:"Netherlands" sport:"Cycling" gold:3
         `);
 
         api.getRowNode('row-group-country-Russia')!.setExpanded(true, undefined, true);
 
-        await new GridRows(api, 'expand Russia async', gridRowsOptions).check(`
+        await new GridRows(api, 'expand Russia async').check(`
             ROOT id:ROOT_NODE_ID
             ├─┬ filler id:row-group-country-Russia ag-Grid-AutoColumn:"Russia"
             │ ├─┬ LEAF_GROUP collapsed id:row-group-country-Russia-sport-Gymnastics ag-Grid-AutoColumn:"Gymnastics" gold:1
-            │ │ └── LEAF hidden id:0 ag-Grid-AutoColumn:undefined year:2012 country:"Russia" sport:"Gymnastics" gold:1
+            │ │ └── LEAF hidden id:0 year:2012 country:"Russia" sport:"Gymnastics" gold:1
             │ ├─┬ LEAF_GROUP collapsed id:row-group-country-Russia-sport-Diving ag-Grid-AutoColumn:"Diving" gold:1
-            │ │ └── LEAF hidden id:1 ag-Grid-AutoColumn:undefined year:2000 country:"Russia" sport:"Diving" gold:1
+            │ │ └── LEAF hidden id:1 year:2000 country:"Russia" sport:"Diving" gold:1
             │ └─ footer id:rowGroupFooter_row-group-country-Russia ag-Grid-AutoColumn:"Total Russia" gold:2
             └─┬ filler collapsed id:row-group-country-Netherlands ag-Grid-AutoColumn:"Netherlands" gold:3
             · └─┬ LEAF_GROUP collapsed hidden id:row-group-country-Netherlands-sport-Cycling ag-Grid-AutoColumn:"Cycling" gold:3
-            · · └── LEAF hidden id:2 ag-Grid-AutoColumn:undefined year:2000 country:"Netherlands" sport:"Cycling" gold:3
+            · · └── LEAF hidden id:2 year:2000 country:"Netherlands" sport:"Cycling" gold:3
         `);
     });
 });

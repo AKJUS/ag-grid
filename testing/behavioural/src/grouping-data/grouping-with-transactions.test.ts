@@ -41,46 +41,40 @@ describe('ag-grid grouping with transactions', () => {
             ],
         });
 
-        const gridRowsOptions: GridRowsOptions = {
-            columns: ['country', 'year', 'name'],
-            printHiddenRows: true,
-            checkDom: true,
-        };
-
-        let gridRows = new GridRows(api, 'first', gridRowsOptions);
+        let gridRows = new GridRows(api, 'first');
 
         await gridRows.check(`
             ROOT id:ROOT_NODE_ID
-            ├─┬ filler id:row-group-country-Ireland
-            │ ├─┬ LEAF_GROUP id:row-group-country-Ireland-year-2000
+            ├─┬ filler id:row-group-country-Ireland ag-Grid-AutoColumn:"Ireland"
+            │ ├─┬ LEAF_GROUP id:row-group-country-Ireland-year-2000 ag-Grid-AutoColumn:2000
             │ │ ├── LEAF id:0 name:"John Von Neumann" country:"Ireland" year:2000
             │ │ └── LEAF id:1 name:"Ada Lovelace" country:"Ireland" year:2000
-            │ └─┬ LEAF_GROUP id:row-group-country-Ireland-year-2001
+            │ └─┬ LEAF_GROUP id:row-group-country-Ireland-year-2001 ag-Grid-AutoColumn:2001
             │ · └── LEAF id:2 name:"Alan Turing" country:"Ireland" year:2001
-            └─┬ filler id:row-group-country-Italy
-            · ├─┬ LEAF_GROUP id:row-group-country-Italy-year-2000
+            └─┬ filler id:row-group-country-Italy ag-Grid-AutoColumn:"Italy"
+            · ├─┬ LEAF_GROUP id:row-group-country-Italy-year-2000 ag-Grid-AutoColumn:2000
             · │ └── LEAF id:3 name:"Donald Knuth" country:"Italy" year:2000
-            · └─┬ LEAF_GROUP id:row-group-country-Italy-year-2001
+            · └─┬ LEAF_GROUP id:row-group-country-Italy-year-2001 ag-Grid-AutoColumn:2001
             · · └── LEAF id:4 name:"Marvin Minsky" country:"Italy" year:2001
         `);
 
         api.applyTransaction({ add: [{ id: '5', country: 'Ireland', year: 2001, name: 'Grace Hopper' }] });
 
-        gridRows = new GridRows(api, 'add', gridRowsOptions);
+        gridRows = new GridRows(api, 'add');
 
         await gridRows.check(`
             ROOT id:ROOT_NODE_ID
-            ├─┬ filler id:row-group-country-Ireland
-            │ ├─┬ LEAF_GROUP id:row-group-country-Ireland-year-2000
+            ├─┬ filler id:row-group-country-Ireland ag-Grid-AutoColumn:"Ireland"
+            │ ├─┬ LEAF_GROUP id:row-group-country-Ireland-year-2000 ag-Grid-AutoColumn:2000
             │ │ ├── LEAF id:0 name:"John Von Neumann" country:"Ireland" year:2000
             │ │ └── LEAF id:1 name:"Ada Lovelace" country:"Ireland" year:2000
-            │ └─┬ LEAF_GROUP id:row-group-country-Ireland-year-2001
+            │ └─┬ LEAF_GROUP id:row-group-country-Ireland-year-2001 ag-Grid-AutoColumn:2001
             │ · ├── LEAF id:2 name:"Alan Turing" country:"Ireland" year:2001
             │ · └── LEAF id:5 name:"Grace Hopper" country:"Ireland" year:2001
-            └─┬ filler id:row-group-country-Italy
-            · ├─┬ LEAF_GROUP id:row-group-country-Italy-year-2000
+            └─┬ filler id:row-group-country-Italy ag-Grid-AutoColumn:"Italy"
+            · ├─┬ LEAF_GROUP id:row-group-country-Italy-year-2000 ag-Grid-AutoColumn:2000
             · │ └── LEAF id:3 name:"Donald Knuth" country:"Italy" year:2000
-            · └─┬ LEAF_GROUP id:row-group-country-Italy-year-2001
+            · └─┬ LEAF_GROUP id:row-group-country-Italy-year-2001 ag-Grid-AutoColumn:2001
             · · └── LEAF id:4 name:"Marvin Minsky" country:"Italy" year:2001
         `);
 
@@ -93,17 +87,17 @@ describe('ag-grid grouping with transactions', () => {
             add: [{ id: '6', country: 'Italy', year: 1940, name: 'unknown' }],
         });
 
-        gridRows = new GridRows(api, 'remove, update, add', gridRowsOptions);
+        gridRows = new GridRows(api, 'remove, update, add');
         await gridRows.check(`
             ROOT id:ROOT_NODE_ID
-            ├─┬ filler id:row-group-country-Ireland
-            │ └─┬ LEAF_GROUP id:row-group-country-Ireland-year-2000
+            ├─┬ filler id:row-group-country-Ireland ag-Grid-AutoColumn:"Ireland"
+            │ └─┬ LEAF_GROUP id:row-group-country-Ireland-year-2000 ag-Grid-AutoColumn:2000
             │ · ├── LEAF id:0 name:"John Von Neumann" country:"Ireland" year:2000
             │ · └── LEAF id:1 name:"Ada Lovelace" country:"Ireland" year:2000
-            └─┬ filler id:row-group-country-Italy
-            · ├─┬ LEAF_GROUP id:row-group-country-Italy-year-2001
+            └─┬ filler id:row-group-country-Italy ag-Grid-AutoColumn:"Italy"
+            · ├─┬ LEAF_GROUP id:row-group-country-Italy-year-2001 ag-Grid-AutoColumn:2001
             · │ └── LEAF id:4 name:"Marvin Minsky" country:"Italy" year:2001
-            · └─┬ LEAF_GROUP id:row-group-country-Italy-year-1940
+            · └─┬ LEAF_GROUP id:row-group-country-Italy-year-1940 ag-Grid-AutoColumn:1940
             · · ├── LEAF id:2 name:"Alan M. Turing" country:"Italy" year:1940
             · · ├── LEAF id:5 name:"Grace Brewster Murray Hopper" country:"Italy" year:1940
             · · └── LEAF id:6 name:"unknown" country:"Italy" year:1940
@@ -122,20 +116,20 @@ describe('ag-grid grouping with transactions', () => {
             api
         );
 
-        gridRows = new GridRows(api, 'async transaction 1', gridRowsOptions);
+        gridRows = new GridRows(api, 'async transaction 1');
         await gridRows.check(`
             ROOT id:ROOT_NODE_ID
-            ├─┬ filler id:row-group-country-Ireland
-            │ └─┬ LEAF_GROUP id:row-group-country-Ireland-year-2000
+            ├─┬ filler id:row-group-country-Ireland ag-Grid-AutoColumn:"Ireland"
+            │ └─┬ LEAF_GROUP id:row-group-country-Ireland-year-2000 ag-Grid-AutoColumn:2000
             │ · ├── LEAF id:0 name:"John Von Neumann" country:"Ireland" year:2000
             │ · └── LEAF id:1 name:"Ada Lovelace" country:"Ireland" year:2000
-            └─┬ filler id:row-group-country-Italy
-            · ├─┬ LEAF_GROUP id:row-group-country-Italy-year-2001
+            └─┬ filler id:row-group-country-Italy ag-Grid-AutoColumn:"Italy"
+            · ├─┬ LEAF_GROUP id:row-group-country-Italy-year-2001 ag-Grid-AutoColumn:2001
             · │ └── LEAF id:4 name:"Marvin Minsky" country:"Italy" year:2001
-            · ├─┬ LEAF_GROUP id:row-group-country-Italy-year-1940
+            · ├─┬ LEAF_GROUP id:row-group-country-Italy-year-1940 ag-Grid-AutoColumn:1940
             · │ ├── LEAF id:2 name:"Alan M. Turing" country:"Italy" year:1940
             · │ └── LEAF id:5 name:"Grace Brewster Murray Hopper" country:"Italy" year:1940
-            · └─┬ LEAF_GROUP id:row-group-country-Italy-year-1901
+            · └─┬ LEAF_GROUP id:row-group-country-Italy-year-1901 ag-Grid-AutoColumn:1901
             · · └── LEAF id:6 name:"unknown 3" country:"Italy" year:1901
         `);
 
@@ -158,22 +152,22 @@ describe('ag-grid grouping with transactions', () => {
             api
         );
 
-        gridRows = new GridRows(api, 'async transaction 2', gridRowsOptions);
+        gridRows = new GridRows(api, 'async transaction 2');
         await gridRows.check(`
             ROOT id:ROOT_NODE_ID
-            ├─┬ filler id:row-group-country-Ireland
-            │ └─┬ LEAF_GROUP id:row-group-country-Ireland-year-2000
+            ├─┬ filler id:row-group-country-Ireland ag-Grid-AutoColumn:"Ireland"
+            │ └─┬ LEAF_GROUP id:row-group-country-Ireland-year-2000 ag-Grid-AutoColumn:2000
             │ · ├── LEAF id:0 name:"John Von Neumann" country:"Ireland" year:2000
             │ · └── LEAF id:1 name:"Ada Lovelace" country:"Ireland" year:2000
-            ├─┬ filler id:row-group-country-Italy
-            │ ├─┬ LEAF_GROUP id:row-group-country-Italy-year-2001
+            ├─┬ filler id:row-group-country-Italy ag-Grid-AutoColumn:"Italy"
+            │ ├─┬ LEAF_GROUP id:row-group-country-Italy-year-2001 ag-Grid-AutoColumn:2001
             │ │ └── LEAF id:4 name:"Marvin Minsky" country:"Italy" year:2001
-            │ ├─┬ LEAF_GROUP id:row-group-country-Italy-year-1940
+            │ ├─┬ LEAF_GROUP id:row-group-country-Italy-year-1940 ag-Grid-AutoColumn:1940
             │ │ └── LEAF id:5 name:"Grace Brewster Murray Hopper" country:"Italy" year:1940
-            │ └─┬ LEAF_GROUP id:row-group-country-Italy-year-1950
+            │ └─┬ LEAF_GROUP id:row-group-country-Italy-year-1950 ag-Grid-AutoColumn:1950
             │ · └── LEAF id:2 name:"unknown 5" country:"Italy" year:1950
-            └─┬ filler id:row-group-country-Germany
-            · └─┬ LEAF_GROUP id:row-group-country-Germany-year-1902
+            └─┬ filler id:row-group-country-Germany ag-Grid-AutoColumn:"Germany"
+            · └─┬ LEAF_GROUP id:row-group-country-Germany-year-1902 ag-Grid-AutoColumn:1902
             · · └── LEAF id:6 name:"unknown 6" country:"Germany" year:1902
         `);
     });
@@ -212,8 +206,6 @@ describe('ag-grid grouping with transactions', () => {
 
         const gridRowsOptions: GridRowsOptions = {
             columns: ['country', 'year', 'name'],
-            printHiddenRows: true,
-            checkDom: true,
         };
 
         let gridRows = new GridRows(api, 'first', gridRowsOptions);
@@ -299,8 +291,6 @@ describe('ag-grid grouping with transactions', () => {
 
         const gridRowsOptions: GridRowsOptions = {
             columns: ['country', 'year', 'name'],
-            printHiddenRows: true,
-            checkDom: true,
         };
         let gridRows = new GridRows(api, 'first', gridRowsOptions);
         await gridRows.check(`
@@ -448,8 +438,6 @@ describe('ag-grid grouping with transactions', () => {
 
         const gridRowsOptions: GridRowsOptions = {
             columns: ['country', 'year', 'name'],
-            printHiddenRows: true,
-            checkDom: true,
         };
 
         // Verify initial structure
@@ -542,8 +530,7 @@ describe('ag-grid grouping with transactions', () => {
 
         const gridRowsOptions: GridRowsOptions = {
             columns: ['country', 'year', 'name'],
-            printHiddenRows: true,
-            checkDom: true,
+
             useFormatter: false,
         };
 
@@ -551,13 +538,13 @@ describe('ag-grid grouping with transactions', () => {
             ROOT id:ROOT_NODE_ID
             ├── LEAF id:4 name:"Empty" country:"" year:""
             ├── LEAF id:5 name:"Null" country:null year:null
-            ├── LEAF id:6 name:"Orphan" country:undefined year:undefined
+            ├── LEAF id:6 name:"Orphan"
             ├─┬ filler id:row-group-country-Ireland
-            │ ├── LEAF id:2 name:"Jane" country:"Ireland" year:undefined
+            │ ├── LEAF id:2 name:"Jane" country:"Ireland"
             │ └─┬ LEAF_GROUP id:row-group-country-Ireland-year-2000
             │ · └── LEAF id:1 name:"John" country:"Ireland" year:2000
             └─┬ filler id:row-group-year-2000
-            · └── LEAF id:3 name:"Mario" country:undefined year:2000
+            · └── LEAF id:3 name:"Mario" year:2000
         `);
 
         // Test with groupAllowUnbalanced: false - should create empty groups
@@ -570,14 +557,14 @@ describe('ag-grid grouping with transactions', () => {
             │ ├─┬ LEAF_GROUP id:row-group-country-Ireland-year-2000
             │ │ └── LEAF id:1 name:"John" country:"Ireland" year:2000
             │ └─┬ LEAF_GROUP id:row-group-country-Ireland-year-
-            │ · └── LEAF id:2 name:"Jane" country:"Ireland" year:undefined
+            │ · └── LEAF id:2 name:"Jane" country:"Ireland"
             └─┬ filler id:row-group-country-
             · ├─┬ LEAF_GROUP id:row-group-country--year-2000
-            · │ └── LEAF id:3 name:"Mario" country:undefined year:2000
+            · │ └── LEAF id:3 name:"Mario" year:2000
             · └─┬ LEAF_GROUP id:row-group-country--year-
             · · ├── LEAF id:4 name:"Empty" country:"" year:""
             · · ├── LEAF id:5 name:"Null" country:null year:null
-            · · └── LEAF id:6 name:"Orphan" country:undefined year:undefined
+            · · └── LEAF id:6 name:"Orphan"
         `);
     });
 
@@ -632,8 +619,6 @@ describe('ag-grid grouping with transactions', () => {
 
         const gridRowsOptions: GridRowsOptions = {
             columns: ['country', 'year', 'name'],
-            printHiddenRows: true,
-            checkDom: true,
         };
 
         await new GridRows(api, 'custom key creators grouping', gridRowsOptions).check(`
@@ -704,8 +689,6 @@ describe('ag-grid grouping with transactions', () => {
 
         const gridRowsOptions: GridRowsOptions = {
             columns: ['department', 'level', 'name'],
-            printHiddenRows: true,
-            checkDom: true,
         };
 
         await new GridRows(api, 'initial departments', gridRowsOptions).check(`
@@ -811,8 +794,6 @@ describe('ag-grid grouping with transactions', () => {
 
         const gridRowsOptions: GridRowsOptions = {
             columns: ['status', 'priority', 'name'],
-            printHiddenRows: true,
-            checkDom: true,
         };
 
         // Complex async operations that test race conditions

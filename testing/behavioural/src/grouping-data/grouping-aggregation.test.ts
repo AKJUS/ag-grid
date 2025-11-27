@@ -46,7 +46,6 @@ describe('ag-grid grouping aggregation', () => {
 
         const gridRowsOptionsFormatted: GridRowsOptions = {
             columns: ['sport', 'gold', 'silver'],
-            checkDom: true,
         };
 
         const gridRowsOptionsUnformatted: GridRowsOptions = {
@@ -143,13 +142,13 @@ describe('ag-grid grouping aggregation', () => {
             getRowId: (params) => params.data.id,
         });
 
-        await new GridRows(api1, 'alwaysAggregateAtRootLevel=false', { columns: ['value'] }).check(`
+        await new GridRows(api1, 'alwaysAggregateAtRootLevel=false').check(`
             ROOT id:ROOT_NODE_ID
-            ├─┬ LEAF_GROUP id:row-group-category-A value:300
-            │ ├── LEAF id:1 value:100
-            │ └── LEAF id:2 value:200
-            └─┬ LEAF_GROUP id:row-group-category-B value:150
-            · └── LEAF id:3 value:150
+            ├─┬ LEAF_GROUP id:row-group-category-A ag-Grid-AutoColumn:"A" value:300
+            │ ├── LEAF id:1 category:"A" value:100
+            │ └── LEAF id:2 category:"A" value:200
+            └─┬ LEAF_GROUP id:row-group-category-B ag-Grid-AutoColumn:"B" value:150
+            · └── LEAF id:3 category:"B" value:150
         `);
 
         // Test alwaysAggregateAtRootLevel
@@ -166,13 +165,13 @@ describe('ag-grid grouping aggregation', () => {
             getRowId: (params) => params.data.id,
         });
 
-        await new GridRows(api2, 'alwaysAggregateAtRootLevel=true', { columns: ['value'] }).check(`
+        await new GridRows(api2, 'alwaysAggregateAtRootLevel=true').check(`
             ROOT id:ROOT_NODE_ID value:450
-            ├─┬ LEAF_GROUP id:row-group-category-A value:300
-            │ ├── LEAF id:1 value:100
-            │ └── LEAF id:2 value:200
-            └─┬ LEAF_GROUP id:row-group-category-B value:150
-            · └── LEAF id:3 value:150
+            ├─┬ LEAF_GROUP id:row-group-category-A ag-Grid-AutoColumn:"A" value:300
+            │ ├── LEAF id:1 category:"A" value:100
+            │ └── LEAF id:2 category:"A" value:200
+            └─┬ LEAF_GROUP id:row-group-category-B ag-Grid-AutoColumn:"B" value:150
+            · └── LEAF id:3 category:"B" value:150
         `);
     });
 
@@ -239,17 +238,15 @@ describe('ag-grid grouping aggregation', () => {
             · └─ footer id:rowGroupFooter_row-group-category-B scores:90.67 metadata:{"minPriority":1}
         `);
 
-        await new GridRows(api, 'custom aggregation functions (formatted)', {
-            columns: true,
-        }).check(`
+        await new GridRows(api, 'custom aggregation functions (formatted)').check(`
             ROOT id:ROOT_NODE_ID scores:"Avg: 87.84" metadata:"Min Priority: NaN"
             ├─ footer id:rowGroupFooter_ROOT_NODE_ID ag-Grid-AutoColumn:"Total " scores:"Avg: 87.84" metadata:"Min Priority: NaN"
             ├─┬ LEAF_GROUP id:row-group-category-A ag-Grid-AutoColumn:"A"
-            │ ├── LEAF id:1 ag-Grid-AutoColumn:undefined category:"A" scores:"Avg: 80,90,85" metadata:"Min Priority: -"
-            │ ├── LEAF id:2 ag-Grid-AutoColumn:undefined category:"A" scores:"Avg: 75,88,92" metadata:"Min Priority: -"
+            │ ├── LEAF id:1 category:"A" scores:"Avg: 80,90,85" metadata:"Min Priority: -"
+            │ ├── LEAF id:2 category:"A" scores:"Avg: 75,88,92" metadata:"Min Priority: -"
             │ └─ footer id:rowGroupFooter_row-group-category-A ag-Grid-AutoColumn:"Total A" scores:"Avg: 85" metadata:"Min Priority: 1"
             └─┬ LEAF_GROUP id:row-group-category-B ag-Grid-AutoColumn:"B"
-            · ├── LEAF id:3 ag-Grid-AutoColumn:undefined category:"B" scores:"Avg: 95,87,90" metadata:"Min Priority: -"
+            · ├── LEAF id:3 category:"B" scores:"Avg: 95,87,90" metadata:"Min Priority: -"
             · └─ footer id:rowGroupFooter_row-group-category-B ag-Grid-AutoColumn:"Total B" scores:"Avg: 90.67" metadata:"Min Priority: 1"
         `);
 
@@ -276,20 +273,18 @@ describe('ag-grid grouping aggregation', () => {
             · └─ footer id:rowGroupFooter_row-group-category-C scores:74 metadata:{"minPriority":2}
         `);
 
-        await new GridRows(api, 'after transaction (formatted)', {
-            columns: true,
-        }).check(`
+        await new GridRows(api, 'after transaction (formatted)').check(`
             ROOT id:ROOT_NODE_ID scores:"Avg: 83.72" metadata:"Min Priority: NaN"
             ├─ footer id:rowGroupFooter_ROOT_NODE_ID ag-Grid-AutoColumn:"Total " scores:"Avg: 83.72" metadata:"Min Priority: NaN"
             ├─┬ LEAF_GROUP id:row-group-category-A ag-Grid-AutoColumn:"A"
-            │ ├── LEAF id:1 ag-Grid-AutoColumn:undefined category:"A" scores:"Avg: 80,90,85" metadata:"Min Priority: -"
-            │ ├── LEAF id:2 ag-Grid-AutoColumn:undefined category:"A" scores:"Avg: 82,94,88" metadata:"Min Priority: -"
+            │ ├── LEAF id:1 category:"A" scores:"Avg: 80,90,85" metadata:"Min Priority: -"
+            │ ├── LEAF id:2 category:"A" scores:"Avg: 82,94,88" metadata:"Min Priority: -"
             │ └─ footer id:rowGroupFooter_row-group-category-A ag-Grid-AutoColumn:"Total A" scores:"Avg: 86.5" metadata:"Min Priority: 1"
             ├─┬ LEAF_GROUP id:row-group-category-B ag-Grid-AutoColumn:"B"
-            │ ├── LEAF id:3 ag-Grid-AutoColumn:undefined category:"B" scores:"Avg: 95,87,90" metadata:"Min Priority: -"
+            │ ├── LEAF id:3 category:"B" scores:"Avg: 95,87,90" metadata:"Min Priority: -"
             │ └─ footer id:rowGroupFooter_row-group-category-B ag-Grid-AutoColumn:"Total B" scores:"Avg: 90.67" metadata:"Min Priority: 1"
             └─┬ LEAF_GROUP id:row-group-category-C ag-Grid-AutoColumn:"C"
-            · ├── LEAF id:4 ag-Grid-AutoColumn:undefined category:"C" scores:"Avg: 70,74,78" metadata:"Min Priority: -"
+            · ├── LEAF id:4 category:"C" scores:"Avg: 70,74,78" metadata:"Min Priority: -"
             · └─ footer id:rowGroupFooter_row-group-category-C ag-Grid-AutoColumn:"Total C" scores:"Avg: 74" metadata:"Min Priority: 2"
         `);
     });
@@ -320,9 +315,7 @@ describe('ag-grid grouping aggregation', () => {
         });
 
         await new GridRows(api, 'mixed data types with nulls (unformatted)', {
-            columns: true,
             useFormatter: false,
-            ignoreUndefinedCells: true,
         }).check(`
             ROOT id:ROOT_NODE_ID amount:450 quantity:{"count":3,"value":20} active:{"value":5}
             ├─┬ LEAF_GROUP id:row-group-category-A ag-Grid-AutoColumn:"A"
@@ -337,10 +330,7 @@ describe('ag-grid grouping aggregation', () => {
             └─ footer id:rowGroupFooter_ROOT_NODE_ID ag-Grid-AutoColumn:null amount:450 quantity:{"count":3,"value":20} active:{"value":5}
         `);
 
-        await new GridRows(api, 'mixed data types with nulls (formatted)', {
-            columns: true,
-            ignoreUndefinedCells: true,
-        }).check(`
+        await new GridRows(api, 'mixed data types with nulls (formatted)').check(`
             ROOT id:ROOT_NODE_ID amount:450 quantity:{"count":3,"value":20} active:{"value":5}
             ├─┬ LEAF_GROUP id:row-group-category-A ag-Grid-AutoColumn:"A"
             │ ├─ footer id:rowGroupFooter_row-group-category-A ag-Grid-AutoColumn:"Total A" amount:300 quantity:{"count":2,"value":30} active:{"value":3}
