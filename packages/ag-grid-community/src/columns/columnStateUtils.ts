@@ -3,7 +3,14 @@ import { _exists, _missing } from '../agStack/utils/generic';
 import { doesMovePassMarryChildren, placeLockedColumns } from '../columnMove/columnMoveUtils';
 import type { BeanCollection } from '../context/context';
 import type { AgColumn } from '../entities/agColumn';
-import { _getSortDefFromInput } from '../entities/agColumn';
+import {
+    _areSortDefsEqual,
+    _getSortDefFromInput,
+    _isSortDirectionValid,
+    _isSortTypeValid,
+    _normalizeSortDirection,
+    _normalizeSortType,
+} from '../entities/agColumn';
 import type { IAggFunc, SortDirection, SortType } from '../entities/colDef';
 import type { ColumnEvent, ColumnEventType, ColumnsResetEvent } from '../events';
 import type { GridOptionsService } from '../gridOptionsService';
@@ -110,11 +117,22 @@ export function _applyColumnState(
 
         const flex = getValue('flex').value1;
 
+        const maybeSortDirection = getValue('sort').value1;
+        const maybeSortType = getValue('sortType').value1;
+        const isSortUpdate = _isSortDirectionValid(maybeSortDirection) || _isSortTypeValid(maybeSortType);
+        /**
+         * If only a direction is provided, we treat it as a default sort type.
+         * User must provide both sortType and direction if they wish to preserve sort type
+         */
+        const type = _normalizeSortType(maybeSortType);
+        const direction = _normalizeSortDirection(maybeSortDirection);
+        const newSortDef = isSortUpdate ? { type, direction } : undefined;
+
         updateSomeColumnState(
             beans,
             column,
             getValue('hide').value1,
-            _getSortDefFromInput({ type: getValue('sortType').value1, direction: getValue('sort').value1 }),
+            newSortDef,
             getValue('sortIndex').value1,
             getValue('pinned').value1,
             flex,
@@ -428,9 +446,10 @@ export function _compareColumnStatesAndDispatchEvents(beans: BeanCollection, sou
         dispatchColumnVisibleEvent(eventSvc, getChangedColumns(visibilityChangePredicate), source);
 
         const sortChangePredicate = (cs: ColumnState, c: AgColumn) =>
-            cs.sort != c.getSortDef().direction ||
-            cs.sortType != c.getSortDef().type ||
-            cs.sortIndex != c.getSortIndex();
+            !_areSortDefsEqual(c.getSortDef(), {
+                type: _normalizeSortType(cs.sortType),
+                direction: _normalizeSortDirection(cs.sort),
+            }) || cs.sortIndex != c.getSortIndex();
         const changedColumns = getChangedColumns(sortChangePredicate);
         if (changedColumns.length > 0) {
             sortSvc?.dispatchSortChangedEvents(source, changedColumns);
@@ -459,7 +478,6 @@ export function _getColumnState(beans: BeanCollection): ColumnState[] {
         const pivotIndex = column.isPivotActive() && pivotColumns ? pivotColumns.indexOf(column) : null;
 
         const aggFunc = column.isValueActive() ? column.getAggFunc() : null;
-        const { direction: sort, type: sortType } = column.getSortDef() || {};
         const sortIndex = column.getSortIndex() != null ? column.getSortIndex() : null;
 
         res.push({
@@ -467,8 +485,8 @@ export function _getColumnState(beans: BeanCollection): ColumnState[] {
             width: column.getActualWidth(),
             hide: !column.isVisible(),
             pinned: column.getPinned(),
-            sort,
-            sortType,
+            sort: column.getSort(),
+            sortType: column.getSortDef()?.type,
             sortIndex,
             aggFunc,
             rowGroup: column.isRowGroupActive(),
