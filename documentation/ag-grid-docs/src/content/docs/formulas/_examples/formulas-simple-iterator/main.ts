@@ -30,16 +30,9 @@ const rowData = [
 
 const gridOptions: GridOptions<any> = {
     columnDefs: [
-        { field: 'gold', colId: 'c0', width: 100 },
-        { field: 'silver', colId: 'c1', width: 100 },
-        { field: 'totals', colId: 'c2', width: 100, cellDataType: 'text', allowFormula: true },
-        {
-            field: 'formula',
-            colId: 'c3',
-            flex: 1,
-            allowFormula: false,
-            valueGetter: (params) => params.getValue('c2'),
-        },
+        { field: 'gold', colId: 'c0' },
+        { field: 'silver', colId: 'c1' },
+        { field: 'totals', colId: 'c2', cellDataType: 'text', allowFormula: true },
     ],
     getRowId: (params) => String(params.data.rid),
     cellSelection: {
@@ -48,6 +41,7 @@ const gridOptions: GridOptions<any> = {
         },
     },
     defaultColDef: {
+        flex: 1,
         editable: true,
     },
     rowData,
