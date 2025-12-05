@@ -695,5 +695,5 @@ export const AG_GRID_LOCALE_ES = {
     timeFormatDashesYYYYMMDD: 'AAAA-MM-DD',
     timeFormatSpacesDDMMMMYYYY: 'DD MMMM AAAA',
     timeFormatHHMMSS: 'HH:MM:SS',
-    timeFormatHHMMSSAmPm: 'HH:MM:SS AM/PM',
+    timeFormatHHMMSSAmPm: 'HH:MM:SS a. m./p. m.',
 };

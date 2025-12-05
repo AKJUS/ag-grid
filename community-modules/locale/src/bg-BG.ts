@@ -693,7 +693,7 @@ export const AG_GRID_LOCALE_BG = {
     timeFormatDotsDDMYY: 'ДД.М.ГГ',
     timeFormatDotsMDDYY: 'М.ДД.ГГ',
     timeFormatDashesYYYYMMDD: 'ГГГГ-ММ-ДД',
-    timeFormatSpacesDDMMMMYYYY: 'ДД МMMM ГГГГ',
+    timeFormatSpacesDDMMMMYYYY: 'ДД ММММ ГГГГ',
     timeFormatHHMMSS: 'ЧЧ:ММ:СС',
     timeFormatHHMMSSAmPm: 'ЧЧ:ММ:СС AM/PM',
 };

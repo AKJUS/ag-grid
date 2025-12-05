@@ -694,5 +694,5 @@ export const AG_GRID_LOCALE_IR = {
     timeFormatDashesYYYYMMDD: 'سال-ماه-روز',
     timeFormatSpacesDDMMMMYYYY: 'روز ماه سال',
     timeFormatHHMMSS: 'ساعت:دقیقه:ثانیه',
-    timeFormatHHMMSSAmPm: 'ساعت:دقیقه:ثانیه قبل/بعد از ظهر',
+    timeFormatHHMMSSAmPm: 'ساعت:دقیقه:ثانیه ق.ظ/ب.ظ',
 };
