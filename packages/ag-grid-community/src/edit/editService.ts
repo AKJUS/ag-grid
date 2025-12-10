@@ -99,14 +99,16 @@ const FORCE_REFRESH = { force: true, suppressFlash: true };
 
 export class EditService extends BeanStub implements NamedBean, IEditService {
     public beanName = 'editSvc' as const;
-    private batch: boolean = false;
 
+    public committing = false;
+
+    private batch: boolean = false;
     private model: IEditModelService;
     private valueSvc: ValueService;
     private rangeSvc: IRangeService;
     private strategy?: BaseEditStrategy;
     private stopping = false;
-    public committing = false;
+    private rangeSelectionWhileEditing = 0;
 
     public postConstruct(): void {
         const { beans } = this;
@@ -234,6 +236,20 @@ export class EditService extends BeanStub implements NamedBean, IEditService {
         return (rowNode && this.model.hasRowEdits(rowNode, params)) ?? false;
     }
 
+    public enableRangeSelectionWhileEditing(): void {
+        if (this.beans.rangeSvc && this.gos.get('cellSelection')) {
+            this.rangeSelectionWhileEditing++;
+        }
+    }
+
+    public disableRangeSelectionWhileEditing(): void {
+        this.rangeSelectionWhileEditing = Math.max(0, this.rangeSelectionWhileEditing - 1);
+    }
+
+    public isRangeSelectionEnabledWhileEditing(): boolean {
+        return this.rangeSelectionWhileEditing > 0;
+    }
+
     /** @returns whether to prevent default on event */
     public startEditing(position: Required<EditPosition>, params: StartEditParams): void {
         const { startedEdit = true, event = null, source = 'ui', ignoreEventKey = false, silent } = params;
@@ -303,6 +319,7 @@ export class EditService extends BeanStub implements NamedBean, IEditService {
 
             return res;
         } finally {
+            this.rangeSelectionWhileEditing = 0;
             this.stopping = false;
         }
     }

@@ -199,6 +199,7 @@ export type UserComponentName =
     | 'agDateStringCellEditor'
     | 'agCheckboxCellEditor'
     | 'agLargeTextCellEditor'
+    | 'agFormulaCellEditor'
     | 'agRichSelect'
     | 'agRichSelectCellEditor'
     | 'agMenuItem'
