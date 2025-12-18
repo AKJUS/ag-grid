@@ -65,6 +65,7 @@ export {
     AgPopupPositionParams,
     PopupEventParams,
 } from './agStack/interfaces/iPopup';
+export { AgPromise } from './agStack/utils/promise';
 export { IDragAndDropImageComponent, IDragAndDropImageParams } from './dragAndDrop/dragAndDropImageComponent';
 export type { RowDragComp } from './dragAndDrop/rowDragComp';
 export type {
@@ -72,7 +73,6 @@ export type {
     RowDropPositionIndicator,
     SetRowDropPositionIndicatorParams,
 } from './dragAndDrop/rowDropHighlightService';
-export { AgPromise } from './agStack/utils/promise';
 
 // Excel Export
 export { GridSerializingParams, RowAccumulator, RowSpanningAccumulator } from './export/iGridSerializer';
@@ -141,7 +141,7 @@ export type {
     RowsDropParams,
 } from './dragAndDrop/rowDragTypes';
 export { DragItem } from './interfaces/iDragItem';
-export { IRowDragItem } from './interfaces/iRowDragItem';
+export { IRowDragItem, RowDragTextFunc } from './interfaces/iRowDragItem';
 
 // Filtering
 export { AgFilterButtonSelector, FilterButton, FilterButtonComp, FilterButtonEvent } from './filter/filterButtonComp';
@@ -226,6 +226,7 @@ export { IAdvancedFilterBuilderParams } from './interfaces/iAdvancedFilterBuilde
 export { IAdvancedFilterParams } from './interfaces/iAdvancedFilterParams';
 export { ContainerType, IAfterGuiAttachedParams } from './interfaces/iAfterGuiAttachedParams';
 export {
+    AlwaysPassFilter,
     BaseFilter,
     BaseFilterParams,
     ColumnFilter,
@@ -244,6 +245,7 @@ export {
     FilterHandlerBaseParams,
     FilterHandlerParams,
     FilterHandlerSource,
+    FilterHandlers,
     FilterModel,
     FilterWrapperParams,
     IDoesFilterPassParams,
@@ -253,6 +255,8 @@ export {
     IFilterParams,
     IFilterType,
     IFloatingFilterType,
+    QuickFilterMatcher,
+    QuickFilterParser,
     SharedFilterUi,
 } from './interfaces/iFilter';
 export {
@@ -397,6 +401,7 @@ export {
     IStatusPanelComp,
     IStatusPanelParams,
     IStatusPanelValueFormatterParams,
+    StatusBar,
     StatusPanelDef,
 } from './interfaces/iStatusPanel';
 
@@ -539,8 +544,12 @@ export {
     ExportFileNameGetterParams,
     ExportParams,
     PackageFileParams,
+    ProcessCellForClipboard,
     ProcessCellForExportParams,
+    ProcessCellFromClipboard,
+    ProcessGroupHeaderForClipboard,
     ProcessGroupHeaderForExportParams,
+    ProcessHeaderForClipboard,
     ProcessHeaderForExportParams,
     ProcessRowGroupForExportParams,
     ShouldRowBeSkippedParams,
@@ -617,19 +626,25 @@ export {
     ColDefField,
     ColGroupDef,
     ColKey,
+    ColSpanFunc,
     ColSpanParams,
     ColTypeDef,
+    ColTypeDefs,
     ColumnChooserParams,
     ColumnFunctionCallbackParams,
     ColumnMenuTab,
     DndSourceCallback,
     DndSourceCallbackParams,
+    DndSourceOnRowDragFunc,
     DndSourceOnRowDragParams,
     EditableCallback,
     EditableCallbackParams,
+    EqualsFunc,
     GetFindTextFunc,
     GetFindTextParams,
+    GetQuickFilterText,
     GetQuickFilterTextParams,
+    GroupHierarchyConfig,
     GroupHierarchyParts,
     HeaderCheckboxSelectionCallback,
     HeaderCheckboxSelectionCallbackParams,
@@ -638,22 +653,32 @@ export {
     HeaderLocation,
     HeaderStyle,
     HeaderStyleFunc,
+    HeaderTooltipValueGetterFunc,
     HeaderValueGetterFunc,
     HeaderValueGetterParams,
     IAggFunc,
     IAggFuncParams,
+    IAggFuncs,
     ILoadingCellRendererSelectorFunc,
+    KeyCreatorFunc,
     KeyCreatorParams,
     NestedFieldPaths,
     NewValueParams,
+    PivotComparatorFunc,
+    RefData,
     RowDragCallback,
     RowDragCallbackParams,
+    RowSpanFunc,
     RowSpanParams,
+    SortComparatorFn,
     SortDef,
     SortDirection,
     SortType,
+    SpanRowsFunc,
     SpanRowsParams,
+    SuppressHeaderKeyboardEventFunc,
     SuppressHeaderKeyboardEventParams,
+    SuppressKeyboardEventFunc,
     SuppressKeyboardEventParams,
     SuppressNavigableCallback,
     SuppressNavigableCallbackParams,
@@ -661,6 +686,7 @@ export {
     SuppressPasteCallbackParams,
     ToolPanelClass,
     ToolPanelClassParams,
+    TooltipValueGetterFunc,
     ValueFormatterFunc,
     ValueFormatterParams,
     ValueGetterFunc,
@@ -675,6 +701,7 @@ export {
     BooleanDataTypeDefinition,
     CoreDataTypeDefinition,
     DataTypeDefinition,
+    DataTypeDefinitions,
     DataTypeFormatValueFunc,
     DateDataTypeDefinition,
     DateStringDataTypeDefinition,
@@ -695,15 +722,23 @@ export {
     CellSelectionOptions,
     ChartRef,
     ChartRefParams,
+    CheckboxLocation,
+    Components,
+    CreateChartContainer,
+    CustomChartThemes,
     DomLayoutType,
+    FillHandleOptions,
     GetChartMenuItems,
     GetChartToolbarItems,
     GetContextMenuItems,
     GetDataPath,
+    GetDocument,
     GetFullRowEditValidationErrors,
     GetMainMenuItems,
+    GetRowClass,
     GetRowIdFunc,
     GetRowNodeIdFunc,
+    GetRowStyle,
     GetServerSideGroupKey,
     GridOptions,
     GroupSelectionMode,
@@ -716,6 +751,11 @@ export {
     IsServerSideGroup,
     LoadingCellRendererSelectorFunc,
     LoadingCellRendererSelectorResult,
+    LocaleText,
+    MasterSelectionMode,
+    MultiRowSelectionOptions,
+    ProcessPivotResultColDef,
+    ProcessPivotResultColGroupDef,
     RangeHandleOptions,
     RowClassParams,
     RowClassRules,
@@ -725,8 +765,7 @@ export {
     RowStyle,
     SelectAllMode,
     SelectionColumnDef,
-    ServerSideGroupLevelParams,
-    ServerSideStoreParams,
+    SingleRowSelectionOptions,
     TreeDataDisplayType,
     UseGroupFooter,
     UseGroupTotalRow,
@@ -734,38 +773,65 @@ export {
 export type { GridOptionsWithDefaults } from './gridOptionsDefault';
 export type { ManagedGridOptionKey, ManagedGridOptions } from './gridOptionsInitial';
 export {
+    DoesExternalFilterPass,
+    FillOperation,
     FillOperationParams,
+    FocusGridInnerElement,
     FocusGridInnerElementParams,
     FullRowEditValidationParams,
+    GetBusinessKeyForNode,
     GetChartMenuItemsParams,
     GetChartToolbarItemsParams,
+    GetChildCount,
     GetContextMenuItemsParams,
     GetGroupAggFilteringParams,
     GetGroupIncludeFooterParams,
     GetGroupIncludeTotalRowParams,
+    GetGroupRowAgg,
     GetGroupRowAggParams,
+    GetLocaleText,
     GetLocaleTextParams,
     GetMainMenuItemsParams,
+    GetRowHeight,
     GetRowIdParams,
+    GetServerSideGroupLevelParams,
     GetServerSideGroupLevelParamsParams,
     IMenuActionParams,
+    InitialGroupOrderComparator,
     InitialGroupOrderComparatorParams,
     IsApplyServerSideTransactionParams,
+    IsExternalFilterPresent,
     IsExternalFilterPresentParams,
+    IsFullWidthRow,
     IsFullWidthRowParams,
+    IsGroupOpenByDefault,
     IsGroupOpenByDefaultParams,
+    IsServerSideGroupOpenByDefault,
     IsServerSideGroupOpenByDefaultParams,
+    NavigateToNextCell,
     NavigateToNextCellParams,
+    NavigateToNextHeader,
     NavigateToNextHeaderParams,
+    PaginationNumberFormatter,
     PaginationNumberFormatterParams,
+    PostProcessPopup,
     PostProcessPopupParams,
+    PostSortRows,
     PostSortRowsParams,
+    ProcessDataFromClipboard,
     ProcessDataFromClipboardParams,
     ProcessRowParams,
+    ProcessRowPostCreate,
+    ProcessUnpinnedColumns,
     ProcessUnpinnedColumnsParams,
     RowHeightParams,
+    SendToClipboard,
     SendToClipboardParams,
+    ServerSideGroupLevelParams,
+    ServerSideStoreParams,
+    TabToNextCell,
     TabToNextCellParams,
+    TabToNextHeader,
     TabToNextHeaderParams,
 } from './interfaces/iCallbackParams';
 export { AgGridCommon, WithoutGridCommon } from './interfaces/iCommon';
@@ -958,6 +1024,7 @@ export type { TabStyleParams } from './theming/parts/tab-style/tab-styles';
 export { styleMaterial, themeAlpine, themeBalham, themeMaterial, themeQuartz } from './theming/parts/theme/themes';
 export type { StyleMaterialParams, ThemeDefaultParams } from './theming/parts/theme/themes';
 export { IconName } from './utils/icon';
+export type { Icons } from './utils/icon';
 
 // Testing
 export { agTestIdFor, wrapAgTestIdFor } from './testing/testIdUtils';
