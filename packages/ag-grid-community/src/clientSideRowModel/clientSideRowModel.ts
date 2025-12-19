@@ -588,12 +588,16 @@ export class ClientSideRowModel extends BeanStub implements IClientSideRowModel,
     }
 
     public getOverlayType(): OverlayType | null {
-        if (this.isEmpty()) {
-            return 'noRows';
-        }
+        const { beans, gos } = this;
 
-        if (this.beans.filterManager?.isAnyFilterPresent() && this.getRowCount() === 0) {
-            return 'noMatchingRows';
+        if (this.rootNode?._leafs?.length) {
+            if (beans.filterManager?.isAnyFilterPresent() && this.getRowCount() === 0) {
+                return 'noMatchingRows';
+            }
+        } else if (this.rowCountReady || (gos.get('rowData')?.length ?? 0) == 0) {
+            // If ready then show the no rows
+            // If not ready only show the noRows overlay during init if rowData is empty
+            return 'noRows';
         }
 
         return null;
