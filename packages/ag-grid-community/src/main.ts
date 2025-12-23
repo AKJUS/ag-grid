@@ -1005,6 +1005,7 @@ export { columnDropStyleBordered, columnDropStylePlain } from './theming/parts/c
 export {
     iconOverrides,
     iconSetAlpine,
+    iconSetBalham,
     iconSetMaterial,
     iconSetQuartz,
     iconSetQuartzBold,

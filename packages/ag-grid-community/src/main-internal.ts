@@ -79,7 +79,11 @@ export {
 } from './agStack/rendering/agPositionableFeature';
 export { AutoScrollService } from './agStack/rendering/autoScrollService';
 export { CssClassManager } from './agStack/rendering/cssClassManager';
-export { _asThemeImpl } from './agStack/theming/themeImpl';
+export {
+    SharedThemeParams as _SharedThemeParams,
+    sharedDefaults as _sharedThemeDefaults,
+} from './agStack/theming/shared/shared-css';
+export { _asThemeImpl, createSharedTheme as _createSharedTheme } from './agStack/theming/themeImpl';
 export { ThemeLogger as _ThemeLogger } from './agStack/theming/themeLogger';
 export { getParamType as _getParamType, paramValueToCss as _paramValueToCss } from './agStack/theming/themeTypeUtils';
 export { paramToVariableName as _paramToVariableName } from './agStack/theming/themeUtils';
@@ -118,6 +122,7 @@ export {
     _setAriaSelected,
     _setAriaSetSize,
     _setAriaSort,
+    _setAriaOrientation,
 } from './agStack/utils/aria';
 export { _EmptyArray, _areEqual, _flatten, _last, _removeAllFromArray, _removeFromArray } from './agStack/utils/array';
 export { _isBrowserFirefox, _isBrowserSafari, _isIOSUserAgent } from './agStack/utils/browser';
@@ -149,6 +154,7 @@ export {
     _setDisplayed,
     _setFixedWidth,
     _setVisible,
+    _isFocusableFormField,
 } from './agStack/utils/dom';
 export { _anchorElementToMouseMoveEvent, _isElementInEventPath } from './agStack/utils/event';
 export {
@@ -445,6 +451,14 @@ export { SortedRowNode } from './sort/rowNodeSorter';
 export type { RowNodeSorter } from './sort/rowNodeSorter';
 export type { SortService } from './sort/sortService';
 export type { CellStyleService } from './styling/cellStyleService';
+export { gridThemeLogger as _gridThemeLogger } from './theming/createTheme';
+export { coreDefaults as _coreThemeDefaults } from './theming/core/core-css';
+export {
+    themeAlpineParams as _themeAlpineParams,
+    themeBalhamParams as _themeBalhamParams,
+    themeMaterialParams as _themeMaterialParams,
+    themeQuartzParams as _themeQuartzParams,
+} from './theming/parts/theme/themes';
 export {
     ITooltipCtrl,
     ITooltipCtrlParams,
