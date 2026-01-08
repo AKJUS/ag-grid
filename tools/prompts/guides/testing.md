@@ -114,12 +114,20 @@ For complex test cases, use records:
 ```typescript
 const EXAMPLES: Record<string, TestCase> = {
     BASIC: {
-        input: { /* ... */ },
-        expected: { /* ... */ },
+        input: {
+            /* ... */
+        },
+        expected: {
+            /* ... */
+        },
     },
     EDGE_CASE: {
-        input: { /* ... */ },
-        expected: { /* ... */ },
+        input: {
+            /* ... */
+        },
+        expected: {
+            /* ... */
+        },
     },
 };
 
@@ -141,6 +149,6 @@ for (const [name, example] of Object.entries(EXAMPLES)) {
 
 ## Coverage
 
-- Aim for meaningful coverage, not 100%
-- Focus on edge cases and error handling
-- Critical paths should have comprehensive tests
+-   Aim for meaningful coverage, not 100%
+-   Focus on edge cases and error handling
+-   Critical paths should have comprehensive tests

@@ -24,20 +24,20 @@ yarn nx benchmark <package> -- -t "pattern"
 
 ### Grid Rendering
 
-- Initial render time
-- Virtual scrolling performance
-- Row/column update speed
+-   Initial render time
+-   Virtual scrolling performance
+-   Row/column update speed
 
 ### Data Operations
 
-- Sorting performance
-- Filtering speed
-- Grouping operations
+-   Sorting performance
+-   Filtering speed
+-   Grouping operations
 
 ### Memory Usage
 
-- Memory footprint with large datasets
-- Memory cleanup after destroy
+-   Memory footprint with large datasets
+-   Memory cleanup after destroy
 
 ## Writing Benchmarks
 

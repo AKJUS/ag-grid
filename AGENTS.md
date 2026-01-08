@@ -4,46 +4,46 @@ This file provides guidance to AI Agents when working with code in this reposito
 
 ### Quick Reference
 
-- **Main branch:** `latest`
-- **Format:** `yarn nx format` (run before commits)
-- **Type-check:** `yarn nx build:types <package>` (run before commits)
-- **Lint:** `yarn nx lint <package>` (run before commits)
-- **Build:** `yarn nx build <package>`
-- **Test:** `yarn nx test <package>`
-- **E2E:** `yarn nx e2e ag-grid-docs`
-- **Dev server:** `yarn nx dev`
+-   **Main branch:** `latest`
+-   **Format:** `yarn nx format` (run before commits)
+-   **Type-check:** `yarn nx build:types <package>` (run before commits)
+-   **Lint:** `yarn nx lint <package>` (run before commits)
+-   **Build:** `yarn nx build <package>`
+-   **Test:** `yarn nx test <package>`
+-   **E2E:** `yarn nx e2e ag-grid-docs`
+-   **Dev server:** `yarn nx dev`
 
 ### Content Locations
 
-- **In-repo prompts:** `tools/prompts/` (guides, checklists, package-agents)
-- **Private prompts:** `external/prompts/` (commands, agents, skills, templates)
+-   **In-repo prompts:** `tools/prompts/` (guides, checklists, package-agents)
+-   **Private prompts:** `external/prompts/` (commands, agents, skills, templates)
 
 ---
 
 ### Must-Know Checklist
 
-- **Yarn and Nx based repo:** Use Yarn for package management and Nx for build and test orchestration.
-- **Main constraint:** Community and enterprise runtime bundles stay dependency-free beyond AG Grid code.
-- **Default branch:** Target `latest`; follow release/JIRA naming conventions below for topic branches.
-- **Build monitoring:** Check `node_modules/.cache/ag-watch-status.json` to monitor watch state (`yarn nx dev`) and build health (see [Development Server Guide](tools/prompts/guides/dev-server.md)).
-- **Formatting:** Run `yarn nx format` from the repo root before proposing commits.
-- **Typechecking:** Run `yarn nx build:types <package>` from the repo root before proposing commits.
-- **Linting:** Run `yarn nx lint <package>` from the repo root before proposing commits.
-- **Baseline verification:** Expect to run `yarn nx test ag-grid-community`, `yarn nx test ag-grid-enterprise`, and `yarn nx e2e ag-grid-docs` after meaningful grid changes.
-- **Test verification patterns:** When writing or modifying tests, review similar tests to ensure consistent verification patterns (see [Testing Guide](tools/prompts/guides/testing.md)).
-- **Context docs:** Skim [technology-stack.md](tools/prompts/technology-stack.md) for stack or architectural decisions before introducing new patterns.
+-   **Yarn and Nx based repo:** Use Yarn for package management and Nx for build and test orchestration.
+-   **Main constraint:** Community and enterprise runtime bundles stay dependency-free beyond AG Grid code.
+-   **Default branch:** Target `latest`; follow release/JIRA naming conventions below for topic branches.
+-   **Build monitoring:** Check `node_modules/.cache/ag-watch-status.json` to monitor watch state (`yarn nx dev`) and build health (see [Development Server Guide](tools/prompts/guides/dev-server.md)).
+-   **Formatting:** Run `yarn nx format` from the repo root before proposing commits.
+-   **Typechecking:** Run `yarn nx build:types <package>` from the repo root before proposing commits.
+-   **Linting:** Run `yarn nx lint <package>` from the repo root before proposing commits.
+-   **Baseline verification:** Expect to run `yarn nx test ag-grid-community`, `yarn nx test ag-grid-enterprise`, and `yarn nx e2e ag-grid-docs` after meaningful grid changes.
+-   **Test verification patterns:** When writing or modifying tests, review similar tests to ensure consistent verification patterns (see [Testing Guide](tools/prompts/guides/testing.md)).
+-   **Context docs:** Skim [technology-stack.md](tools/prompts/technology-stack.md) for stack or architectural decisions before introducing new patterns.
 
 ### Specialized Guides
 
 For detailed information on specific topics, consult these guides:
 
-- **[Testing Guide](tools/prompts/guides/testing.md)** - Testing strategies, best practices, and philosophy
-- **[Examples Guide](tools/prompts/guides/examples.md)** - Working with examples, validation, and path mappings
-- **[Documentation Pages Guide](tools/prompts/guides/docs-pages.md)** - Creating consistent, high-quality documentation pages
-- **[JIRA Guide](external/ag-shared/prompts/guides/jira.md)** - JIRA ticket search and creation guidelines
-- **[Code Quality Guide](external/ag-shared/prompts/guides/code-quality.md)** - Code bloat avoidance, comments, and review practices
-- **[Development Server Guide](tools/prompts/guides/dev-server.md)** - Dev server setup and build watch monitoring
-- **[Benchmarks Guide](tools/prompts/guides/benchmarks.md)** - Running and creating performance benchmarks
+-   **[Testing Guide](tools/prompts/guides/testing.md)** - Testing strategies, best practices, and philosophy
+-   **[Examples Guide](tools/prompts/guides/examples.md)** - Working with examples, validation, and path mappings
+-   **[Documentation Pages Guide](tools/prompts/guides/docs-pages.md)** - Creating consistent, high-quality documentation pages
+-   **[JIRA Guide](external/ag-shared/prompts/guides/jira.md)** - JIRA ticket search and creation guidelines
+-   **[Code Quality Guide](external/ag-shared/prompts/guides/code-quality.md)** - Code bloat avoidance, comments, and review practices
+-   **[Development Server Guide](tools/prompts/guides/dev-server.md)** - Dev server setup and build watch monitoring
+-   **[Benchmarks Guide](tools/prompts/guides/benchmarks.md)** - Running and creating performance benchmarks
 
 ### Project Overview
 
@@ -57,52 +57,52 @@ For detailed information about preferred technologies and architectural constrai
 
 ### Repository Conventions
 
-- The main branch of this repo is `latest`
-- Release branch names are of the form `b33.0.0`
-- JIRA-related branch should be named of the form `ag-12345/${kebabCaseChangeSummary}`
-- **Language conventions:** UK/British English for documentation text, comments, and JSDocs; US English for API option names
+-   The main branch of this repo is `latest`
+-   Release branch names are of the form `b33.0.0`
+-   JIRA-related branch should be named of the form `ag-12345/${kebabCaseChangeSummary}`
+-   **Language conventions:** UK/British English for documentation text, comments, and JSDocs; US English for API option names
 
 ### Essential Commands
 
-- `yarn install` – install dependencies after cloning or when the Yarn lockfile changes.
-  - `./external/ag-shared/scripts/install-for-cloud/install-for-cloud.sh` – install dependencies and tooling in a remote environment - use this in preference to `yarn install` to ensure all global tools are installed.
-- `yarn nx clean` – purge all dist folders when switching branches or before packaging releases.
-- `yarn nx format` – format repo files; run from the project root before committing.
-- `yarn nx build <package>` – compile a specific package after code edits.
-- `yarn nx build:types <package>` – regenerate declaration files when touching exported APIs.
-- `yarn nx build:package <package>` – create ESM/CJS bundles to validate publishable output.
-- `yarn nx build:umd <package>` – produce UMD bundles for browser distribution smoke-tests.
-- `yarn nx run-many -t build` – rebuild all packages when changes span the dependency graph.
-- `yarn nx test <package>` – execute Jest suites for the affected package.
-- `yarn nx test <package> --testPathPattern="<file-name>"` - test specific test file
-- `yarn nx test <package> --testPathPattern="<file-name>" --testNamePattern="<test-name>"` - test specific test name in a specific test file
-- `yarn nx e2e <package>` – run Playwright flows when altering website behaviour.
-- `yarn nx lint <package>` – apply ESLint and custom rules before final review.
+-   `yarn install` – install dependencies after cloning or when the Yarn lockfile changes.
+    -   `./external/ag-shared/scripts/install-for-cloud/install-for-cloud.sh` – install dependencies and tooling in a remote environment - use this in preference to `yarn install` to ensure all global tools are installed.
+-   `yarn nx clean` – purge all dist folders when switching branches or before packaging releases.
+-   `yarn nx format` – format repo files; run from the project root before committing.
+-   `yarn nx build <package>` – compile a specific package after code edits.
+-   `yarn nx build:types <package>` – regenerate declaration files when touching exported APIs.
+-   `yarn nx build:package <package>` – create ESM/CJS bundles to validate publishable output.
+-   `yarn nx build:umd <package>` – produce UMD bundles for browser distribution smoke-tests.
+-   `yarn nx run-many -t build` – rebuild all packages when changes span the dependency graph.
+-   `yarn nx test <package>` – execute Jest suites for the affected package.
+-   `yarn nx test <package> --testPathPattern="<file-name>"` - test specific test file
+-   `yarn nx test <package> --testPathPattern="<file-name>" --testNamePattern="<test-name>"` - test specific test name in a specific test file
+-   `yarn nx e2e <package>` – run Playwright flows when altering website behaviour.
+-   `yarn nx lint <package>` – apply ESLint and custom rules before final review.
 
 ### Slash Commands
 
 NOTE: These are only intended for agentic tools that don't support custom slash commands, such as Cursor or Codex.
 
-- `/pr/review` - execute `external/ag-shared/prompts/commands/pr/review.md` on specified PR.
-- `/code/cleanup` - execute `external/ag-shared/prompts/commands/code/cleanup.md` to reduce code bloat, redundant code and comments, and productionize changes on the current branch.
-- `/code/fixup` - execute `external/ag-shared/prompts/commands/code/fixup.md` for quick fixes to common issues.
-- `/batch/lint-cleanup` - execute `external/ag-shared/prompts/commands/batch/lint-cleanup.md` to fix linting issues.
-- `/git/split` - execute `external/ag-shared/prompts/commands/git/split.md` to split large changes into smaller commits.
-- `/git/bisect` - execute `external/ag-shared/prompts/commands/git/bisect.md` to find commits that introduced issues.
+-   `/pr/review` - execute `external/ag-shared/prompts/commands/pr/review.md` on specified PR.
+-   `/code/cleanup` - execute `external/ag-shared/prompts/commands/code/cleanup.md` to reduce code bloat, redundant code and comments, and productionize changes on the current branch.
+-   `/code/fixup` - execute `external/ag-shared/prompts/commands/code/fixup.md` for quick fixes to common issues.
+-   `/batch/lint-cleanup` - execute `external/ag-shared/prompts/commands/batch/lint-cleanup.md` to fix linting issues.
+-   `/git/split` - execute `external/ag-shared/prompts/commands/git/split.md` to split large changes into smaller commits.
+-   `/git/bisect` - execute `external/ag-shared/prompts/commands/git/bisect.md` to find commits that introduced issues.
 
 ### Architecture
 
 #### Monorepo Structure
 
-- **packages/ag-grid-community/**: MIT licensed version - core grid functionality
-- **packages/ag-grid-enterprise/**: Commercial version with advanced features
-- **packages/ag-grid-react/angular/vue3/**: Framework wrappers
-- **community-modules/locale/**: Internationalization support
-- **community-modules/styles/**: Grid styling and themes
-- **documentation/ag-grid-docs/**: Astro documentation site
-- **testing/**: E2E, behavioural, accessibility, and performance tests
-- **plugins/**: Nx plugins for code generation
-- **external/**: Shared AG ecosystem code (ag-shared)
+-   **packages/ag-grid-community/**: MIT licensed version - core grid functionality
+-   **packages/ag-grid-enterprise/**: Commercial version with advanced features
+-   **packages/ag-grid-react/angular/vue3/**: Framework wrappers
+-   **community-modules/locale/**: Internationalization support
+-   **community-modules/styles/**: Grid styling and themes
+-   **documentation/ag-grid-docs/**: Astro documentation site
+-   **testing/**: E2E, behavioural, accessibility, and performance tests
+-   **plugins/**: Nx plugins for code generation
+-   **external/**: Shared AG ecosystem code (ag-shared)
 
 #### Build Dependencies
 
@@ -110,10 +110,10 @@ Core dependency chain: `ag-grid-community` → `ag-grid-enterprise` → framewor
 
 #### Key Patterns
 
-- **Virtual DOM rendering**: High-performance custom rendering engine
-- **Modular feature architecture**: Extensible grid features through module registration
-- **Framework agnostic core**: Clean separation with framework-specific wrappers
-- **Enterprise/community split**: Feature flagging through separate packages
+-   **Virtual DOM rendering**: High-performance custom rendering engine
+-   **Modular feature architecture**: Extensible grid features through module registration
+-   **Framework agnostic core**: Clean separation with framework-specific wrappers
+-   **Enterprise/community split**: Feature flagging through separate packages
 
 ### Development Workflow
 
@@ -123,11 +123,11 @@ For comprehensive testing information, see [Testing Guide](tools/prompts/guides/
 
 Key testing tools:
 
-- **Unit tests**: Jest with jsdom environment
-- **E2E tests**: Playwright for website interaction testing
-- **Behavioural tests**: `testing/behavioural/` for grid behaviour verification
-- **Accessibility tests**: `testing/accessibility/` for a11y compliance
-- **Performance tests**: `testing/performance/` for performance regression testing
+-   **Unit tests**: Jest with jsdom environment
+-   **E2E tests**: Playwright for website interaction testing
+-   **Behavioural tests**: `testing/behavioural/` for grid behaviour verification
+-   **Accessibility tests**: `testing/accessibility/` for a11y compliance
+-   **Performance tests**: `testing/performance/` for performance regression testing
 
 #### Code Quality
 
@@ -135,38 +135,40 @@ For code quality guidelines, see [Code Quality Guide](external/ag-shared/prompts
 
 Essential practices:
 
-- Run `yarn nx format` before committing
-- Self-review your changes before proposing commits
-- Ensure tests exercise real implementations, not test helpers
+-   Run `yarn nx format` before committing
+-   Self-review your changes before proposing commits
+-   Ensure tests exercise real implementations, not test helpers
 
 ### Common Development Tasks
 
 #### Quick Playbooks
 
-- **Bug fix or feature work (community/enterprise)**
-  1. Update the affected implementation (typically under `packages/ag-grid-*/src/`).
-  2. Sync any dependent docs/examples.
-  3. Run `yarn nx test ag-grid-community`, `yarn nx test ag-grid-enterprise`.
+-   **Bug fix or feature work (community/enterprise)**
 
-- **Documentation/content update**
-  1. Consult the [Documentation Pages Guide](tools/prompts/guides/docs-pages.md) for structure and patterns.
-  2. Modify the relevant content under `documentation/ag-grid-docs/`.
-  3. Create or update examples in `_examples/` folder following the [Examples Guide](tools/prompts/guides/examples.md).
-  4. Ensure all examples are framework-compatible.
-  5. Test page in dev server with `yarn nx dev` across all frameworks.
-  6. For significant doc changes, sanity-check with `yarn nx e2e ag-grid-docs`.
+    1. Update the affected implementation (typically under `packages/ag-grid-*/src/`).
+    2. Sync any dependent docs/examples.
+    3. Run `yarn nx test ag-grid-community`, `yarn nx test ag-grid-enterprise`.
 
-- **Example-only change** (see [Examples Guide](tools/prompts/guides/examples.md))
-  1. Edit the example files.
-  2. Mirror updates in the corresponding docs page.
-  3. Run the relevant generation/typecheck commands.
+-   **Documentation/content update**
+
+    1. Consult the [Documentation Pages Guide](tools/prompts/guides/docs-pages.md) for structure and patterns.
+    2. Modify the relevant content under `documentation/ag-grid-docs/`.
+    3. Create or update examples in `_examples/` folder following the [Examples Guide](tools/prompts/guides/examples.md).
+    4. Ensure all examples are framework-compatible.
+    5. Test page in dev server with `yarn nx dev` across all frameworks.
+    6. For significant doc changes, sanity-check with `yarn nx e2e ag-grid-docs`.
+
+-   **Example-only change** (see [Examples Guide](tools/prompts/guides/examples.md))
+    1. Edit the example files.
+    2. Mirror updates in the corresponding docs page.
+    3. Run the relevant generation/typecheck commands.
 
 ### Technical Requirements
 
-- **Node.js**: Check `.nvmrc` for version
-- **Package Manager**: Yarn
-- **Build Target**: ES2020
-- **TypeScript**: Strict mode enabled across all packages
+-   **Node.js**: Check `.nvmrc` for version
+-   **Package Manager**: Yarn
+-   **Build Target**: ES2020
+-   **TypeScript**: Strict mode enabled across all packages
 
 ### JIRA Tickets
 
@@ -176,4 +178,4 @@ When creating tickets for this repo, use component `Grid` instead of `Charts`.
 
 ### Documentation Resources
 
-- AG Grid documentation: https://ag-grid.com/documentation/
+-   AG Grid documentation: https://ag-grid.com/documentation/
