@@ -1,5 +1,7 @@
 ---
-paths: 'documentation/**/*.mdoc,documentation/**/*.md'
+targets: ['*']
+description: 'Creating and maintaining documentation pages for AG Grid'
+globs: ['documentation/**/*.mdoc', 'documentation/**/*.md']
 ---
 
 # Documentation Pages Guide

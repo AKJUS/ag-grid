@@ -1,5 +1,7 @@
 ---
-paths: 'packages/*/src/**/*.ts'
+targets: ['*']
+description: 'Technology choices and architectural constraints for AG Grid'
+globs: ['packages/*/src/**/*.ts']
 ---
 
 # Technology Stack

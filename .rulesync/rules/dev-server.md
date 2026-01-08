@@ -1,5 +1,7 @@
 ---
-paths: 'documentation/**/*,packages/*/src/**/*'
+targets: ['*']
+description: 'Development server setup and build watch monitoring'
+globs: ['documentation/**/*', 'packages/*/src/**/*']
 ---
 
 # Development Server Guide

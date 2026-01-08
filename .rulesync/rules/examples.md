@@ -1,5 +1,7 @@
 ---
-paths: '_examples/**/*,documentation/**/_examples/**/*'
+targets: ['*']
+description: 'Working with examples in AG Grid documentation'
+globs: ['_examples/**/*', 'documentation/**/_examples/**/*']
 ---
 
 # Examples Guide

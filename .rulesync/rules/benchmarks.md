@@ -1,5 +1,7 @@
 ---
-paths: 'testing/performance/**/*,**/benchmark*'
+targets: ['*']
+description: 'Running and creating performance benchmarks for AG Grid'
+globs: ['testing/performance/**/*', '**/benchmark*']
 ---
 
 # Benchmarks Guide

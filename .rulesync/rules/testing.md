@@ -1,5 +1,7 @@
 ---
-paths: '**/*.test.ts,**/*.spec.ts,testing/**/*'
+targets: ['*']
+description: 'Testing strategies, Jest patterns, and verification for AG Grid'
+globs: ['**/*.test.ts', '**/*.spec.ts', 'testing/**/*']
 ---
 
 # Testing Guide
