@@ -36,7 +36,7 @@ All public documentation examples MUST work across all frameworks:
 
 ### Writing Framework-Compatible Examples
 
--   Use `document.getElementById('myChart')` for container references
+-   Use `document.getElementById('myGrid')` or `document.querySelector('#myGrid')` for grid container references
 -   Store options in top-level variables
 -   Keep event handlers as simple function calls
 -   Avoid complex DOM manipulation

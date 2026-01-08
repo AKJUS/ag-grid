@@ -57,7 +57,7 @@ yarn nx e2e ag-grid-docs
 
 ```bash
 # Run behavioural test suite
-yarn nx test testing-behavioural
+yarn nx test ag-behavioural-testing
 ```
 
 ## Test Patterns

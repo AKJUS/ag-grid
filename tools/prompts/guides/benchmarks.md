@@ -8,16 +8,27 @@ This guide covers running and creating performance benchmarks for AG Grid.
 
 ## Overview
 
-Performance benchmarks help detect regressions and validate optimizations. Benchmarks are located in `testing/performance/`.
+Performance benchmarks help detect regressions and validate optimizations.
+
+**Two types of performance testing exist in AG Grid:**
+
+1. **Behavioural Benchmarks** (Vitest) - Located in `testing/behavioural/` - micro-benchmarks for specific operations
+2. **Performance E2E Tests** (Playwright) - Located in `testing/performance/e2e/` - end-to-end performance scenarios
 
 ## Running Benchmarks
 
 ```bash
-# Run all benchmarks for a package
-yarn nx benchmark <package>
+# Run behavioural benchmarks
+yarn nx benchmark ag-behavioural-testing
 
-# Run specific benchmark pattern
-yarn nx benchmark <package> -- -t "pattern"
+# Run specific benchmark file
+yarn nx benchmark ag-behavioural-testing -- src/tree-data/datapath/benchmarks/tree-data-path.bench.ts
+
+# Watch mode for development
+yarn nx benchmark ag-behavioural-testing --configuration=watch
+
+# Update benchmark baselines
+yarn nx benchmark ag-behavioural-testing --configuration=update
 ```
 
 ## Key Performance Areas
@@ -51,10 +62,10 @@ When creating new benchmarks:
 
 ## Debugging Performance
 
-Enable detailed output:
+For watch mode during development:
 
 ```bash
-AG_BENCHMARK_DEBUG=1 yarn nx benchmark <package>
+yarn nx benchmark ag-behavioural-testing --configuration=watch
 ```
 
 ## Best Practices
