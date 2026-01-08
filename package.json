@@ -25,6 +25,7 @@
     "@axe-core/cli": "^4.10.2",
     "@axe-core/playwright": "^4.10.2",
     "@eslint/js": "^9.2.0",
+    "@modelcontextprotocol/server-sequential-thinking": "^2025.12.18",
     "@nx/devkit": "20.3.1",
     "@nx/esbuild": "20.3.1",
     "@nx/eslint": "20.3.1",
