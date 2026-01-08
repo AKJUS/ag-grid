@@ -83,6 +83,7 @@ documentation/ag-grid-docs/test-results/.last-run.json
 /.claude/skills/
 /.cursor/
 /.gemini/
+/.github/prompts/
 
 # Local settings
 .claude/settings.local.json
