@@ -47,9 +47,13 @@ jobs:
             - name: Install dependencies
               run: yarn install --frozen-lockfile
 
-            - name: Verify Rulesync Integrity
-              id: rulesync
+            - name: Verify Rulesync Integrity (Claude Code)
+              id: rulesync-claudecode
               run: ./external/ag-shared/scripts/setup-prompts/verify-rulesync.sh . claudecode
+
+            - name: Verify Rulesync Integrity (Codex CLI)
+              id: rulesync-codexcli
+              run: ./external/ag-shared/scripts/setup-prompts/verify-rulesync.sh . codexcli
 
     code-dependency-scan:
         runs-on: ubuntu-latest
