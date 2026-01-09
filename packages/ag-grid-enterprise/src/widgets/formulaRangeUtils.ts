@@ -53,7 +53,9 @@ export const tagRangeWithFormulaColor = (
 
 // Range helpers
 export const getCellRangeParams = (beans: BeanCollection, ref: string) => {
-    const match = FULL_CELL_OR_RANGE_REGEX.exec(ref);
+    // Allow a trailing ":" while the user is still typing a range (e.g. "A1:").
+    const normalizedRef = ref.endsWith(':') ? ref.slice(0, -1) : ref;
+    const match = FULL_CELL_OR_RANGE_REGEX.exec(normalizedRef);
     if (!match) {
         return null;
     }
@@ -134,13 +136,17 @@ export const rangeToRef = (beans: BeanCollection, range: CellRange): string | nu
     return `${colStartRef}${rowStartIndex}:${colEndRef}${rowEndIndex}`;
 };
 
-export const getRefsFromText = (text: string): Set<string> => {
-    // Extract all A1-style refs/ranges from raw text to keep grid ranges in sync.
-    const refs = new Set<string>();
+type RefToken = { ref: string; index: number };
+
+export const getRefTokensFromText = (text: string): RefToken[] => {
+    // Extract A1-style refs/ranges with their occurrence index (left-to-right).
+    const tokens: RefToken[] = [];
     let match: RegExpExecArray | null;
+    let index = 0;
     CELL_OR_RANGE_REGEX.lastIndex = 0;
     while ((match = CELL_OR_RANGE_REGEX.exec(text)) != null) {
-        refs.add(match[0]);
+        tokens.push({ ref: match[0], index });
+        index += 1;
     }
-    return refs;
+    return tokens;
 };
