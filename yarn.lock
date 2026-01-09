@@ -21092,7 +21092,7 @@ react-dom@~18.2.0:
 
 react-gif-player@0.5.1:
   version "0.5.1"
-  resolved "http://registry.yarnpkg.com/react-gif-player/-/react-gif-player-0.5.1.tgz#526053f5f65d7ba71ccdae337772be8b57cf3cf4"
+  resolved "http://registry.ag-grid.com/react-gif-player/-/react-gif-player-0.5.1.tgz#526053f5f65d7ba71ccdae337772be8b57cf3cf4"
   integrity sha512-txjepE8WEKumnGnFKnfg9Eym9Ww9qGEbmF/nt0MS/xd1ZjRKJD+Zp512DdixG2LewY75Mtw8QcreDWVOdUhpuw==
   dependencies:
     prop-types "^15.6.0"
