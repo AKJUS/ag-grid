@@ -1,4 +1,4 @@
-import { BeanStub } from 'ag-grid-community';
+import { BeanStub, _last } from 'ag-grid-community';
 import type { CellRange, CellSelectionChangedEvent, Column } from 'ag-grid-community';
 
 import type { AgFormulaInputField } from './agFormulaInputField';
@@ -253,8 +253,18 @@ export class FormulaInputRangeSyncFeature extends BeanStub {
                 return;
             }
 
+            if (action === 'replace' && previousRef === ref) {
+                // Clicking the same ref should not leave a duplicate range behind.
+                this.discardLatestRangeForRef(ref);
+                this.field.restoreCaretAfterToken();
+                this.refocusEditingCell();
+                return;
+            }
+
             this.tagLatestRangeForRef(ref, tokenIndex);
             this.handleRangeTokenUpdate(previousRef, ref, true, action === 'insert', tokenIndex);
+            // Refresh token indices for existing ranges so their colors match the new token order.
+            this.syncRangesFromFormula(this.field.getCurrentValue());
             this.field.restoreCaretAfterToken();
             this.refocusEditingCell();
             return;
@@ -370,7 +380,7 @@ export class FormulaInputRangeSyncFeature extends BeanStub {
 
         const { beans, field, trackedRanges } = this;
         const ranges = beans.rangeSvc?.getCellRanges();
-        const latest = ranges?.length ? ranges[ranges.length - 1] : null;
+        const latest = ranges?.length ? _last(ranges) : null;
 
         if (!latest) {
             return;
@@ -381,6 +391,32 @@ export class FormulaInputRangeSyncFeature extends BeanStub {
 
         tagRangeWithFormulaColor(latest, ref, colorIndex);
         this.refreshRangeStyling();
+    }
+
+    private discardLatestRangeForRef(ref: string): void {
+        const rangeSvc = this.beans.rangeSvc;
+        if (!rangeSvc) {
+            return;
+        }
+
+        const ranges = rangeSvc.getCellRanges() ?? [];
+        if (!ranges.length) {
+            return;
+        }
+
+        const latest = _last(ranges);
+        if (rangeToRef(this.beans, latest) !== ref) {
+            return;
+        }
+
+        if (this.trackedRanges.has(latest)) {
+            this.removeTrackedRange(latest);
+            return;
+        }
+
+        this.suppressRangeEvents = true;
+        rangeSvc.setCellRanges(ranges.slice(0, -1));
+        this.suppressRangeEvents = false;
     }
 
     private ensureTrackedRangeColors(): boolean {
