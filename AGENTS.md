@@ -1,3 +1,34 @@
+Please also reference the following rules as needed. The list below is provided in TOON format, and `@` stands for the project root directory.
+
+rules[8]:
+  - path: @.codex/memories/testing.md
+    description: "Testing strategies, Jest patterns, and verification for AG Grid"
+    applyTo[3]: **/*.test.ts,**/*.spec.ts,testing/**/*
+  - path: @.codex/memories/technology-stack.md
+    description: Technology choices and architectural constraints for AG Grid
+    applyTo[1]: packages/*/src/**/*.ts
+  - path: @.codex/memories/jira.md
+    description: Guidelines for searching and creating JIRA tickets in AG products
+  - path: @.codex/memories/examples.md
+    description: Working with examples in AG Grid documentation
+    applyTo[2]: _examples/**/*,documentation/**/_examples/**/*
+  - path: @.codex/memories/docs-pages.md
+    description: Creating and maintaining documentation pages for AG Grid
+    applyTo[2]: documentation/**/*.mdoc,documentation/**/*.md
+  - path: @.codex/memories/dev-server.md
+    description: Development server setup and build watch monitoring
+    applyTo[2]: documentation/**/*,packages/*/src/**/*
+  - path: @.codex/memories/code-quality.md
+    description: "Code quality practices including avoiding bloat, comment guidelines, and review practices"
+    applyTo[1]: packages/*/src/**/*.ts
+  - path: @.codex/memories/benchmarks.md
+    description: Running and creating performance benchmarks for AG Grid
+    applyTo[2]: testing/performance/**/*,**/benchmark*
+
+# Additional Conventions Beyond the Built-in Functions
+
+As this project's AI coding tool, you must follow the additional conventions below, in addition to the built-in functions.
+
 ## AI Agent Instructions
 
 This file provides guidance to AI Agents when working with code in this repository.
