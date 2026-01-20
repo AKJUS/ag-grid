@@ -898,20 +898,34 @@ export class EditService extends BeanStub implements NamedBean, IEditService {
 
     public setDataValue(position: Required<EditPosition>, newValue: any, eventSource?: string): boolean | undefined {
         try {
-            if ((!this.isEditing() || this.committing) && !SET_DATA_SOURCE_AS_API.has(eventSource)) {
-                return;
+            const batch = this.batch;
+            const editing = this.isEditing(batch ? undefined : position);
+
+            if ((!editing || this.committing) && !SET_DATA_SOURCE_AS_API.has(eventSource)) {
+                return; // Ignore non-edit edits that are not treated as API sources.
             }
 
-            const { beans } = this;
+            if (!editing && !batch && eventSource === 'paste') {
+                return; // Paste on non editable cells and not batching
+            }
+
+            const beans = this.beans;
 
             this.strategy ??= this.createStrategy();
-            const source = this.batch ? 'ui' : this.committing ? eventSource ?? 'api' : 'api';
+            let source: string;
+            if (batch) {
+                source = 'ui';
+            } else if (this.committing) {
+                source = eventSource ?? 'api';
+            } else {
+                source = 'api';
+            }
 
             if (!eventSource || KEEP_EDITOR_SOURCES.has(eventSource)) {
                 // editApi or undoRedoApi apply change without involving the editor
                 _syncFromEditor(beans, position, newValue, eventSource, undefined, { persist: true });
 
-                if (this.batch) {
+                if (batch) {
                     this.cleanupEditors();
 
                     _purgeUnchangedEdits(beans);
