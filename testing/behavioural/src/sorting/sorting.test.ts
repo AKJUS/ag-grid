@@ -159,6 +159,60 @@ describe('Sorting', () => {
         `);
     });
 
+    test('sorts bigint values ascending, descending, and absolute', async () => {
+        const api = gridMgr.createGrid('bigintSort', {
+            columnDefs: [
+                {
+                    field: 'value',
+                    cellDataType: 'bigint',
+                    valueFormatter: (params) => (params.value == null ? '' : `${params.value}n`),
+                },
+            ],
+            rowData: [
+                { id: 'a', value: 9007199254740993n },
+                { id: 'b', value: -5n },
+                { id: 'c', value: 10n },
+            ],
+            getRowId: (params) => params.data?.id,
+        });
+
+        await new GridRows(api, 'bigint initial').check(`
+            ROOT id:ROOT_NODE_ID
+            ├── LEAF id:a value:"9007199254740993n"
+            ├── LEAF id:b value:"-5n"
+            └── LEAF id:c value:"10n"
+        `);
+
+        api.applyColumnState({ state: [{ colId: 'value', sort: 'asc' }] });
+
+        await new GridRows(api, 'bigint asc').check(`
+            ROOT id:ROOT_NODE_ID
+            ├── LEAF id:b value:"-5n"
+            ├── LEAF id:c value:"10n"
+            └── LEAF id:a value:"9007199254740993n"
+        `);
+
+        api.applyColumnState({ state: [{ colId: 'value', sort: 'desc' }] });
+
+        await new GridRows(api, 'bigint desc').check(`
+            ROOT id:ROOT_NODE_ID
+            ├── LEAF id:a value:"9007199254740993n"
+            ├── LEAF id:c value:"10n"
+            └── LEAF id:b value:"-5n"
+        `);
+
+        api.applyColumnState({
+            state: [{ colId: 'value', sort: 'asc', sortIndex: 0, sortType: 'absolute' }],
+        });
+
+        await new GridRows(api, 'bigint absolute asc').check(`
+            ROOT id:ROOT_NODE_ID
+            ├── LEAF id:b value:"-5n"
+            ├── LEAF id:c value:"10n"
+            └── LEAF id:a value:"9007199254740993n"
+        `);
+    });
+
     test('accentedSort toggles locale aware ordering', async () => {
         const namesRowData = [
             { id: 'accent-1', name: 'Zorro' },

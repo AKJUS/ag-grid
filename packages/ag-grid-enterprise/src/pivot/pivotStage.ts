@@ -12,7 +12,7 @@ import type {
     ValueService,
     _IRowNodePivotStage,
 } from 'ag-grid-community';
-import { BeanStub, _missing } from 'ag-grid-community';
+import { BeanStub, _jsonEquals, _missing } from 'ag-grid-community';
 
 import type { PivotColDefService } from './pivotColDefService';
 
@@ -166,19 +166,14 @@ export class PivotStage extends BeanStub implements NamedBean, _IRowNodePivotSta
     }
 
     private setUniqueValues(newValues: Map<string, any>): boolean {
-        const json1 = JSON.stringify(mapToObject(this.uniqueValues));
-        const json2 = JSON.stringify(mapToObject(newValues));
-
-        const uniqueValuesChanged = json1 !== json2;
-
+        const uniqueValuesChanged = !_jsonEquals(mapToObject(this.uniqueValues), mapToObject(newValues));
         // we only continue the below if the unique values are different, as otherwise
         // the result will be the same as the last time we did it
         if (uniqueValuesChanged) {
             this.uniqueValues = newValues;
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     private currentUniqueCount = 0;
