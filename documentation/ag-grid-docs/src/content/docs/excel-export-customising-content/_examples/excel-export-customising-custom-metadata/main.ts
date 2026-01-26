@@ -31,10 +31,10 @@ const rowData: ReportRow[] = [
     { department: 'Legal', reportId: 'RPT-109', owner: 'Taylor', cost: 2700 },
 ];
 
-const excelCustomMetadata = {
-    ExportID: '12345',
-    GeneratedBy: 'AgGrid',
+const customMetadata = {
+    ExportID: 'EXP-2026-001',
     ExpirationDate: '2025-01-01T12:00:00Z',
+    Disclaimer: 'Preliminary data; subject to audit',
 };
 
 let gridApi: GridApi<ReportRow>;
@@ -53,7 +53,7 @@ const gridOptions: GridOptions<ReportRow> = {
     },
     rowData,
     defaultExcelExportParams: {
-        excelCustomMetadata: excelCustomMetadata,
+        customMetadata: customMetadata,
     },
 };
 
