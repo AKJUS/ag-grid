@@ -749,4 +749,92 @@ describe('Cell Editing Regression', () => {
             });
         });
     });
+
+    test('Delete key on cell with valueGetter passes correct oldValue to valueSetter', async () => {
+        const valueSetterCalls: Array<{ oldValue: any; newValue: any }> = [];
+
+        const api = await gridMgr.createGridAndWait('myGrid', {
+            columnDefs: [
+                { field: 'name' },
+                {
+                    headerName: 'Total Medals',
+                    colId: 'totalMedals',
+                    editable: true,
+                    valueGetter: (params) => params.data.medals,
+                    valueSetter: (params) => {
+                        valueSetterCalls.push({
+                            oldValue: structuredClone(params.oldValue),
+                            newValue: params.newValue,
+                        });
+                        if (params.newValue == null) {
+                            params.data.medals = { gold: 0, silver: 0, bronze: 0 };
+                            return true;
+                        }
+                        return false;
+                    },
+                    valueFormatter: ({ value }) => value.gold + value.silver + value.bronze,
+                },
+                {
+                    field: 'score',
+                    editable: true,
+                    valueGetter: (params) => params.data.scoreData.value,
+                    valueSetter: (params) => {
+                        valueSetterCalls.push({
+                            oldValue: params.oldValue,
+                            newValue: params.newValue,
+                        });
+                        params.data.scoreData.value = params.newValue ?? 0;
+                        return true;
+                    },
+                },
+            ],
+            defaultColDef: {
+                flex: 1,
+                editable: true,
+                cellDataType: false,
+            },
+            rowData: [
+                {
+                    name: 'Michael Phelps',
+                    medals: { gold: 8, silver: 2, bronze: 0 },
+                    scoreData: { value: 42 },
+                },
+            ],
+        });
+
+        const gridDiv = getGridElement(api)! as HTMLElement;
+        await asyncSetTimeout(1);
+
+        // Test object valueGetter
+        const medalsCell = getByTestId(gridDiv, agTestIdFor.cell('0', 'totalMedals'));
+        expect(medalsCell).toHaveTextContent('10');
+
+        await userEvent.click(medalsCell);
+        await asyncSetTimeout(1);
+        expect(api.getEditingCells()).toHaveLength(0);
+
+        await userEvent.keyboard('{Delete}');
+        await asyncSetTimeout(1);
+
+        expect(valueSetterCalls).toHaveLength(1);
+        expect(valueSetterCalls[0].newValue).toBeNull();
+        expect(valueSetterCalls[0].oldValue).toEqual({ gold: 8, silver: 2, bronze: 0 });
+        expect(medalsCell).toHaveTextContent('0');
+
+        // Test primitive valueGetter
+        const scoreCell = getByTestId(gridDiv, agTestIdFor.cell('0', 'score'));
+        expect(scoreCell).toHaveTextContent('42');
+
+        await userEvent.click(scoreCell);
+        await asyncSetTimeout(1);
+        expect(api.getEditingCells()).toHaveLength(0);
+
+        await userEvent.keyboard('{Delete}');
+        await asyncSetTimeout(1);
+
+        expect(valueSetterCalls).toHaveLength(2);
+        expect(valueSetterCalls[1].newValue).toBeNull();
+        expect(valueSetterCalls[1].oldValue).toBe(42);
+        expect(scoreCell).toHaveTextContent('0');
+    });
 });

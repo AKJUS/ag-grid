@@ -112,21 +112,28 @@ export class EditModelService extends BeanStub implements NamedBean, IEditModelS
         return data;
     }
 
-    public getEdit(position: EditPosition, copy?: false): Readonly<EditValue> | undefined {
-        const edit = this._getEdit(position);
-        return copy && edit ? { ...edit } : edit;
-    }
-
-    private _getEdit(position: EditPosition): EditValue | undefined {
-        if (this.suspendEdits) {
-            return undefined;
+    public getEdit(position: EditPosition, params?: GetEditsParams): EditValue | undefined {
+        const { rowNode, column } = position;
+        const edits = this.edits;
+        if (this.suspendEdits || edits.size === 0 || !rowNode || !column) {
+            return undefined; // no edits or incomplete position
         }
 
-        if (this.edits.size === 0) {
-            return undefined;
+        // Check the row's edits first
+        const edit = edits.get(rowNode)?.get(column);
+        if (edit) {
+            return edit; // found edit for the cell
         }
 
-        return position.rowNode && position.column && this.getEditRow(position.rowNode)?.get(position.column);
+        // If checkSiblings, also check the pinned sibling for the column
+        if (params?.checkSiblings) {
+            const pinnedSibling = (rowNode as RowNode).pinnedSibling;
+            if (pinnedSibling) {
+                return edits.get(pinnedSibling)?.get(column); // return edit from pinned sibling if found
+            }
+        }
+
+        return undefined;
     }
 
     public getEditMap(copy = true): EditMap {
@@ -168,7 +175,7 @@ export class EditModelService extends BeanStub implements NamedBean, IEditModelS
             edits.set(position.rowNode, new Map());
         }
 
-        const currentEdit = this._getEdit(position);
+        const currentEdit = this.getEdit(position);
 
         const updatedEdit = Object.assign({
             editorState: {
@@ -188,7 +195,7 @@ export class EditModelService extends BeanStub implements NamedBean, IEditModelS
         const { rowNode, column } = position;
         if (rowNode) {
             if (column) {
-                const edit = this._getEdit(position);
+                const edit = this.getEdit(position);
                 if (edit) {
                     edit.editorValue = undefined;
                     edit.pendingValue = edit.sourceValue;

@@ -101,7 +101,8 @@ export interface IEditService extends NamedBean {
         event?: KeyboardEvent,
         source?: EditSource
     ): boolean | null;
-    getCellDataValue(position: Required<EditPosition>, preferEditor: boolean): any;
+    getCellValueForDisplay(rowNode: IRowNode, column: Column, source: 'ui' | 'api' | string): any;
+    getCellDataValue(position: Required<EditPosition>): any;
     addStopEditingWhenGridLosesFocus(viewports: HTMLElement[]): void;
     createPopupEditorWrapper(params: ICellEditorParams): PopupEditorWrapper;
     setDataValue(position: Required<EditPosition>, newValue: any, eventSource?: string): boolean | undefined;

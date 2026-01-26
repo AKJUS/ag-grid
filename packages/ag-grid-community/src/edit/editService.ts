@@ -93,6 +93,7 @@ const CANCEL_PARAMS: StopEditParams = { cancel: true, source: 'api' };
 
 const COMMIT_PARAMS: StopEditParams = { cancel: false, source: 'api' };
 
+/** Params to also check the pinnedSibling row when looking up edits (pinned rows share edit state with their unpinned counterpart). */
 const CHECK_SIBLING = { checkSiblings: true };
 
 const FORCE_REFRESH = { force: true, suppressFlash: true };
@@ -864,26 +865,47 @@ export class EditService extends BeanStub implements NamedBean, IEditService {
         return res;
     }
 
-    public getCellDataValue({ rowNode, column }: Required<EditPosition>, preferEditor = true): any {
-        if (!rowNode || !column) {
-            return undefined;
+    /** Gets the pending edit value for display (used by ValueService). Returns undefined to fallback to valueGetter. */
+    public getCellValueForDisplay(rowNode: IRowNode, column: Column, source: 'ui' | 'api' | string): any {
+        if (source !== 'ui') {
+            return undefined; // only show edit values for UI operations
         }
 
-        let edit = this.model.getEdit({ rowNode, column });
+        const edit = this.model.getEdit({ rowNode, column }, CHECK_SIBLING);
 
-        const pinnedSibling = (rowNode as RowNode).pinnedSibling;
-        if (pinnedSibling) {
-            const siblingEdit = this.model.getEdit({ rowNode: pinnedSibling, column });
-            if (siblingEdit) {
-                edit = siblingEdit;
+        // Skip if no edit, or during stopEditing when value was already committed (non-batch, no editor opened)
+        if (!edit || (this.stopping && !this.batch && !edit.editorState?.cellStartedEditing)) {
+            return undefined; // no edit or value already committed
+        }
+
+        const editorValue = edit.editorValue;
+        if (editorValue != null && editorValue !== UNEDITED) {
+            return editorValue; // live value from editor component
+        }
+
+        const pendingValue = edit.pendingValue;
+        if (pendingValue !== UNEDITED) {
+            return pendingValue; // synced pending value
+        }
+
+        return undefined; // fallback to valueGetter
+    }
+
+    public getCellDataValue(position: Required<EditPosition>): any {
+        const edit = this.model.getEdit(position, CHECK_SIBLING);
+        if (edit) {
+            const newValue = edit.pendingValue;
+            if (newValue !== UNEDITED) {
+                return newValue; // return edit value if exists
+            }
+            const sourceValue = edit.sourceValue;
+            if (sourceValue != null) {
+                return sourceValue; // return source value if no edit value
             }
         }
 
-        const newValue = preferEditor ? edit?.editorValue ?? edit?.pendingValue : edit?.pendingValue;
-
-        return newValue === UNEDITED || !edit
-            ? edit?.sourceValue ?? this.valueSvc.getValue(column as AgColumn, rowNode, false, 'api')
-            : newValue;
+        // fallback to getting value from ValueService
+        return this.valueSvc.getValue(position.column as AgColumn, position.rowNode, false, 'api');
     }
 
     public addStopEditingWhenGridLosesFocus(viewports: HTMLElement[]): void {
