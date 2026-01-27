@@ -274,6 +274,14 @@ export interface GridOptions<TData = any> {
      */
     tooltipShowDelay?: number;
     /**
+     * The delay in milliseconds before a tooltip is shown when moving the pointer from one tooltip-enabled element to
+     * another while the previous tooltip is still visible or pending hide.
+     * **Note:** This property does not work if `enableBrowserTooltips` is `true`.
+     * @default 200
+     * @agModule `TooltipModule`
+     */
+    tooltipSwitchShowDelay?: number;
+    /**
      * The delay in milliseconds that it takes for tooltips to hide once they have been displayed.
      * **Note:** This property does not work if `enableBrowserTooltips` is `true` and `tooltipHideTriggers` includes `timeout`.
      * @default 10000
