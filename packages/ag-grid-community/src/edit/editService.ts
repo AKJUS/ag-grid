@@ -14,12 +14,12 @@ import type { EditingCellPosition, ICellEditorParams, ICellEditorValidationError
 import type { CellPosition } from '../interfaces/iCellPosition';
 import type { RefreshCellsParams } from '../interfaces/iCellsParams';
 import type { Column } from '../interfaces/iColumn';
-import type { EditMap, EditRow, EditValue, IEditModelService } from '../interfaces/iEditModelService';
+import type { EditMap, EditPositionValue, EditRow, EditValue } from '../interfaces/iEditModelService';
 import type {
+    CellValueResolveFrom,
     EditNavOnValidationResult,
     EditPosition,
     EditSource,
-    IEditService,
     IsEditingParams,
     StartEditParams,
     StopEditParams,
@@ -33,6 +33,7 @@ import { CellCtrl } from '../rendering/cell/cellCtrl';
 import type { RowCtrl } from '../rendering/row/rowCtrl';
 import type { ValueService } from '../valueService/valueService';
 import { PopupEditorWrapper } from './cellEditors/popupEditorWrapper';
+import type { EditModelService } from './editModelService';
 import type { BaseEditStrategy } from './strategy/baseEditStrategy';
 import { isCellEditable, isFullRowCellEditable, shouldStartEditing } from './strategy/strategyUtils';
 import { CellEditStyleFeature } from './styles/cellEditStyleFeature';
@@ -98,13 +99,13 @@ const CHECK_SIBLING = { checkSiblings: true };
 
 const FORCE_REFRESH = { force: true, suppressFlash: true };
 
-export class EditService extends BeanStub implements NamedBean, IEditService {
+export class EditService extends BeanStub implements NamedBean {
     public beanName = 'editSvc' as const;
 
     public committing = false;
 
     private batch: boolean = false;
-    private model: IEditModelService;
+    private model: EditModelService;
     private valueSvc: ValueService;
     private rangeSvc: IRangeService;
     private strategy?: BaseEditStrategy;
@@ -229,8 +230,8 @@ export class EditService extends BeanStub implements NamedBean, IEditService {
         return _validateEdit(this.beans);
     }
 
-    public isEditing(position?: EditPosition, params?: IsEditingParams): boolean {
-        return this.model.hasEdits(position, params ?? CHECK_SIBLING);
+    public isEditing(position?: EditPosition | null, params?: IsEditingParams): boolean {
+        return this.model.hasEdits(position ?? undefined, params ?? CHECK_SIBLING);
     }
 
     public isRowEditing(rowNode?: IRowNode, params?: IsEditingParams): boolean {
@@ -865,30 +866,42 @@ export class EditService extends BeanStub implements NamedBean, IEditService {
         return res;
     }
 
-    /** Gets the pending edit value for display (used by ValueService). Returns undefined to fallback to valueGetter. */
-    public getCellValueForDisplay(rowNode: IRowNode, column: Column, source: 'ui' | 'api' | string): any {
-        if (source !== 'ui') {
-            return undefined; // only show edit values for UI operations
+    /**
+     * Gets the pending edit value for display (used by ValueService).
+     * Returns undefined to fallback to data/valueGetter.
+     */
+    public getCellValueForDisplay(rowNode: IRowNode, column: Column, from: CellValueResolveFrom): any {
+        if (from === 'data') {
+            return undefined; // 'data' mode: always use committed data, never edit values
+        }
+
+        if (from === 'batch' && !this.batch) {
+            return undefined; // 'batch' mode: only return edit values when batch editing is active
         }
 
         const edit = this.model.getEdit({ rowNode, column }, CHECK_SIBLING);
-
-        // Skip if no edit, or during stopEditing when value was already committed (non-batch, no editor opened)
-        if (!edit || (this.stopping && !this.batch && !edit.editorState?.cellStartedEditing)) {
-            return undefined; // no edit or value already committed
+        if (!edit) {
+            return undefined;
         }
 
-        const editorValue = edit.editorValue;
-        if (editorValue != null && editorValue !== UNEDITED) {
-            return editorValue; // live value from editor component
+        // Skip during stopEditing when value was already committed (non-batch, no editor opened)
+        if (this.stopping && !this.batch && !edit.editorState?.cellStartedEditing) {
+            return undefined;
+        }
+
+        if (from === 'edit') {
+            const editorValue = edit.editorValue;
+            if (editorValue != null && editorValue !== UNEDITED) {
+                return editorValue; // For 'edit' mode: return editorValue (live typing) if available
+            }
         }
 
         const pendingValue = edit.pendingValue;
         if (pendingValue !== UNEDITED) {
-            return pendingValue; // synced pending value
+            return pendingValue; // Return batch pending value if available
         }
 
-        return undefined; // fallback to valueGetter
+        return undefined;
     }
 
     public getCellDataValue(position: Required<EditPosition>): any {
@@ -905,7 +918,7 @@ export class EditService extends BeanStub implements NamedBean, IEditService {
         }
 
         // fallback to getting value from ValueService
-        return this.valueSvc.getValue(position.column as AgColumn, position.rowNode, false, 'api');
+        return this.valueSvc.getValue(position.column as AgColumn, position.rowNode, 'data');
     }
 
     public addStopEditingWhenGridLosesFocus(viewports: HTMLElement[]): void {
@@ -1063,7 +1076,7 @@ export class EditService extends BeanStub implements NamedBean, IEditService {
     }
 
     private toEventChangeList(edits: EditMap): CellValueChange[] {
-        return this.model.getEditPositions(edits).map((edit) => ({
+        return this.model.getEditPositions(edits).map((edit: EditPositionValue) => ({
             rowIndex: edit.rowNode.rowIndex!,
             rowPinned: edit.rowNode.rowPinned,
             columnId: edit.column.getColId(),
@@ -1109,7 +1122,7 @@ export class EditService extends BeanStub implements NamedBean, IEditService {
                     const isFormulaForColumn = !!isFormula && column.isAllowFormula();
 
                     if (this.isCellEditable({ rowNode, column }, 'api')) {
-                        const sourceValue = valueSvc.getValue(column as AgColumn, rowNode, true, 'api');
+                        const sourceValue = valueSvc.getValue(column as AgColumn, rowNode, 'data', true);
                         let pendingValue = valueSvc.parseValue(
                             column as AgColumn,
                             rowNode ?? null,
@@ -1199,7 +1212,7 @@ export class EditService extends BeanStub implements NamedBean, IEditService {
             if (!rowNode) {
                 continue;
             }
-            const sourceValue = valueSvc.getValue(col as AgColumn, rowNode, true, 'api');
+            const sourceValue = valueSvc.getValue(col as AgColumn, rowNode, 'data', true);
 
             if (
                 !params?.forceRefreshOfEditCellsOnly &&

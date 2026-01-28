@@ -6,6 +6,7 @@ import type { DataTypeService } from '../columns/dataTypeService';
 import type { NamedBean } from '../context/bean';
 import { BeanStub } from '../context/beanStub';
 import type { BeanCollection } from '../context/context';
+import type { EditService } from '../edit/editService';
 import type { AgColumn } from '../entities/agColumn';
 import type {
     ColDef,
@@ -19,7 +20,7 @@ import type { RowNode } from '../entities/rowNode';
 import type { CellValueChangedEvent } from '../events';
 import { _addGridCommonParams, _isServerSideRowModel } from '../gridOptionsUtils';
 import type { IFormulaDataService } from '../interfaces/formulas';
-import type { IEditService } from '../interfaces/iEditService';
+import type { CellValueResolveFrom } from '../interfaces/iEditService';
 import type { IRowNode } from '../interfaces/iRowNode';
 import { _warn } from '../validation/logging';
 import type { ExpressionService } from './expressionService';
@@ -32,7 +33,7 @@ export class ValueService extends BeanStub implements NamedBean {
     private colModel: ColumnModel;
     private valueCache?: ValueCache;
     private dataTypeSvc?: DataTypeService;
-    private editSvc?: IEditService;
+    private editSvc?: EditService;
     private formulaDataSvc?: IFormulaDataService;
 
     public wireBeans(beans: BeanCollection): void {
@@ -97,12 +98,12 @@ export class ValueService extends BeanStub implements NamedBean {
         includeValueFormatted?: boolean;
         useRawFormula?: boolean;
         exporting?: boolean;
-        source?: 'ui' | 'api';
+        from: CellValueResolveFrom;
     }): {
         value: any;
         valueFormatted: string | null;
     } {
-        const { column, node, includeValueFormatted, useRawFormula, exporting, source = 'ui' } = params;
+        const { column, node, includeValueFormatted, useRawFormula, exporting, from } = params;
         const { showRowGroupColValueSvc } = this.beans;
         const isFullWidthGroup = !column && node.group;
         const isGroupCol = column?.colDef.showRowGroup;
@@ -113,7 +114,7 @@ export class ValueService extends BeanStub implements NamedBean {
 
         // handle group cell value
         if (showRowGroupColValueSvc && processTreeDataAsGroup && (isFullWidthGroup || isGroupCol)) {
-            const groupValue = showRowGroupColValueSvc.getGroupValue(node, column);
+            const groupValue = showRowGroupColValueSvc.getGroupValue(node, column, this.displayIgnoresAggData(node));
             if (groupValue == null) {
                 return {
                     value: null,
@@ -143,16 +144,7 @@ export class ValueService extends BeanStub implements NamedBean {
             };
         }
 
-        // when in pivot mode, leafGroups cannot be expanded
-        const isPivotLeaf = node.leafGroup && this.colModel.isPivotMode();
-        const isOpenedGroup = node.group && node.expanded && !node.footer && !isPivotLeaf;
-        // checks if we show header data
-        const groupShowsAggData = this.gos.get('groupSuppressBlankHeader') || !node.sibling;
-
-        // if doing grouping and footers, we don't want to include the agg value
-        // in the header when the group is open
-        const ignoreAggData = isOpenedGroup && !groupShowsAggData;
-        let value = this.getValue(column, node, ignoreAggData, source);
+        let value = this.getValue(column, node, from, this.displayIgnoresAggData(node));
         let valueToFormat = value;
 
         const { formula } = this.beans;
@@ -175,9 +167,9 @@ export class ValueService extends BeanStub implements NamedBean {
 
     public getValue(
         column: AgColumn,
-        rowNode?: IRowNode | null,
-        ignoreAggData = false,
-        source: 'ui' | 'api' | 'edit' | string = 'ui'
+        rowNode: IRowNode | null | undefined,
+        from: CellValueResolveFrom,
+        ignoreAggData: boolean = false
     ): any {
         // hack - the grid is getting refreshed before this bean gets initialised, race condition.
         // really should have a way so they get initialised in the right order???
@@ -189,8 +181,8 @@ export class ValueService extends BeanStub implements NamedBean {
             return;
         }
 
-        // If editing, return the pending value if available
-        const pending = this.editSvc?.getCellValueForDisplay(rowNode, column, source);
+        // Check for edit/pending values if not requesting committed data
+        const pending = this.editSvc?.getCellValueForDisplay(rowNode, column, from);
         if (pending !== undefined) {
             return pending;
         }
@@ -225,6 +217,27 @@ export class ValueService extends BeanStub implements NamedBean {
 
         const formula = dataSource.getFormula({ column, rowNode });
         return _isExpressionString(formula) ? formula : undefined;
+    }
+
+    /** Computes whether to ignore aggregation data for display purposes. */
+    private displayIgnoresAggData(node: IRowNode): boolean {
+        // If doing grouping and footers, we don't want to include the agg value
+        // in the header when the group is open.
+        // Result is: isOpenedGroup && !groupShowsAggData
+
+        // Check isOpenedGroup conditions: node.group && node.expanded && !node.footer && !isPivotLeaf
+        if (!node.group || !node.expanded || node.footer) {
+            return false;
+        }
+        // When in pivot mode, leafGroups cannot be expanded
+        if (node.leafGroup && this.colModel.isPivotMode()) {
+            return false; // isPivotLeaf - not an opened group
+        }
+
+        // isOpenedGroup is true. Now check if groupShowsAggData.
+        // groupShowsAggData = this.gos.get('groupSuppressBlankHeader') || !node.sibling
+        // We return true only if !groupShowsAggData, i.e., !groupSuppressBlankHeader && node.sibling
+        return !!node.sibling && !this.gos.get('groupSuppressBlankHeader');
     }
 
     private resolveValue(column: AgColumn, rowNode: IRowNode, ignoreAggData: boolean): any {
@@ -330,7 +343,12 @@ export class ValueService extends BeanStub implements NamedBean {
     public getDeleteValue(column: AgColumn, rowNode: IRowNode): any {
         if (_exists(column.getColDef().valueParser)) {
             return (
-                this.parseValue(column, rowNode, '', this.getValueForDisplay({ column, node: rowNode }).value) ?? null
+                this.parseValue(
+                    column,
+                    rowNode,
+                    '',
+                    this.getValueForDisplay({ column, node: rowNode, from: 'edit' }).value
+                ) ?? null
             );
         }
         return null;
@@ -408,7 +426,8 @@ export class ValueService extends BeanStub implements NamedBean {
             return false;
         }
 
-        const oldValue = this.getValue(column, rowNode, undefined, eventSource);
+        // Get old value from stored data, ignoring any pending edit state
+        const oldValue = this.getValue(column, rowNode, 'data');
 
         const params: ValueSetterParams = _addGridCommonParams(this.gos, {
             node: rowNode,
@@ -501,7 +520,7 @@ export class ValueService extends BeanStub implements NamedBean {
 
         this.valueCache?.onDataChanged();
 
-        const savedValue = this.getValue(column, rowNode);
+        const savedValue = this.getValue(column, rowNode, 'edit');
 
         this.dispatchCellValueChangedEvent(rowNode, params, savedValue, eventSource);
         if ((rowNode as RowNode).pinnedSibling) {
@@ -693,16 +712,13 @@ export class ValueService extends BeanStub implements NamedBean {
     ): any {
         const colId = column.getColId();
 
-        // if inside the same turn, just return back the value we got last time
         const valueFromCache = this.valueCache!.getValue(rowNode as RowNode, colId);
-
         if (valueFromCache !== undefined) {
             return valueFromCache;
         }
 
         const result = this.executeValueGetterWithoutValueCache(valueGetter, data, column, rowNode);
 
-        // if a turn is active, store the value in case the grid asks for it again
         this.valueCache!.setValue(rowNode as RowNode, colId, result);
 
         return result;
@@ -720,7 +736,7 @@ export class ValueService extends BeanStub implements NamedBean {
             node: rowNode,
             column: column,
             colDef: column.getColDef(),
-            getValue: this.getValueCallback.bind(this, rowNode),
+            getValue: (field) => this.getValueCallback(rowNode, field),
         });
 
         let result;
@@ -737,7 +753,7 @@ export class ValueService extends BeanStub implements NamedBean {
         const otherColumn = this.colModel.getColDefCol(field);
 
         if (otherColumn) {
-            return this.getValue(otherColumn, node);
+            return this.getValue(otherColumn, node, 'data');
         }
 
         return null;
@@ -745,7 +761,9 @@ export class ValueService extends BeanStub implements NamedBean {
 
     // used by row grouping and pivot, to get key for a row. col can be a pivot col or a row grouping col
     public getKeyForNode(col: AgColumn, rowNode: IRowNode): any {
-        const value = this.getValue(col, rowNode);
+        // Use 'data' - grouping keys should be based on committed data, not pending edits.
+        // Row structure should remain stable during editing; rows only move groups when edits are committed.
+        const value = this.getValue(col, rowNode, 'data');
         const keyCreator = col.getColDef().keyCreator;
 
         let result = value;

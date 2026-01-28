@@ -240,4 +240,89 @@ describe('Batch editing documentation examples', () => {
             └─ footer id:rowGroupFooter_ROOT_NODE_ID age:{"count":2,"value":25} total:128
         `);
     });
+
+    test('batch editing preserves values when navigating between cells', async () => {
+        const api = await gridsManager.createGridAndWait('batchNavigation', {
+            columnDefs: [
+                { field: 'a', cellEditor: 'agTextCellEditor' },
+                { field: 'b', cellEditor: 'agTextCellEditor' },
+                { field: 'c', cellEditor: 'agTextCellEditor' },
+            ],
+            rowData: [
+                { id: '0', a: 'a0', b: 'b0', c: 'c0' },
+                { id: '1', a: 'a1', b: 'b1', c: 'c1' },
+            ],
+            getRowId: (params) => params.data.id,
+            defaultColDef: { editable: true, flex: 1 },
+        });
+
+        await asyncSetTimeout(1);
+        const gridElement = getGridElement(api)! as HTMLElement;
+        const getCell = (rowId: string, colId: string) => getByTestId(gridElement, agTestIdFor.cell(rowId, colId));
+        const user = userEvent.setup();
+
+        api.startBatchEdit();
+
+        // Edit cell a0
+        const cellA0 = getCell('0', 'a');
+        await user.dblClick(cellA0);
+        await user.keyboard('edited-a0');
+        expect(cellA0.querySelector('input')?.value).toBe('edited-a0');
+
+        // Tab to next cell - value should be preserved
+        await user.keyboard('{Tab}');
+        await asyncSetTimeout(1);
+
+        expect(cellA0).toHaveTextContent('edited-a0');
+        expect(cellA0).toHaveClass('ag-cell-batch-edit');
+
+        // Edit cell b0
+        const cellB0 = getCell('0', 'b');
+        expect(cellB0.querySelector('input')).toBeTruthy();
+        await user.keyboard('edited-b0');
+        await asyncSetTimeout(1);
+
+        // Tab to next cell
+        await user.keyboard('{Tab}');
+        await asyncSetTimeout(1);
+
+        expect(cellA0).toHaveTextContent('edited-a0');
+        expect(cellB0).toHaveTextContent('edited-b0');
+        expect(cellA0).toHaveClass('ag-cell-batch-edit');
+        expect(cellB0).toHaveClass('ag-cell-batch-edit');
+
+        // Edit cell c0
+        const cellC0 = getCell('0', 'c');
+        expect(cellC0.querySelector('input')).toBeTruthy();
+        await user.keyboard('edited-c0');
+        await asyncSetTimeout(1);
+
+        // Press Enter to close editor
+        await user.keyboard('{Enter}');
+        await asyncSetTimeout(1);
+
+        expect(cellA0).toHaveTextContent('edited-a0');
+        expect(cellB0).toHaveTextContent('edited-b0');
+        expect(cellC0).toHaveTextContent('edited-c0');
+        expect(cellA0).toHaveClass('ag-cell-batch-edit');
+        expect(cellB0).toHaveClass('ag-cell-batch-edit');
+        expect(cellC0).toHaveClass('ag-cell-batch-edit');
+
+        // Data should still be original until commit
+        const rowNode = api.getRowNode('0')!;
+        expect(rowNode.data.a).toBe('a0');
+        expect(rowNode.data.b).toBe('b0');
+        expect(rowNode.data.c).toBe('c0');
+
+        // Commit should apply all pending values
+        api.commitBatchEdit();
+        await asyncSetTimeout(1);
+
+        expect(rowNode.data.a).toBe('edited-a0');
+        expect(rowNode.data.b).toBe('edited-b0');
+        expect(rowNode.data.c).toBe('edited-c0');
+        expect(cellA0).not.toHaveClass('ag-cell-batch-edit');
+        expect(cellB0).not.toHaveClass('ag-cell-batch-edit');
+        expect(cellC0).not.toHaveClass('ag-cell-batch-edit');
+    });
 });

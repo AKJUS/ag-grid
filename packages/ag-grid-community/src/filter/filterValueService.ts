@@ -23,7 +23,7 @@ export class FilterValueService extends BeanStub implements NamedBean {
         if (filterValueGetter) {
             return this.executeFilterValueGetter(filterValueGetter, rowNode.data, column, rowNode, colDef);
         }
-        const value = valueSvc.getValue(column, rowNode);
+        const value = valueSvc.getValue(column, rowNode, 'data');
         if (column.isAllowFormula() && formula?.isFormula(value)) {
             return formula.resolveValue(column, rowNode as RowNode);
         }

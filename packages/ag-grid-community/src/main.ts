@@ -400,6 +400,7 @@ export {
     SuppressMouseEventHandlingParams,
 } from './rendering/cellRenderers/iCellRenderer';
 export { GetCellValueParams } from './valueService/cellApi';
+export { CellValueResolveFrom } from './interfaces/iEditService';
 
 // Status Bar
 export {

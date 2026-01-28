@@ -514,7 +514,7 @@ export class RowNode<TData = any>
         if (!column) {
             return false;
         }
-        const oldValue = valueSvc.getValueForDisplay({ column, node: this, source: 'api' }).value;
+        const oldValue = valueSvc.getValueForDisplay({ column, node: this, from: 'data' }).value;
 
         if (gos.get('readOnlyEdit')) {
             const {
