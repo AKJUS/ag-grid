@@ -1,4 +1,5 @@
 import type { AgEvent } from '../agStack/interfaces/agEvent';
+import type { ColKey } from '../entities/colDef';
 import type { BuildEventTypeMap } from '../eventTypes';
 import type { SelectionEventSourceType } from '../events';
 import type { Column } from '../interfaces/iColumn';
@@ -316,8 +317,12 @@ export interface IRowNode<TData = any> extends BaseRowNode<TData>, GroupRowNode<
     /**
      * Replaces the value on the `rowNode` for the specified column. When complete,
      * the grid refreshes the rendered cell on the required row only.
+     *
      * **Note**: This method only fires `onCellEditRequest` when the Grid is in **Read Only** mode.
+     *
      * **Note**: This method defers to EditModule if available and batches the edit when `fullRow` or `batchEdit` is enabled.
+     *
+     * **Pivot Mode**: On leaf data rows (non-group rows), pivot columns resolve to their underlying value column.
      *
      * @param colKey The column where the value should be updated
      * @param newValue The new value
@@ -330,4 +335,19 @@ export interface IRowNode<TData = any> extends BaseRowNode<TData>, GroupRowNode<
      * Returns the route of the row node. If the Row Node does not have a key (i.e it's a leaf row inside a row group) returns undefined
      */
     getRoute(): string[] | undefined;
+
+    /**
+     * Returns the immediate children that contribute to the aggregation of this group RowNode.
+     *
+     * - For leaf groups (groups containing data rows): returns the data rows.
+     *   With pivot columns, only rows matching the pivot keys are included.
+     * - For non-leaf groups (groups containing other groups): returns the child groups.
+     * - For leaf (non-group) RowNodes: returns an empty array.
+     *
+     * **Note:** Only supported with the Client-Side Row Model.
+     *
+     * @param colKey - The column key. Pass the pivot column to filter by pivot keys, or `null` to get all children.
+     * @returns An array of child `IRowNode` instances contributing to this group's aggregation. Warning: the returned array must not be modified.
+     */
+    getAggregatedChildren(colKey: ColKey<TData> | null | undefined): IRowNode<TData>[];
 }

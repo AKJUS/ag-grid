@@ -1,4 +1,4 @@
-import type { GridOptions, GroupRowValueSetterFunc, ValueFormatterParams, ValueParserParams } from 'ag-grid-community';
+import type { GridApi, GridOptions, GroupRowValueSetterFunc, ValueParserParams } from 'ag-grid-community';
 import {
     ClientSideRowModelModule,
     ModuleRegistry,
@@ -10,6 +10,8 @@ import {
 import { RowGroupingModule, SetFilterModule } from 'ag-grid-enterprise';
 
 import { getData } from './data';
+
+let gridApi: GridApi<SalesRecord>;
 
 interface SalesRecord {
     id: string;
@@ -28,40 +30,52 @@ ModuleRegistry.registerModules([
     ...(process.env.NODE_ENV !== 'production' ? [ValidationModule] : []),
 ]);
 
-const currencyFormatter = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-});
-
-const amountValueFormatter = (params: ValueFormatterParams): string =>
-    typeof params.value === 'number' ? currencyFormatter.format(params.value) : params.value ?? '';
-
+// Parse input to integer
 const amountValueParser = (params: ValueParserParams): number | null => {
     const numericValue = Number(params.newValue);
-    return Number.isFinite(numericValue) ? numericValue : params.oldValue ?? null;
+    return Number.isFinite(numericValue) ? Math.round(numericValue) : params.oldValue ?? null;
 };
 
-const amountGroupRowValueSetter: GroupRowValueSetterFunc<SalesRecord> = ({ node, newValue, eventSource }) => {
-    const numericValue = Number(newValue);
-    if (!Number.isFinite(numericValue)) {
+/**
+ * Distributes a new group total equally among children.
+ *
+ * `aggregatedChildren` contains the immediate children used for aggregation:
+ * - For leaf groups: the data rows
+ * - For non-leaf groups: the child groups
+ *
+ * Calling `setDataValue` on a child group triggers `groupRowValueSetter` again,
+ * enabling recursive cascade through the entire group hierarchy.
+ */
+const cascadeGroupTotal: GroupRowValueSetterFunc<SalesRecord> = ({
+    column,
+    newValue,
+    eventSource,
+    aggregatedChildren,
+}) => {
+    const total = Number(newValue);
+    if (!Number.isFinite(total) || !aggregatedChildren.length) {
         return false;
     }
 
-    let result = false;
-    // distribute the new value equally amongst all filtered children
-    const children = node.childrenAfterSort;
-    if (children?.length) {
-        const perChild = numericValue / children.length;
-        for (const child of children) {
-            // If child is a leaf, setDataValue will update the underlying data item
-            // If child is a group, setDataValue will recursively call this value setter down the tree to update group values
-            if (child.setDataValue('amount', perChild, eventSource)) {
-                result = true;
-            }
+    // Distribute equally among children
+    // https://en.wikipedia.org/wiki/Largest_remainder_method
+    const count = aggregatedChildren.length;
+    const base = Math.floor(total / count);
+    let remainder = Math.round(total) - base * count;
+
+    // Apply the distributed values
+    let changed = false;
+    for (const child of aggregatedChildren) {
+        let value = base;
+        if (remainder > 0) {
+            value++;
+            remainder--;
+        }
+        if (child.setDataValue(column, value, eventSource)) {
+            changed = true;
         }
     }
-    return result;
+    return changed;
 };
 
 const gridOptions: GridOptions<SalesRecord> = {
@@ -70,15 +84,14 @@ const gridOptions: GridOptions<SalesRecord> = {
         { field: 'segment', rowGroup: true, hide: true, filter: 'agSetColumnFilter' },
         { field: 'country', filter: 'agSetColumnFilter' },
         {
-            headerName: 'Annual Budget',
+            headerName: 'Amount',
             field: 'amount',
             aggFunc: 'sum',
             editable: true,
             groupRowEditable: true,
             filter: 'agNumberColumnFilter',
             valueParser: amountValueParser,
-            groupRowValueSetter: amountGroupRowValueSetter,
-            valueFormatter: amountValueFormatter,
+            groupRowValueSetter: cascadeGroupTotal,
         },
     ],
     autoGroupColumnDef: {
@@ -102,9 +115,6 @@ const gridOptions: GridOptions<SalesRecord> = {
 
 // setup the grid after the page has finished loading
 document.addEventListener('DOMContentLoaded', () => {
-    const gridDiv = document.querySelector<HTMLElement>('#myGrid');
-    if (!gridDiv) {
-        return;
-    }
-    createGrid(gridDiv, gridOptions);
+    const gridDiv = document.querySelector<HTMLElement>('#myGrid')!;
+    gridApi = createGrid(gridDiv, gridOptions);
 });

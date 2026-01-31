@@ -136,12 +136,8 @@ describe('ag-grid tree data pinned rows', () => {
         });
         await asyncSetTimeout(10);
 
-        // France should still exist and be pinned.
-        // Note: the pinned row aggregate shows 300 (original value), but source group shows 200
-        // because pinned rows are clones and their aggregate values aren't automatically refreshed.
-        // TODO: This will be fixed when AG-16601-pivot-aggregation-edit is merged.
         await new GridRows(api, 'after remove paris', { checkDom: false }).check(`
-            PINNED_TOP id:t-top-france ag-Grid-AutoColumn:"France" name:"France" amount:300 path:["Europe","France"]
+            PINNED_TOP id:t-top-france ag-Grid-AutoColumn:"France" name:"France" amount:200 path:["Europe","France"]
             ROOT id:ROOT_NODE_ID
             ├─┬ Europe GROUP id:europe ag-Grid-AutoColumn:"Europe" name:"Europe" amount:350
             │ ├─┬ France GROUP id:france ag-Grid-AutoColumn:"France" name:"France" amount:200

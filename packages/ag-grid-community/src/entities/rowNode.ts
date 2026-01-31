@@ -17,6 +17,7 @@ import type {
 import type { DetailGridInfo } from '../interfaces/masterDetail';
 import { _error, _warn } from '../validation/logging';
 import type { AgColumn } from './agColumn';
+import type { ColKey } from './colDef';
 
 export const ROW_ID_PREFIX_ROW_GROUP = 'row-group-';
 export const ROW_ID_PREFIX_TOP_PINNED = 't-';
@@ -498,8 +499,12 @@ export class RowNode<TData = any>
     /**
      * Replaces the value on the `rowNode` for the specified column. When complete,
      * the grid refreshes the rendered cell on the required row only.
+     *
      * **Note**: This method only fires `onCellEditRequest` when the Grid is in **Read Only** mode.
+     *
      * **Note**: This method defers to EditModule if available and batches the edit when `fullRow` or `batchEdit` is enabled.
+     *
+     * **Pivot Mode**: On leaf data rows (non-group rows), pivot columns resolve to their underlying value column.
      *
      * @param colKey The column where the value should be updated
      * @param newValue The new value
@@ -509,11 +514,26 @@ export class RowNode<TData = any>
     public setDataValue(colKey: string | AgColumn, newValue: any, eventSource?: string): boolean {
         const { colModel, valueSvc, gos, editSvc } = this.beans;
 
-        // if in pivot mode, grid columns wont include primary columns
-        const column = typeof colKey !== 'string' ? colKey : colModel.getCol(colKey) ?? colModel.getColDefCol(colKey);
-        if (!column) {
-            return false;
+        if (colKey == null) {
+            return false; // no column
         }
+
+        let column = colModel.getCol(colKey) ?? colModel.getColDefCol(colKey);
+        if (!column) {
+            return false; // column not found
+        }
+
+        // For leaf (non-group) rows with pivot result columns, resolve to the underlying value column.
+        // Pivot columns don't map to real data fields on leaf rows — only the source value column does.
+        // This allows groupRowValueSetter to cascade edits using the same column reference for both
+        // group and leaf rows.
+        if (!this.group) {
+            const colDef = column.getColDef();
+            if (colDef.pivotValueColumn) {
+                column = colDef.pivotValueColumn as AgColumn;
+            }
+        }
+
         const oldValue = valueSvc.getValueForDisplay({ column, node: this, from: 'data' }).value;
 
         if (gos.get('readOnlyEdit')) {
@@ -638,6 +658,14 @@ export class RowNode<TData = any>
             }
         }
         callback(this);
+    }
+
+    public getAggregatedChildren(colKey: ColKey | null | undefined): RowNode<TData>[] {
+        const beans = this.beans;
+        // Use getCol() instead of fallback to getColDefCol() because we need just pivot result columns for performance.
+        // getCol() searches in cols (which includes pivot result columns), whereas getColDefCol()
+        // only searches in colDefCols (user-defined columns, excluding generated pivot columns).
+        return beans.aggStage?.getAggregatedChildren(this, beans.colModel.getCol(colKey)) ?? [];
     }
 
     public dispatchRowEvent<T extends RowNodeEventType>(type: T): void {

@@ -74,13 +74,14 @@ export function getGroupColumnDisplayValue(rowNode: IRowNode): string | undefine
 export type CallbackArgs =
     | Parameters<EditableCallback>
     | Parameters<GroupRowEditableCallback>
-    | Parameters<ValueSetterCallback>;
+    | Parameters<ValueSetterCallback>
+    | Parameters<GroupRowValueSetterCallback>;
 
 export function callsForRowNode(calls: CallbackArgs[], rowId?: string | null) {
     if (!rowId) {
         return [] as CallbackArgs[];
     }
-    return calls.filter(([params]) => params?.node?.id === rowId);
+    return calls.filter(([params]) => (params as { node?: { id?: string } })?.node?.id === rowId);
 }
 
 export function createGroupRowData() {
@@ -98,16 +99,20 @@ export function createGroupRowData() {
     ];
 }
 
-export const cascadeGroupRowValueSetter: GroupRowValueSetterCallback = ({ node, column, newValue, eventSource }) => {
+export const cascadeGroupRowValueSetter: GroupRowValueSetterCallback = ({
+    aggregatedChildren,
+    column,
+    newValue,
+    eventSource,
+}) => {
     const numericValue = Number(newValue);
     if (!Number.isFinite(numericValue)) {
         return;
     }
 
-    const children = node.childrenAfterSort;
-    if (children) {
-        const perChild = numericValue / children.length;
-        for (const child of children) {
+    if (aggregatedChildren.length) {
+        const perChild = numericValue / aggregatedChildren.length;
+        for (const child of aggregatedChildren) {
             child.setDataValue(column, perChild, eventSource);
         }
     }

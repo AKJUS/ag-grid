@@ -167,6 +167,14 @@ export interface IAggFuncParams<TData = any, TValue = any, TContext = any> exten
     rowNode: IRowNode<TData>;
     /** data (if any) of the parent RowNode */
     data: TData;
+    /**
+     * The immediate children of rowNode that contribute to the aggregation.
+     *
+     * - For leaf groups (groups containing data rows): returns the data rows.
+     *   With pivot columns, only rows matching the pivot keys are included.
+     * - For non-leaf groups (groups containing other groups): returns the child groups.
+     */
+    aggregatedChildren: IRowNode<TData>[];
 }
 
 export type PivotComparatorFunc = (valueA: string, valueB: string) => number;
@@ -400,7 +408,9 @@ export interface ColDef<TData = any, TValue = any> extends AbstractColDef<TData,
      * Use this to mutate descendants directly; the grid always commits the group row value afterwards.
      */
     groupRowValueSetter?: GroupRowValueSetterFunc<TData, TValue>;
-    /** Function or expression. Sets the value into your data for saving. Return `true` if the data changed. */
+    /**
+     * Function or expression. Sets the value into your data for saving. Return `true` if the data changed.
+     */
     valueSetter?: string | ValueSetterFunc<TData, TValue>;
     /** Function or expression. Parses the value for saving. */
     valueParser?: string | ValueParserFunc<TData, TValue>;
@@ -985,6 +995,17 @@ export interface GroupRowValueSetterParams<TData = any, TValue = any, TContext =
     eventSource: string | undefined;
     /** Whether the value actually changed. */
     valueChanged: boolean;
+    /**
+     * The immediate children that contribute to the aggregation.
+     *
+     * - For leaf groups (groups containing data rows): returns the data rows.
+     *   With pivot columns, only rows matching the pivot keys are included.
+     * - For non-leaf groups (groups containing other groups): returns the child groups.
+     *   Use `setDataValue` on child groups to cascade recursively.
+     *
+     * **Note:** Only supported with the Client-Side Row Model.
+     */
+    aggregatedChildren: IRowNode<TData>[];
 }
 export type GroupRowValueSetterFunc<TData = any, TValue = any, TContext = any> = (
     params: GroupRowValueSetterParams<TData, TValue, TContext>

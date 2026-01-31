@@ -130,11 +130,8 @@ describe('ag-grid grouping pinned rows', () => {
         await asyncSetTimeout(10);
 
         // France group should still exist and be pinned
-        // Note: the pinned row aggregate shows 300 (original value), but source group shows 200
-        // because pinned rows are clones and their aggregate values aren't automatically refreshed.
-        // TODO: This will be fixed when AG-16601-pivot-aggregation-edit is merged.
         await new GridRows(api, 'after remove', { checkDom: false }).check(`
-            PINNED_TOP id:t-top-row-group-country-France ag-Grid-AutoColumn:"France" amount:300
+            PINNED_TOP id:t-top-row-group-country-France ag-Grid-AutoColumn:"France" amount:200
             ROOT id:ROOT_NODE_ID
             ├─┬ LEAF_GROUP id:row-group-country-France ag-Grid-AutoColumn:"France" amount:200
             │ └── LEAF id:fr-lyon country:"France" sport:"rugby" amount:200
@@ -286,10 +283,6 @@ describe('ag-grid grouping pinned rows', () => {
         const pinnedFrance = api.getPinnedTopRow(0);
         expect(pinnedFrance?.group).toBe(true);
         expect(pinnedFrance?.key).toBe('France');
-
-        // The source group node should exist
-        const franceGroup = api.getRowNode('row-group-country-France');
-        expect(franceGroup).toBeDefined();
     });
 
     test('sibling group removal via transaction does not affect pinned group', async () => {
