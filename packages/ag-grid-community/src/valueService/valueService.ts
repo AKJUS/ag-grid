@@ -103,8 +103,10 @@ export class ValueService extends BeanStub implements NamedBean {
         value: any;
         valueFormatted: string | null;
     } {
-        const { column, node, includeValueFormatted, useRawFormula, exporting, from } = params;
-        const { showRowGroupColValueSvc } = this.beans;
+        const beans = this.beans;
+        const column = params.column;
+        const node = params.node;
+        const showRowGroupColValueSvc = beans.showRowGroupColValueSvc;
         const isFullWidthGroup = !column && node.group;
         const isGroupCol = column?.colDef.showRowGroup;
 
@@ -122,17 +124,11 @@ export class ValueService extends BeanStub implements NamedBean {
                 };
             }
 
-            if (!includeValueFormatted) {
-                return {
-                    value: groupValue.value,
-                    valueFormatted: null,
-                };
-            }
-
-            const valueFormatted = showRowGroupColValueSvc.formatAndPrefixGroupColValue(groupValue, column, exporting);
             return {
                 value: groupValue.value,
-                valueFormatted,
+                valueFormatted: params.includeValueFormatted
+                    ? showRowGroupColValueSvc.formatAndPrefixGroupColValue(groupValue, column, params.exporting)
+                    : null,
             };
         }
 
@@ -144,13 +140,12 @@ export class ValueService extends BeanStub implements NamedBean {
             };
         }
 
-        let value = this.getValue(column, node, from, this.displayIgnoresAggData(node));
+        let value = this.getValue(column, node, params.from, this.displayIgnoresAggData(node));
         let valueToFormat = value;
 
-        const { formula } = this.beans;
-        const format = includeValueFormatted && !(exporting && column.colDef.useValueFormatterForExport === false);
+        const formula = beans.formula;
         if (column.isAllowFormula() && formula?.isFormula(value)) {
-            if (useRawFormula) {
+            if (params.useRawFormula) {
                 value = formula.normaliseFormula(value, true);
                 valueToFormat = formula.resolveValue(column, node as RowNode);
             } else {
@@ -159,6 +154,8 @@ export class ValueService extends BeanStub implements NamedBean {
             }
         }
 
+        const format =
+            params.includeValueFormatted && !(params.exporting && column.colDef.useValueFormatterForExport === false);
         return {
             value,
             valueFormatted: format ? this.formatValue(column, node, valueToFormat) : null,
@@ -194,7 +191,7 @@ export class ValueService extends BeanStub implements NamedBean {
         }
 
         // Check for edit/pending values if not requesting committed data
-        const pending = this.editSvc?.getCellValueForDisplay(rowNode, column, from);
+        const pending = this.editSvc?.getPendingEditValue(rowNode, column, from);
         if (pending !== undefined) {
             return pending;
         }
@@ -508,11 +505,21 @@ export class ValueService extends BeanStub implements NamedBean {
             return true; // not a group row
         }
 
-        if (colDef.groupRowEditable != null || colDef.groupRowValueSetter != null) {
-            return false; // Do not create the row data for a group row automatically
+        // If groupRowValueSetter or groupRowEditable is defined, do not create row data automatically.
+        // The user has explicitly configured group editing behavior.
+        if (colDef.groupRowValueSetter != null || colDef.groupRowEditable != null) {
+            return false;
         }
 
-        return true; // create the rowData for groupRowEditable (default legacy behaviour)
+        // For pivot columns (identified by pivotValueColumn), preserve legacy behavior:
+        // do not auto-create row data. In previous versions, pivot columns silently
+        // skipped value changes on group rows because we were not looking for them when calling setDataValue.
+        // Now we do, so we need to block auto-creation to avoid unexpected data mutations to not change behavior.
+        if (colDef.pivotValueColumn) {
+            return false; // Legacy behaviour - pivot groups do not auto-create data with pivot columns
+        }
+
+        return true;
     }
 
     private finishValueChange(

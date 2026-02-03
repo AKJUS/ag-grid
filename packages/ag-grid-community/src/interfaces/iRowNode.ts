@@ -332,6 +332,21 @@ export interface IRowNode<TData = any> extends BaseRowNode<TData>, GroupRowNode<
     setDataValue(colKey: string | Column, newValue: any, eventSource?: string): boolean;
 
     /**
+     * Retrieves the data value from the `rowNode` for the specified column.
+     * Always returns the committed data value, ignoring any pending edit state.
+     * For group rows, returns aggregated values or the group key as appropriate.
+     * If the value is a formula, the computed result is returned.
+     *
+     * To get the displayed value (including pending edits and formatting), use `api.getCellValue()` instead.
+     *
+     * **Pivot Mode**: On leaf data rows (non-group rows), pivot columns resolve to their underlying value column.
+     *
+     * @param colKey The column to get the value from
+     * @returns The data value, `null` if the value is null, or `undefined` if the column is not found.
+     */
+    getDataValue<TValue = any>(colKey: ColKey<TValue>): TValue | null | undefined;
+
+    /**
      * Returns the route of the row node. If the Row Node does not have a key (i.e it's a leaf row inside a row group) returns undefined
      */
     getRoute(): string[] | undefined;
