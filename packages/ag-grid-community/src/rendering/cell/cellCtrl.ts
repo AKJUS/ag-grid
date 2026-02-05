@@ -854,7 +854,7 @@ export class CellCtrl extends BeanStub {
         return isFocused;
     }
 
-    public setupFocus() {
+    private setupFocus() {
         // when cell is created, if it should be focus the grid should take focus from the focused cell
         this.restoreFocus(true);
         this.onCellFocused(this.focusEventWhileNotReady ?? undefined);
@@ -881,7 +881,10 @@ export class CellCtrl extends BeanStub {
         this.comp.toggleCss(CSS_CELL_FOCUS, cellFocused);
 
         // see if we need to force browser focus - this can happen if focus is programmatically set
-        if (cellFocused && event?.forceBrowserFocus) {
+        if (
+            cellFocused &&
+            (event?.forceBrowserFocus || (!this.hasBrowserFocus() && this.beans.focusSvc.shouldTakeFocus()))
+        ) {
             let focusEl = this.comp.getFocusableElement();
 
             if (editing) {
@@ -891,8 +894,13 @@ export class CellCtrl extends BeanStub {
                 }
             }
 
-            focusEl.focus({ preventScroll: !!event.preventScrollOnBrowserFocus });
+            const preventScroll = event ? event.preventScrollOnBrowserFocus : true;
+            focusEl.focus({ preventScroll });
             _placeCaretAtEnd(beans, focusEl);
+        }
+
+        if (cellFocused && this.focusEventWhileNotReady) {
+            this.focusEventWhileNotReady = null;
         }
 
         // require event to announce so we only announce
