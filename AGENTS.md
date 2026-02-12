@@ -1,7 +1,3 @@
-# Additional Conventions Beyond the Built-in Functions
-
-As this project's AI coding tool, you must follow the additional conventions below, in addition to the built-in functions.
-
 ## AI Agent Instructions
 
 This file provides guidance to AI Agents when working with code in this repository.
