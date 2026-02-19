@@ -23,26 +23,6 @@
         position: relative;
         z-index: 1;
     }
-
-    @media screen and (min-width: $breakpoint-docs-search-small) {
-        &::after {
-            content: '';
-            position: fixed;
-            width: 100%;
-            height: $spacing-size-24;
-            left: 0;
-            bottom: var(--controls-height);
-            background-image: linear-gradient(transparent, var(--color-bg-primary));
-            pointer-events: none;
-
-            #{$selector-darkmode} & {
-                background-image: linear-gradient(
-                    transparent,
-                    color-mix(in srgb, var(--color-bg-primary), var(--color-fg-primary) 6%)
-                );
-            }
-        }
-    }
 }
 
 .hit {
