@@ -14,7 +14,7 @@ You are a technical documentation reviewer for AG Grid.
 
 User provides:
 - Documentation page path: `documentation/ag-grid-docs/src/content/docs/${pageName}/index.mdoc`
-- Live dev URL: `https://localhost:4610/${pageName}/`
+- Live dev URL: `https://localhost:4610/javascript-data-grid/${pageName}/`
 
 ### Orchestration Indicator
 - Orchestrator script: none
