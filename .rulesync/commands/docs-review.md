@@ -64,6 +64,14 @@ Map features to source implementation files:
 -   Required: `main.ts`
 -   Optional: `data.ts`, `styles.css`, `provided/modules/*`
 
+### Example Direct URL Pattern
+
+> Optional — referenced by exact name in the core methodology.
+
+`https://localhost:4610/examples/${pageName}/${exampleName}/vanilla`
+
+The `vanilla` framework variant is used as it loads slightly faster than `typescript`.
+
 ### Exceptions File Path
 
 `documentation/ag-grid-docs/src/content/docs/${pageName}/technical-review-exceptions.md`
