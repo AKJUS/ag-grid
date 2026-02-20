@@ -55,17 +55,17 @@ Quick-reference for all AI agent commands, skills, sub-agents, and rules availab
 
 ## Context and Memory
 
-| Type    | Name               | Invoke        | What it does                                       |
-| ------- | ------------------ | ------------- | -------------------------------------------------- |
-| Command | 🔵 `/remember`     | `/remember`   | Save branch context or project learnings as memory |
-| Command | 🔵 `/recall`       | `/recall`     | Load branch context and browse project memory      |
+| Type    | Name           | Invoke      | What it does                                       |
+| ------- | -------------- | ----------- | -------------------------------------------------- |
+| Command | 🔵 `/remember` | `/remember` | Save branch context or project learnings as memory |
+| Command | 🔵 `/recall`   | `/recall`   | Load branch context and browse project memory      |
 
 ## Documentation Review
 
-| Type    | Name                       | Invoke                | What it does                                                      |
-| ------- | -------------------------- | --------------------- | ----------------------------------------------------------------- |
-| Command | 🟢 `/docs-review`          | `/docs-review`        | Review docs pages for technical accuracy and example consistency  |
-| Command | 🟢 `/release-docs-review`  | `/release-docs-review`| Review all documentation changes between releases                |
+| Type    | Name                      | Invoke                 | What it does                                                     |
+| ------- | ------------------------- | ---------------------- | ---------------------------------------------------------------- |
+| Command | 🟢 `/docs-review`         | `/docs-review`         | Review docs pages for technical accuracy and example consistency |
+| Command | 🟢 `/release-docs-review` | `/release-docs-review` | Review all documentation changes between releases                |
 
 ## Git and Branch Management
 
