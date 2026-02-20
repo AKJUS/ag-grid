@@ -47,14 +47,8 @@
 }
 
 .container {
-    --top-offset: 50px;
-    --bottom-offset: 64px;
-    --input-height: 76px;
-    --controls-height: 56px;
-    --max-container-height: 800px;
-
     position: fixed;
-    top: var(--top-offset);
+    top: 50px;
     left: 50%;
     transform: translateX(-50%);
     width: 850px;
