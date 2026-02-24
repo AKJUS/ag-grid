@@ -29,22 +29,18 @@ function getRandomNumber(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-function getFilteredValuePageFromServer(
+function getValuePageFromServer(
     params: RichCellEditorValuesPageParams
 ): Promise<RichCellEditorValuesPageResult<string>> {
-    const search = params.search.toLowerCase();
-
+    // Simulates an async request to a server
     return new Promise((resolve) => {
         setTimeout(() => {
-            const filtered = search
-                ? languages.filter((language) => language.toLowerCase().includes(search))
-                : languages;
-            const pageValues = filtered.slice(params.startRow, params.endRow);
-            const nextOffset = params.endRow < filtered.length ? String(params.endRow) : null;
+            const pageValues = languages.slice(params.startRow, params.endRow);
+            const nextOffset = params.endRow < languages.length ? String(params.endRow) : null;
 
             resolve({
                 values: pageValues,
-                lastRow: filtered.length,
+                lastRow: languages.length,
                 cursor: nextOffset,
             });
         }, 300);
@@ -62,22 +58,19 @@ function getInitialStartRowForValue(value: string | null | undefined): number {
     }
 
     const selectedIndex = Number(match[1]) - 1;
-    return Math.max(selectedIndex - 40, 0);
+    return Math.max(selectedIndex - 50, 0);
 }
 
 const columnDefs: ColDef[] = [
     {
         field: 'language',
-        width: 320,
+        width: 300,
         editable: true,
         cellEditor: 'agRichSelectCellEditor',
         cellEditorParams: {
-            allowTyping: true,
-            filterList: true,
-            filterListAsync: true,
-            valuesPage: getFilteredValuePageFromServer,
+            valuesPage: getValuePageFromServer,
             valuesPageInitialStartRow: (value: string | null | undefined) => getInitialStartRowForValue(value),
-            valuesPageSize: 80,
+            valuesPageSize: 100,
             valuesPageLoadThreshold: 8,
         } as IRichCellEditorParams,
     },

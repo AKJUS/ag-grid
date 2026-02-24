@@ -28,9 +28,16 @@ function getRandomNumber(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-function getValueFromServer(_params: RichCellEditorValuesCallbackParams): Promise<string[]> {
+function getValueFromServer(params: RichCellEditorValuesCallbackParams): Promise<string[]> {
+    const search = params.search?.toLowerCase() ?? '';
+    // Simulates an async request to a server
     return new Promise((resolve) => {
-        setTimeout(() => resolve(languages), 1000);
+        console.log(`Grid requested \`${search}\` from server.`);
+        setTimeout(() => {
+            const entries = languages.filter((l) => l.toLowerCase().includes(search));
+            console.log(`Server response for \`${search}\`: ${entries.length} hit${entries.length === 1 ? '' : 's'}.`);
+            resolve(entries);
+        }, 1000);
     });
 }
 
@@ -38,8 +45,12 @@ const columnDefs: ColDef[] = [
     {
         field: 'language',
         cellEditor: 'agRichSelectCellEditor',
+        width: 300,
         cellEditorParams: {
+            allowTyping: true,
+            filterList: true,
             values: getValueFromServer,
+            filterListAsync: true,
         } as IRichCellEditorParams,
     },
 ];
