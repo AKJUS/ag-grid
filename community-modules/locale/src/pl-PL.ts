@@ -702,6 +702,9 @@ export const AG_GRID_LOCALE_PL = {
     ariaPageSizeSelectorLabel: 'Rozmiar Strony',
     ariaChartMenuClose: 'Zamknij Menu Edycji Wykresu',
     ariaChartSelected: 'Wybrane',
+    ariaSparklineChartDescription:
+        'Wykres iskrowy - ${chartType} wyświetla ${count} wartości między ${min} a ${max}. Zaczyna się od ${start} i kończy na ${end}.',
+    ariaSparklineChartDescriptionEmpty: 'Wykres iskrowy - ${chartType} bez wartości.',
     ariaSkeletonCellLoadingFailed: 'Wiersza nie udało się załadować',
     ariaSkeletonCellLoading: 'Dane wiersza ładują się',
     ariaDeferSkeletonCellLoading: 'Komórka się ładuje',

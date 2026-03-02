@@ -700,6 +700,9 @@ export const AG_GRID_LOCALE_SE = {
     ariaPageSizeSelectorLabel: 'Sidstorlek',
     ariaChartMenuClose: 'Stäng diagramredigeringsmeny',
     ariaChartSelected: 'Vald',
+    ariaSparklineChartDescription:
+        'Sparkline - ${chartType} som visar ${count} värden mellan ${min} och ${max}. Börjar på ${start} och slutar på ${end}.',
+    ariaSparklineChartDescriptionEmpty: 'Sparkline - ${chartType} utan värden.',
     ariaSkeletonCellLoadingFailed: 'Raden kunde inte laddas',
     ariaSkeletonCellLoading: 'Raddata laddas',
     ariaDeferSkeletonCellLoading: 'Cellen laddas',

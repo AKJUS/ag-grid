@@ -703,6 +703,9 @@ export const AG_GRID_LOCALE_GR = {
     ariaPageSizeSelectorLabel: 'Μέγεθος Σελίδας',
     ariaChartMenuClose: 'Κλείσιμο Μενού Επεξεργασίας Γραφήματος',
     ariaChartSelected: 'Επιλεγμένο',
+    ariaSparklineChartDescription:
+        'Sparkline - ${chartType} που εμφανίζει ${count} τιμές μεταξύ ${min} και ${max}. Ξεκινά από ${start} και τελειώνει στο ${end}.',
+    ariaSparklineChartDescriptionEmpty: 'Sparkline - ${chartType} χωρίς τιμές.',
     ariaSkeletonCellLoadingFailed: 'Αποτυχία φόρτωσης γραμμής',
     ariaSkeletonCellLoading: 'Τα δεδομένα γραμμής φορτώνονται',
     ariaDeferSkeletonCellLoading: 'Το κύτταρο φορτώνεται',

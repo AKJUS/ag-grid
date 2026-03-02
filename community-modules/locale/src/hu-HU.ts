@@ -703,6 +703,9 @@ export const AG_GRID_LOCALE_HU = {
     ariaPageSizeSelectorLabel: 'Oldal méret',
     ariaChartMenuClose: 'Diagram szerkesztési menü bezárása',
     ariaChartSelected: 'Kiválasztva',
+    ariaSparklineChartDescription:
+        'Sparkline - ${chartType}, ${count} értéket jelenít meg ${min} és ${max} között. ${start} értéknél kezdődik és ${end} értéknél végződik.',
+    ariaSparklineChartDescriptionEmpty: 'Sparkline - ${chartType}, értékek nélkül.',
     ariaSkeletonCellLoadingFailed: 'A sor betöltése sikertelen volt',
     ariaSkeletonCellLoading: 'A sor adatai betöltődnek',
     ariaDeferSkeletonCellLoading: 'A cella betöltődik',
