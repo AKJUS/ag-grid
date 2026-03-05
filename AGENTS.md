@@ -1,42 +1,3 @@
-Please also reference the following rules as needed. The list below is provided in TOON format, and `@` stands for the project root directory.
-
-rules[11]:
-  - path: @.agents/memories/benchmarks.md
-    description: Running and creating performance benchmarks for AG Grid
-    applyTo[2]: testing/performance/**/*,**/benchmark*
-  - path: @.agents/memories/code-quality.md
-    description: "Code quality practices including avoiding bloat, comment guidelines, and review practices"
-    applyTo[1]: packages/*/src/**/*.ts
-  - path: @.agents/memories/docs-pages.md
-    description: Creating and maintaining documentation pages for AG Grid
-    applyTo[2]: documentation/**/*.mdoc,documentation/**/*.md
-  - path: @.agents/memories/docs-review-testing.md
-    description: Browser testing tips for documentation review
-  - path: @.agents/memories/examples.md
-    description: Working with examples in AG Grid documentation
-    applyTo[2]: _examples/**/*,documentation/**/_examples/**/*
-  - path: @.agents/memories/nx-conventions.md
-    description: Nx project configuration conventions
-    applyTo[2]: **/project.json,nx.json
-  - path: @.agents/memories/setup-prompts.md
-    applyTo[2]: **/setup-prompts/**/*,**/patches/rulesync*
-  - path: @.agents/memories/testing.md
-    description: "Testing strategies, Jest patterns, and verification for AG Grid"
-    applyTo[3]: **/*.test.ts,**/*.spec.ts,testing/**/*
-  - path: @.agents/memories/website-astro-pages.md
-    description: "Astro page creation patterns, layout props, content collections, and code conventions for AG product websites"
-    applyTo[2]: **/src/pages/**/*.astro,**/src/layouts/**/*.astro
-  - path: @.agents/memories/website-browser-testing.md
-    description: Chrome DevTools MCP browser testing workflow for AG product websites
-    applyTo[2]: **/src/pages/**/*.astro,**/src/layouts/**/*.astro
-  - path: @.agents/memories/website-css.md
-    description: "CSS architecture, design system, design tokens, utility classes, and styling patterns for AG product websites"
-    applyTo[4]: **/src/pages-styles/**/*.scss,**/src/pages-styles/**/*.css,**/src/components/**/*.scss,external/ag-website-shared/src/design-system/**/*.scss
-
-# Additional Conventions Beyond the Built-in Functions
-
-As this project's AI coding tool, you must follow the additional conventions below, in addition to the built-in functions.
-
 ## AI Agent Instructions
 
 This file provides guidance to AI Agents when working with code in this repository.
@@ -117,6 +78,9 @@ For detailed information about preferred technologies and architectural constrai
 -   `./behave.sh "<file-pattern>"` – run specific behavioural test file.
 -   `./behave.sh "<file-pattern>" -t "<test-name>"` – run specific behavioural test by name.
 -   `./behave.sh --watch` – run behavioural tests in watch mode.
+-   `./behave.sh --update-grid-rows` – update GridRows inline snapshots after diagram format changes.
+-   `./behave.sh --update-grid-rows "<pattern>"` – update snapshots in matching test files only.
+-   `./behave.sh --update-grid-rows=dry` – dry run, shows what would change without writing files.
 -   `yarn nx test <package>` – execute Jest unit tests for the affected package.
 -   `yarn nx test <package> --testPathPattern="<file-name>"` - test specific test file
 -   `yarn nx test <package> --testPathPattern="<file-name>" --testNamePattern="<test-name>"` - test specific test name in a specific test file
