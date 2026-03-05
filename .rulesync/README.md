@@ -120,25 +120,25 @@ Rules load automatically when you edit files matching their glob patterns.
 
 Skills load on-demand when invoked. All skills are invoked via `/skill-name`. All skills are shared across AI tools via `.rulesync/skills/`.
 
-| Skill                           | Description                                               |
-| ------------------------------- | --------------------------------------------------------- |
-| 🔵 `batch-lint-cleanup`         | Auto-fix ESLint violations by rule                        |
-| 🔵 `code-cleanup`               | Remove bloat, duplication; improve clarity                |
-| 🔵 `code-fixup`                 | Fix build and lint errors across a package                |
-| 🟢 `dev-server`                 | Start dev server, check build status                      |
-| 🔵 `git-bisect`                 | Find the commit that introduced a regression              |
-| 🔵 `git-conventions`            | Branch, commit, and PR naming conventions                 |
-| 🔵 `git-split`                  | Split large files preserving git history                  |
-| 🔵 `git-worktree-clean`         | Hard-reset worktree to `origin/latest`                    |
-| 🔵 `plan-implementation-review` | Review plan execution, identify delivery gaps             |
-| 🔵 `plan-review`                | Review plans for completeness and correctness             |
-| 🔵 `pr-create`                  | Commit, push, and open a PR                               |
-| 🔵 `pr-review`                  | Review a PR (Markdown default, JSON with `--json`)        |
-| 🔵 `pr-split`                   | Split a branch into stacked PRs                           |
-| 🔵 `recall`                     | Load branch context, browse project memories              |
-| 🔵 `remember`                   | Save branch context or project learnings as memory        |
-| 🔵 `sync-ag-shared`             | Sync ag-shared subrepo changes across AG repos            |
-| 🟢 `technology-stack`           | Architecture constraints and zero-dependency requirements |
+| Skill                           | Description                                                 |
+| ------------------------------- | ----------------------------------------------------------- |
+| 🔵 `batch-lint-cleanup`         | Auto-fix ESLint violations by rule                          |
+| 🔵 `code-cleanup`               | Remove bloat, duplication; improve clarity                  |
+| 🔵 `code-fixup`                 | Fix build and lint errors across a package                  |
+| 🟢 `dev-server`                 | Start dev server, check build status                        |
+| 🔵 `git-bisect`                 | Find the commit that introduced a regression                |
+| 🔵 `git-conventions`            | Branch, commit, and PR naming conventions                   |
+| 🔵 `git-split`                  | Split large files preserving git history                    |
+| 🔵 `git-worktree-clean`         | Hard-reset worktree to `origin/latest`                      |
+| 🔵 `plan-implementation-review` | Review plan execution, identify delivery gaps               |
+| 🔵 `plan-review`                | Review plans for completeness and correctness               |
+| 🔵 `pr-create`                  | Commit, push, and open a PR                                 |
+| 🔵 `pr-review`                  | Review a PR (Markdown default, JSON with `--json`)          |
+| 🔵 `pr-split`                   | Split a branch into stacked PRs                             |
+| 🔵 `recall`                     | Load branch context, browse project memories                |
+| 🔵 `remember`                   | Save branch context or project learnings as memory          |
+| 🔵 `sync-ag-shared`             | Sync ag-shared subrepo changes across AG repos              |
+| 🟢 `technology-stack`           | Architecture constraints and zero-dependency requirements   |
 | 🔵 `validate-prompts`           | Validate prompt file references for consistency and hygiene |
 
 ---
