@@ -53,6 +53,12 @@ Quick-reference for all AI agent commands, skills, sub-agents, and rules availab
 | Skill | 🔵 `plan-implementation-review` | `/plan-implementation-review` (user) | Review plan execution, identify delivery gaps    |
 | Agent | 🔵 `nx-expert`                  | Auto                                 | Nx monorepo configuration and build optimisation |
 
+## Prompt Hygiene
+
+| Type  | Name                  | Invoke                     | What it does                                     |
+| ----- | --------------------- | -------------------------- | ------------------------------------------------ |
+| Skill | 🔵 `validate-prompts` | `/validate-prompts` (user) | Validate prompt file references for path hygiene |
+
 ## Memory
 
 | Type  | Name          | Invoke             | What it does                                       |
@@ -133,6 +139,7 @@ Skills load on-demand when invoked. All skills are invoked via `/skill-name`. Al
 | 🔵 `remember`                   | Save branch context or project learnings as memory        |
 | 🔵 `sync-ag-shared`             | Sync ag-shared subrepo changes across AG repos            |
 | 🟢 `technology-stack`           | Architecture constraints and zero-dependency requirements |
+| 🔵 `validate-prompts`           | Validate prompt file references for consistency and hygiene |
 
 ---
 
