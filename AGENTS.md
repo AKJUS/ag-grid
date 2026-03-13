@@ -1,38 +1,3 @@
-Please also reference the following rules as needed. The list below is provided in TOON format, and `@` stands for the project root directory.
-
-rules[11]:
-  - path: @.opencode/memories/benchmarks.md
-    description: Running and creating performance benchmarks for AG Grid
-    applyTo[2]: testing/performance/**/*,**/benchmark*
-  - path: @.opencode/memories/code-quality.md
-    description: "Code quality practices including avoiding bloat, comment guidelines, and review practices"
-    applyTo[1]: packages/*/src/**/*.ts
-  - path: @.opencode/memories/docs-pages.md
-    description: Creating and maintaining documentation pages for AG Grid
-    applyTo[2]: documentation/**/*.mdoc,documentation/**/*.md
-  - path: @.opencode/memories/docs-review-testing.md
-    description: Browser testing tips for documentation review
-  - path: @.opencode/memories/examples.md
-    description: Working with examples in AG Grid documentation
-    applyTo[2]: _examples/**/*,documentation/**/_examples/**/*
-  - path: @.opencode/memories/nx-conventions.md
-    description: Nx project configuration conventions
-    applyTo[2]: **/project.json,nx.json
-  - path: @.opencode/memories/setup-prompts.md
-    applyTo[2]: **/setup-prompts/**/*,**/patches/rulesync*
-  - path: @.opencode/memories/testing.md
-    description: "Testing strategies, Jest patterns, and verification for AG Grid"
-    applyTo[3]: **/*.test.ts,**/*.spec.ts,testing/**/*
-  - path: @.opencode/memories/website-astro-pages.md
-    description: Astro page conventions for AG product websites — loads /website-astro skill for details
-    applyTo[2]: **/src/pages/**/*.astro,**/src/layouts/**/*.astro
-  - path: @.opencode/memories/website-browser-testing.md
-    description: Chrome DevTools MCP browser testing workflow for AG product websites
-    applyTo[2]: **/src/pages/**/*.astro,**/src/layouts/**/*.astro
-  - path: @.opencode/memories/website-css.md
-    description: CSS styling conventions for AG product websites — loads /website-css skill for details
-    applyTo[4]: **/src/pages-styles/**/*.scss,**/src/pages-styles/**/*.css,**/src/components/**/*.scss,external/ag-website-shared/src/design-system/**/*.scss
-
 ## AI Agent Instructions
 
 This file provides guidance to AI Agents when working with code in this repository.
@@ -40,7 +5,7 @@ This file provides guidance to AI Agents when working with code in this reposito
 ### Quick Reference
 
 -   **Main branch:** `latest`
--   **Format:** `yarn nx format --sort-root-tsconfig-paths=false` (run before commits)
+-   **Format:** `yarn nx format` (run before commits)
 -   **Type-check:** `yarn nx build:types <package>` (run before commits)
 -   **Lint:** `yarn nx lint <package>` (run before commits)
 -   **Build:** `yarn nx build <package>`
@@ -62,7 +27,7 @@ This file provides guidance to AI Agents when working with code in this reposito
 -   **Main constraint:** Community and enterprise runtime bundles stay dependency-free beyond AG Grid code.
 -   **Default branch:** Target `latest`; follow release/JIRA naming conventions below for topic branches.
 -   **Build monitoring:** Check `node_modules/.cache/ag-watch-status.json` to monitor watch state (`yarn nx dev`) and build health (see [Development Server Guide](.rulesync/rules/dev-server.md)).
--   **Formatting:** Run `yarn nx format --sort-root-tsconfig-paths=false` from the repo root before proposing commits.
+-   **Formatting:** Run `yarn nx format` from the repo root before proposing commits.
 -   **Typechecking:** Run `yarn nx build:types <package>` from the repo root before proposing commits.
 -   **Linting:** Run `yarn nx lint <package>` from the repo root before proposing commits.
 -   **Baseline verification:** Expect to run `yarn nx test ag-grid-community`, `yarn nx test ag-grid-enterprise`, and `yarn nx e2e ag-grid-docs` after meaningful grid changes.
@@ -103,7 +68,7 @@ For detailed information about preferred technologies and architectural constrai
 -   `yarn install` – install dependencies after cloning or when the Yarn lockfile changes.
     -   `./external/ag-shared/scripts/install-for-cloud/install-for-cloud.sh` – install dependencies and tooling in a remote environment - use this in preference to `yarn install` to ensure all global tools are installed.
 -   `yarn nx clean` – purge all dist folders when switching branches or before packaging releases.
--   `yarn nx format --sort-root-tsconfig-paths=false` – format repo files; run from the project root before committing.
+-   `yarn nx format` – format repo files; run from the project root before committing.
 -   `yarn nx build <package>` – compile a specific package after code edits.
 -   `yarn nx build:types <package>` – regenerate declaration files when touching exported APIs.
 -   `yarn nx build:package <package>` – create ESM/CJS bundles to validate publishable output.
@@ -182,7 +147,7 @@ For code quality guidelines, see [Code Quality Guide](.rulesync/rules/code-quali
 
 Essential practices:
 
--   Run `yarn nx format --sort-root-tsconfig-paths=false` before committing
+-   Run `yarn nx format` before committing
 -   Self-review your changes before proposing commits
 -   Ensure tests exercise real implementations, not test helpers
 
