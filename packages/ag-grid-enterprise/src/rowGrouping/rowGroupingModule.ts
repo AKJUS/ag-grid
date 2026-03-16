@@ -6,6 +6,7 @@ import { AggregationModule, SharedAggregationModule } from '../aggregation/aggre
 import { SharedColumnStateUpdateStrategyModule } from '../columnToolPanel/updates/columnStateUpdateStrategyModule';
 import { GroupHierarchyModule } from '../groupHierarchy/groupHierarchyModule';
 import {
+    ChangedPathModule,
     ClientSideRowModelHierarchyModule,
     GroupColumnModule,
     GroupEditModule,
@@ -43,6 +44,7 @@ export const SharedRowGroupingModule: _ModuleWithApi<_RowGroupingGridApi> = {
         EnterpriseCoreModule,
         SharedAggregationModule,
         GroupColumnModule,
+        ChangedPathModule,
         StickyRowModule,
         GroupHierarchyModule,
     ],

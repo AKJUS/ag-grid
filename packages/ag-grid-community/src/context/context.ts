@@ -95,6 +95,7 @@ import type { IWatermark } from '../interfaces/iWatermark';
 import type { IMasterDetailService } from '../interfaces/masterDetail';
 import type { IRenderStatusService } from '../interfaces/renderStatusService';
 import type { IRowNumbersService } from '../interfaces/rowNumbers';
+import type { IChangedPathFactory } from '../main-internal';
 import type { AnimationFrameService } from '../misc/animationFrameService';
 import type { ApiEventService } from '../misc/apiEvents/apiEventService';
 import type { IconService } from '../misc/iconService';
@@ -374,6 +375,7 @@ interface CoreBeanCollection
     colDelayRenderSvc?: ColumnDelayRenderService;
     gridSerializer?: GridSerializer;
     licenseManager?: IWatermark;
+    changedPathFactory?: IChangedPathFactory;
     changeDetectionSvc?: ChangeDetectionService;
     iconSvc: IconService;
     groupHierarchyColSvc?: IGroupHierarchyColService;
