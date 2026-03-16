@@ -116,6 +116,7 @@ type InternalModuleName =
     | 'Popup'
     | 'QuickFilterCore'
     | 'SharedAggregation'
+    | 'SharedColumnStateUpdateStrategy'
     | 'SharedDragAndDrop'
     | 'SharedExport'
     | 'SharedMasterDetail'
