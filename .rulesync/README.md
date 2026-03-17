@@ -55,13 +55,13 @@ Quick-reference for all AI agent commands, skills, sub-agents, and rules availab
 
 ## Planning and Analysis
 
-| Type  | Name                            | Invoke                               | What it does                                               |
-| ----- | ------------------------------- | ------------------------------------ | ---------------------------------------------------------- |
-| Skill | 🔵 `jira`                       | `/jira`                              | Create, estimate, or analyse JIRA tickets                  |
-| Skill | 🔵 `nx-performance`             | `/nx-performance`                    | Nx monorepo performance diagnostics and optimization       |
-| Skill | 🔵 `plan-implementation-review` | `/plan-implementation-review` (user) | Review plan execution, identify delivery gaps              |
-| Skill | 🔵 `plan-review`                | `/plan-review` (user)                | Review plans for completeness and correctness              |
-| Agent | 🔵 `nx-expert`                  | Auto                                 | Nx monorepo configuration and build optimisation           |
+| Type  | Name                            | Invoke                               | What it does                                         |
+| ----- | ------------------------------- | ------------------------------------ | ---------------------------------------------------- |
+| Skill | 🔵 `jira`                       | `/jira`                              | Create, estimate, or analyse JIRA tickets            |
+| Skill | 🔵 `nx-performance`             | `/nx-performance`                    | Nx monorepo performance diagnostics and optimization |
+| Skill | 🔵 `plan-implementation-review` | `/plan-implementation-review` (user) | Review plan execution, identify delivery gaps        |
+| Skill | 🔵 `plan-review`                | `/plan-review` (user)                | Review plans for completeness and correctness        |
+| Agent | 🔵 `nx-expert`                  | Auto                                 | Nx monorepo configuration and build optimisation     |
 
 ## Prompt Hygiene
 
