@@ -40,6 +40,7 @@ export class ColumnToolPanel extends Component implements IColumnToolPanel, IToo
     private colToolPanelFactory?: ColumnToolPanelFactory;
     private deferredButtonsComp?: FilterButtonComp;
     private isDeferModeEnabled = false;
+    private isCommitting = false;
 
     constructor() {
         super({ tag: 'div', cls: 'ag-column-panel' });
@@ -130,6 +131,23 @@ export class ColumnToolPanel extends Component implements IColumnToolPanel, IToo
             childDestroyFuncs.push(() => pivotModeListener());
         }
 
+        if (this.isDeferModeEnabled) {
+            const resetListener = this.onExternalGridChange;
+
+            childDestroyFuncs.push(
+                ...this.addManagedEventListeners({
+                    sortChanged: resetListener,
+                    columnVisible: resetListener,
+                    columnRowGroupChanged: resetListener,
+                    columnValueChanged: resetListener,
+                    columnPivotChanged: resetListener,
+                    columnPivotModeChanged: resetListener,
+                    newColumnsLoaded: resetListener,
+                    ...(mergedParams.suppressSyncLayoutWithGrid ? {} : { columnMoved: resetListener }),
+                })
+            );
+        }
+
         if (mergedParams.buttons?.length) {
             if (!mergedParams.buttons.includes('apply')) {
                 _warn(298);
@@ -167,7 +185,12 @@ export class ColumnToolPanel extends Component implements IColumnToolPanel, IToo
     }
 
     private readonly onDeferredApply = (): void => {
-        this.beans.columnStateUpdateStrategy.commit(this.isDeferModeEnabled);
+        this.isCommitting = true;
+        try {
+            this.beans.columnStateUpdateStrategy.commit(this.isDeferModeEnabled);
+        } finally {
+            this.isCommitting = false;
+        }
         this.deferredButtonsComp?.updateValidity(false);
     };
 
@@ -184,6 +207,19 @@ export class ColumnToolPanel extends Component implements IColumnToolPanel, IToo
         this.deferredButtonsComp?.updateValidity(
             this.beans.columnStateUpdateStrategy.hasPendingChanges(this.isDeferModeEnabled)
         );
+    };
+
+    private readonly onExternalGridChange = (): void => {
+        if (!this.isDeferModeEnabled || this.isCommitting) {
+            return;
+        }
+        if (!this.beans.columnStateUpdateStrategy.hasPendingChanges(this.isDeferModeEnabled)) {
+            return;
+        }
+        this.beans.columnStateUpdateStrategy.reset(this.isDeferModeEnabled);
+        this.deferredButtonsComp?.updateValidity(false);
+        this.refreshToolPanelLayouts();
+        this.pivotModePanel?.refreshEditStrategy();
     };
 
     public refreshDeferredUi(): void {
