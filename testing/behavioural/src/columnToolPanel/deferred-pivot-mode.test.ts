@@ -1509,6 +1509,34 @@ describe('deferred column tool panel pivot mode', () => {
         expect(gridApi.getPivotColumns().map((col) => col.getColId())).toEqual(['year']);
     });
 
+    test('column labels section shows previous pivot columns after toggling pivot mode off, applying, then back on', async () => {
+        const { gridApi, toolPanel, toolPanelGui } = await createDeferredPivotModeGrid();
+
+        // Initially Year is a pivot column
+        expect(
+            getUpdateStrategy(toolPanel)
+                .getPivotColumns(true)
+                .map((col) => col.getColId())
+        ).toEqual(['year']);
+
+        // Toggle pivot off and apply
+        getPivotModeToggle(toolPanelGui).click();
+        getApplyButton(toolPanelGui).click();
+        await waitForNoLoadingRows(gridApi);
+
+        expect(gridApi.isPivotMode()).toBe(false);
+
+        // Toggle pivot back on (before Apply)
+        getPivotModeToggle(toolPanelGui).click();
+
+        // Deferred state should show Year in pivot columns
+        expect(
+            getUpdateStrategy(toolPanel)
+                .getPivotColumns(true)
+                .map((col) => col.getColId())
+        ).toEqual(['year']);
+    });
+
     test('turning pivot mode off and applying should remove year header group text and update the grid option', async () => {
         const { gridApi, toolPanelGui } = await createDeferredPivotModeGrid();
 
@@ -1591,6 +1619,42 @@ describe('deferred column tool panel pivot mode', () => {
 
         getUpdateStrategy(toolPanel).setColumnsVisible(true, [athlete], true, 'toolPanelUi');
         toolPanel.refreshDeferredUi();
+
+        expect(getApplyButton(toolPanelGui).disabled).toBe(true);
+    });
+
+    test('apply button is disabled after reverting a staged column visibility change via checkbox', async () => {
+        const { toolPanel, toolPanelGui } = await createDeferredNonPivotGrid();
+
+        expect(getApplyButton(toolPanelGui).disabled).toBe(true);
+
+        // Toggle Athlete checkbox off (hide column)
+        const athleteComp = createPrimaryColumnComp(toolPanel, 'Athlete');
+        athleteComp['onChangeCommon'](false);
+
+        expect(getApplyButton(toolPanelGui).disabled).toBe(false);
+
+        // Toggle Athlete checkbox back on (show column — revert to original state)
+        const athleteComp2 = createPrimaryColumnComp(toolPanel, 'Athlete');
+        athleteComp2['onChangeCommon'](true);
+
+        expect(getApplyButton(toolPanelGui).disabled).toBe(true);
+    });
+
+    test('apply button is disabled after reverting a staged pivot column change via checkbox', async () => {
+        const { toolPanel, toolPanelGui } = await createDeferredPivotModeGrid();
+
+        expect(getApplyButton(toolPanelGui).disabled).toBe(true);
+
+        // Toggle Athlete checkbox on (add to row group in pivot mode)
+        const athleteComp = createPrimaryColumnComp(toolPanel, 'Athlete');
+        athleteComp['onChangeCommon'](true);
+
+        expect(getApplyButton(toolPanelGui).disabled).toBe(false);
+
+        // Toggle Athlete checkbox back off (revert)
+        const athleteComp2 = createPrimaryColumnComp(toolPanel, 'Athlete');
+        athleteComp2['onChangeCommon'](false);
 
         expect(getApplyButton(toolPanelGui).disabled).toBe(true);
     });

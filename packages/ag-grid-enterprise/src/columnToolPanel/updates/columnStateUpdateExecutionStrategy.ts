@@ -265,7 +265,7 @@ class DeferredColumnStateUpdateStrategy implements ColumnStateConcreteUpdateStra
                     (patch.hide !== undefined && patch.hide !== !column.isVisible()) ||
                     (patch.rowGroup !== undefined && !!patch.rowGroup !== column.isRowGroupActive()) ||
                     (patch.pivot !== undefined && !!patch.pivot !== column.isPivotActive()) ||
-                    (patch.aggFunc !== undefined && patch.aggFunc !== column.getAggFunc())
+                    (patch.aggFunc !== undefined && (patch.aggFunc ?? null) !== (column.getAggFunc() ?? null))
                 ) {
                     return true;
                 }
@@ -646,11 +646,16 @@ class DeferredColumnStateUpdateStrategy implements ColumnStateConcreteUpdateStra
             return [];
         }
 
+        const livePivotColumns = this.beans.pivotColsSvc?.columns;
+        const fallbackColumns = livePivotColumns?.length
+            ? livePivotColumns
+            : getDraftColumns(this.beans, this.lastPivotColIds);
+
         return getDraftColumns(
             this.beans,
             getDraftFunctionColumnIds(
                 this.state.pivot?.colIds,
-                this.beans.pivotColsSvc?.columns,
+                fallbackColumns,
                 this.state.columnState?.patches,
                 (patch) => (patch.pivot == null ? undefined : !!patch.pivot)
             )
