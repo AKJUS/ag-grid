@@ -33,6 +33,7 @@ export interface ToolPanelColumnCompParams<TData = any, TContext = any>
     extends IToolPanelParams<TData, TContext, ColumnToolPanelState>,
         IToolPanelColumnCompParams {}
 
+/** Captures full grid state for no-op detection (includes width to distinguish from resize). */
 interface GridStateSnapshot {
     rowGroupColIds: string[];
     valueColIds: string[];
@@ -42,6 +43,7 @@ interface GridStateSnapshot {
     visibleColIds: string[];
     sortState: string[];
     aggFuncState: (string | IAggFunc | null | undefined)[];
+    widthState: string[];
 }
 
 const DEFERRED_TOOL_PANEL_CLASS = 'ag-column-panel-deferred';
@@ -61,7 +63,7 @@ export class ColumnToolPanel extends Component implements IColumnToolPanel, IToo
     private deferredButtonsComp?: FilterButtonComp;
     private isDeferModeEnabled = false;
     private isCommitting = false;
-    private lastAppliedGridState?: GridStateSnapshot;
+    private lastKnownGridState?: GridStateSnapshot;
 
     constructor() {
         super({ tag: 'div', cls: 'ag-column-panel' });
@@ -153,11 +155,11 @@ export class ColumnToolPanel extends Component implements IColumnToolPanel, IToo
         }
 
         if (this.isDeferModeEnabled) {
-            this.lastAppliedGridState = this.captureGridState();
             const resetListener = this.onExternalGridChange;
 
             childDestroyFuncs.push(
                 ...this.addManagedEventListeners({
+                    columnEverythingChanged: this.onColumnEverythingChanged,
                     sortChanged: resetListener,
                     columnVisible: resetListener,
                     columnRowGroupChanged: resetListener,
@@ -216,7 +218,7 @@ export class ColumnToolPanel extends Component implements IColumnToolPanel, IToo
             this.isCommitting = false;
         }
         this.deferredButtonsComp?.updateValidity(false);
-        this.lastAppliedGridState = this.captureGridState();
+        this.lastKnownGridState = this.captureGridState();
     };
 
     private readonly onDeferredCancel = (): void => {
@@ -224,7 +226,7 @@ export class ColumnToolPanel extends Component implements IColumnToolPanel, IToo
         this.deferredButtonsComp?.updateValidity(false);
         this.refreshToolPanelLayouts();
         this.pivotModePanel?.refreshEditStrategy();
-        this.lastAppliedGridState = this.captureGridState();
+        this.lastKnownGridState = this.captureGridState();
     };
 
     private readonly onPivotModePanelValueChanged = (): void => {
@@ -235,6 +237,24 @@ export class ColumnToolPanel extends Component implements IColumnToolPanel, IToo
         );
     };
 
+    /** Handles columnEverythingChanged — only resets staged changes on true no-ops. */
+    private readonly onColumnEverythingChanged = (): void => {
+        if (!this.isDeferModeEnabled || this.isCommitting) {
+            return;
+        }
+        const currentState = this.captureGridState();
+        if (!this.beans.columnStateUpdateStrategy.hasPendingChanges(this.isDeferModeEnabled)) {
+            this.lastKnownGridState = currentState;
+            return;
+        }
+        const isNoOp = this.lastKnownGridState && this.isGridStateEqual(this.lastKnownGridState, currentState);
+        this.lastKnownGridState = currentState;
+        if (!isNoOp) {
+            return;
+        }
+        this.resetDeferredState();
+    };
+
     private readonly onExternalGridChange = (): void => {
         if (!this.isDeferModeEnabled || this.isCommitting) {
             return;
@@ -242,16 +262,16 @@ export class ColumnToolPanel extends Component implements IColumnToolPanel, IToo
         if (!this.beans.columnStateUpdateStrategy.hasPendingChanges(this.isDeferModeEnabled)) {
             return;
         }
-        const currentState = this.captureGridState();
-        if (this.lastAppliedGridState && this.isGridStateEqual(this.lastAppliedGridState, currentState)) {
-            return;
-        }
+        this.resetDeferredState();
+        this.lastKnownGridState = this.captureGridState();
+    };
+
+    private resetDeferredState(): void {
         this.beans.columnStateUpdateStrategy.reset(this.isDeferModeEnabled);
         this.deferredButtonsComp?.updateValidity(false);
         this.refreshToolPanelLayouts();
         this.pivotModePanel?.refreshEditStrategy();
-        this.lastAppliedGridState = currentState;
-    };
+    }
 
     private captureGridState(): GridStateSnapshot {
         const { beans } = this;
@@ -271,6 +291,7 @@ export class ColumnToolPanel extends Component implements IColumnToolPanel, IToo
                 .filter((c) => c.getSort())
                 .map((c) => `${c.getColId()}:${c.getSort()}:${c.getSortIndex()}`),
             aggFuncState: (beans.valueColsSvc?.columns ?? []).map((c) => c.getAggFunc()),
+            widthState: beans.colModel.getCols().map((c) => `${c.getColId()}:${c.getActualWidth()}`),
         };
     }
 
@@ -283,7 +304,8 @@ export class ColumnToolPanel extends Component implements IColumnToolPanel, IToo
             _areEqual(a.columnOrder, b.columnOrder) &&
             _areEqual(a.visibleColIds, b.visibleColIds) &&
             _areEqual(a.sortState, b.sortState) &&
-            _areEqual(a.aggFuncState, b.aggFuncState)
+            _areEqual(a.aggFuncState, b.aggFuncState) &&
+            _areEqual(a.widthState, b.widthState)
         );
     }
 
