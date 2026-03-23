@@ -1,5 +1,8 @@
+import { userEvent } from '@testing-library/user-event';
+
 import type { GridOptions, ValueParserParams } from 'ag-grid-community';
 
+import { TestGridsManager } from '../../test-utils';
 import type {
     EditableCallback,
     GroupRowEditableCallback,
@@ -459,6 +462,133 @@ describe.each(EDIT_MODES)('groupRowEditable behaviour (%s)', (editMode) => {
         }
     });
 
+    test('double-clicking editable group cell starts editing instead of toggling expansion', async () => {
+        if (editMode !== 'ui') {
+            return; // dblclick only relevant for UI mode
+        }
+
+        const api = await gridsManager.createGridAndWait('group-dblclick-edit', {
+            columnDefs: [
+                { field: 'category', rowGroup: true, hide: true },
+                {
+                    field: 'amount',
+                    aggFunc: 'sum',
+                    editable: true,
+                    groupRowEditable: true,
+                },
+            ],
+            autoGroupColumnDef: {
+                editable: true,
+                groupRowEditable: true,
+                cellEditorParams: { useFormatter: true },
+            },
+            rowData: [
+                { id: 'a-1', category: 'A', amount: 10 },
+                { id: 'a-2', category: 'A', amount: 20 },
+            ],
+            groupDefaultExpanded: -1,
+            getRowId: (params) => params.data.id,
+        });
+
+        const gridDiv = TestGridsManager.getHTMLElement(api)!;
+        await asyncSetTimeout(1);
+
+        const groupRowNode = api.getDisplayedRowAtIndex(0);
+        expect(groupRowNode?.group).toBe(true);
+        expect(groupRowNode?.expanded).toBe(true);
+
+        // Double-click the amount cell — should start editing, NOT collapse
+        const rowElement = gridDiv.querySelector<HTMLElement>(`[row-id="${groupRowNode!.id}"]`)!;
+        const amountCell = rowElement.querySelector<HTMLElement>('[col-id="amount"]')!;
+        expect(amountCell).toBeTruthy();
+
+        await userEvent.dblClick(amountCell);
+        await asyncSetTimeout(1);
+
+        expect(groupRowNode?.expanded).toBe(true);
+        expect(api.getEditingCells()).toHaveLength(1);
+    });
+
+    test('double-clicking auto group column cell with groupRowEditable starts editing instead of toggling expansion', async () => {
+        if (editMode !== 'ui') {
+            return;
+        }
+
+        const api = await gridsManager.createGridAndWait('group-dblclick-autogroup', {
+            columnDefs: [
+                { field: 'category', rowGroup: true, hide: true },
+                { field: 'amount', aggFunc: 'sum', editable: true, groupRowEditable: true },
+            ],
+            autoGroupColumnDef: {
+                editable: true,
+                groupRowEditable: true,
+                cellEditorParams: { useFormatter: true },
+            },
+            rowData: [
+                { id: 'a-1', category: 'A', amount: 10 },
+                { id: 'a-2', category: 'A', amount: 20 },
+            ],
+            groupDefaultExpanded: -1,
+            getRowId: (params) => params.data.id,
+        });
+
+        const gridDiv = TestGridsManager.getHTMLElement(api)!;
+        await asyncSetTimeout(1);
+
+        const groupRowNode = api.getDisplayedRowAtIndex(0);
+        expect(groupRowNode?.group).toBe(true);
+        expect(groupRowNode?.expanded).toBe(true);
+
+        // Double-click the auto group column cell — the groupCellRenderer dblclick handler
+        // should NOT toggle expansion when the cell is editable
+        const rowElement = gridDiv.querySelector<HTMLElement>(`[row-id="${groupRowNode!.id}"]`)!;
+        const autoGroupCell = rowElement.querySelector<HTMLElement>('[col-id="ag-Grid-AutoColumn"]')!;
+        expect(autoGroupCell).toBeTruthy();
+
+        await userEvent.dblClick(autoGroupCell);
+        await asyncSetTimeout(1);
+
+        expect(groupRowNode?.expanded).toBe(true);
+        expect(api.getEditingCells()).toHaveLength(1);
+    });
+
+    test('double-clicking non-editable auto group column cell toggles expansion normally', async () => {
+        if (editMode !== 'ui') {
+            return;
+        }
+
+        const api = await gridsManager.createGridAndWait('group-dblclick-collapse', {
+            columnDefs: [
+                { field: 'category', rowGroup: true, hide: true },
+                { field: 'amount', aggFunc: 'sum' },
+            ],
+            rowData: [
+                { id: 'a-1', category: 'A', amount: 10 },
+                { id: 'a-2', category: 'A', amount: 20 },
+            ],
+            groupDefaultExpanded: -1,
+            getRowId: (params) => params.data.id,
+        });
+
+        const gridDiv = TestGridsManager.getHTMLElement(api)!;
+        await asyncSetTimeout(1);
+
+        const groupRowNode = api.getDisplayedRowAtIndex(0);
+        expect(groupRowNode?.group).toBe(true);
+        expect(groupRowNode?.expanded).toBe(true);
+
+        const rowElement = gridDiv.querySelector<HTMLElement>(`[row-id="${groupRowNode!.id}"]`)!;
+        const autoGroupCell = rowElement.querySelector<HTMLElement>('[col-id="ag-Grid-AutoColumn"]')!;
+        expect(autoGroupCell).toBeTruthy();
+
+        // Double-click on non-editable group cell should collapse
+        await userEvent.dblClick(autoGroupCell);
+        await asyncSetTimeout(1);
+
+        expect(groupRowNode?.expanded).toBe(false);
+        expect(api.getEditingCells()).toHaveLength(0);
+    });
+
     test('groupRowValueSetter fires even when groupRowEditable is false', async () => {
         let invocationCount = 0;
         const valueSetter: ValueSetterCallback = (params) => {
@@ -503,5 +633,179 @@ describe.each(EDIT_MODES)('groupRowEditable behaviour (%s)', (editMode) => {
         await asyncSetTimeout(0);
 
         expect(invocationCount).toBe(1);
+    });
+});
+
+describe('editability based on distribution configuration', () => {
+    const ROW_DATA = [
+        { id: 'a-1', category: 'A', amount: 10 },
+        { id: 'a-2', category: 'A', amount: 20 },
+    ];
+
+    test.each([
+        // --- Suppressed (not editable) ---
+        { name: 'distribution: false', aggFunc: 'sum', setter: { distribution: false }, expected: false },
+        { name: 'distribution: null', aggFunc: 'sum', setter: { distribution: null }, expected: false },
+        {
+            name: 'per-aggFunc record { sum: false }',
+            aggFunc: 'sum',
+            setter: { distribution: { sum: false, avg: 'uniform' } },
+            expected: false,
+        },
+        {
+            name: 'per-aggFunc options { sum: { distribution: false } }',
+            aggFunc: 'sum',
+            setter: { distribution: { sum: { distribution: false } } },
+            expected: false,
+        },
+        {
+            name: 'per-aggFunc count with distribution: undefined inherits disabled-by-default',
+            aggFunc: 'count',
+            setter: { distribution: { count: { distribution: undefined, precision: 0 } } },
+            expected: false,
+        },
+        {
+            name: 'per-aggFunc min without distribution key inherits disabled-by-default',
+            aggFunc: 'min',
+            setter: { distribution: { min: { precision: 0 } } },
+            expected: false,
+        },
+        { name: 'implicit count (no groupRowValueSetter)', aggFunc: 'count', expected: false },
+        {
+            name: 'implicit custom string aggFunc',
+            aggFunc: 'myAgg',
+            expected: false,
+            extra: {
+                aggFuncs: { myAgg: (params: any) => params.values.reduce((a: number, b: number) => a + b, 0) },
+            },
+        },
+        {
+            name: 'implicit function aggFunc',
+            aggFunc: ((params: any) => params.values.reduce((a: number, b: number) => a + b, 0)) as any,
+            expected: false,
+        },
+
+        // --- Editable ---
+        {
+            name: 'per-aggFunc record { sum: "percentage" }',
+            aggFunc: 'sum',
+            setter: { distribution: { sum: 'percentage', avg: false } },
+            expected: true,
+        },
+        {
+            name: 'per-aggFunc record missing matching aggFunc entry',
+            aggFunc: 'sum',
+            setter: { distribution: { avg: false } },
+            expected: true,
+        },
+        { name: 'groupRowValueSetter: true (sum)', aggFunc: 'sum', setter: true, expected: true },
+        { name: 'distribution: "uniform"', aggFunc: 'sum', setter: { distribution: 'uniform' }, expected: true },
+        {
+            name: 'per-aggFunc count with distribution: "overwrite" explicitly enabled',
+            aggFunc: 'count',
+            setter: { distribution: { count: { distribution: 'overwrite', precision: 0 } } },
+            expected: true,
+        },
+        {
+            name: 'per-aggFunc sum with distribution: undefined (sum not disabled by default)',
+            aggFunc: 'sum',
+            setter: { distribution: { sum: { distribution: undefined, precision: 0 } } },
+            expected: true,
+        },
+        { name: 'groupRowValueSetter as function', aggFunc: 'sum', setter: () => false, expected: true },
+        { name: 'groupRowValueSetter: true (count)', aggFunc: 'count', setter: true, expected: true },
+        { name: 'implicit sum (no groupRowValueSetter)', aggFunc: 'sum', expected: true },
+        { name: 'implicit avg (no groupRowValueSetter)', aggFunc: 'avg', expected: true },
+    ])('$name → editable=$expected', async ({ aggFunc, setter, expected, extra }: any) => {
+        const api = await gridsManager.createGridAndWait('editability-test', {
+            ...extra,
+            columnDefs: [
+                { field: 'category', rowGroup: true, hide: true },
+                {
+                    field: 'amount',
+                    aggFunc,
+                    editable: true,
+                    groupRowEditable: true,
+                    ...(setter !== undefined ? { groupRowValueSetter: setter } : {}),
+                },
+            ],
+            rowData: ROW_DATA,
+            groupDefaultExpanded: -1,
+            getRowId: (params: any) => params.data.id,
+        });
+
+        const groupRowNode = api.getDisplayedRowAtIndex(0);
+        expect(groupRowNode?.group).toBe(true);
+        expect(api.getColumn('amount')!.isCellEditable(groupRowNode!)).toBe(expected);
+    });
+
+    test('leaf rows remain editable when group distribution is suppressed', async () => {
+        const api = await gridsManager.createGridAndWait('leaf-editable-check', {
+            columnDefs: [
+                { field: 'category', rowGroup: true, hide: true },
+                {
+                    field: 'amount',
+                    aggFunc: 'sum',
+                    editable: true,
+                    groupRowEditable: true,
+                    groupRowValueSetter: { distribution: false },
+                },
+            ],
+            rowData: ROW_DATA,
+            groupDefaultExpanded: -1,
+            getRowId: (params) => params.data.id,
+        });
+
+        const column = api.getColumn('amount')!;
+        const groupRowNode = api.getDisplayedRowAtIndex(0)!;
+        expect(column.isCellEditable(groupRowNode)).toBe(false);
+        expect(column.isCellEditable(api.getRowNode('a-1')!)).toBe(true);
+    });
+});
+
+describe('suppressDoubleClickExpand with groupRowEditable', () => {
+    test('double-click does not expand/collapse when suppressDoubleClickExpand is true', async () => {
+        const api = gridsManager.createGrid('suppress-dblclick-expand', {
+            defaultColDef: { cellEditor: 'agTextCellEditor' },
+            groupDisplayType: 'custom',
+            columnDefs: [
+                {
+                    colId: 'group',
+                    headerName: 'Group',
+                    cellRenderer: 'agGroupCellRenderer',
+                    cellRendererParams: { suppressDoubleClickExpand: true },
+                },
+                { field: 'category', rowGroup: true, hide: true },
+                {
+                    colId: 'amount',
+                    field: 'amount',
+                    aggFunc: 'sum',
+                    editable: true,
+                    groupRowEditable: true,
+                },
+            ],
+            rowData: [
+                { id: '1', category: 'A', amount: 10 },
+                { id: '2', category: 'A', amount: 20 },
+            ],
+            groupDefaultExpanded: -1,
+            getRowId: (params) => params.data.id,
+        });
+        await asyncSetTimeout(0);
+
+        const groupNode = api.getDisplayedRowAtIndex(0)!;
+        expect(groupNode.group).toBe(true);
+        expect(groupNode.expanded).toBe(true);
+
+        // Double-click the group cell — should NOT collapse when suppressDoubleClickExpand is true
+        const gridDiv = TestGridsManager.getHTMLElement(api)!;
+        const groupCell = gridDiv.querySelector<HTMLElement>(`[row-id="${groupNode.id}"] [col-id="group"]`);
+        expect(groupCell).not.toBeNull();
+
+        await userEvent.dblClick(groupCell!);
+        await asyncSetTimeout(0);
+
+        // Node should still be expanded — suppressDoubleClickExpand prevents collapse
+        expect(groupNode.expanded).toBe(true);
     });
 });
