@@ -1697,14 +1697,13 @@ describe('deferred column tool panel pivot mode', () => {
         expect(getApplyButton(toolPanelGui).disabled).toBe(true);
     });
 
-    test('apply button is disabled after removing then re-adding a row group column via drop zone in pivot mode', async () => {
+    test('apply button stays enabled after removing then re-adding a row group column at a different position', async () => {
         const { gridApi, toolPanel, toolPanelGui } = await createDeferredPivotModeGrid();
         const country = gridApi.getColumn('country')! as AgColumn;
 
         expect(getApplyButton(toolPanelGui).disabled).toBe(true);
 
-        // Remove country from row groups via the drop zone (simulates removing pill)
-        // This goes through pillDropZonePanel.removeItems → updateItems → setRowGroupColumns
+        // Remove country from row groups via the drop zone
         const rowGroupPanel = toolPanel.rowGroupDropZonePanel;
         const existingRowGroupCols = rowGroupPanel.getExistingItems();
         const withoutCountry = existingRowGroupCols.filter((c: AgColumn) => c !== country);
@@ -1713,12 +1712,79 @@ describe('deferred column tool panel pivot mode', () => {
 
         expect(getApplyButton(toolPanelGui).disabled).toBe(false);
 
-        // Add country back via the drop zone (simulates dragging from columns list)
+        // Add country back at the end (different position from original)
         const currentRowGroupCols = rowGroupPanel.getExistingItems();
         rowGroupPanel['updateItems']([...currentRowGroupCols, country]);
         toolPanel.refreshDeferredUi();
 
+        // Apply should stay enabled because order changed
+        expect(getApplyButton(toolPanelGui).disabled).toBe(false);
+    });
+
+    test('apply button is disabled after removing then re-adding a row group column at same position via drop zone', async () => {
+        const { gridApi, toolPanel, toolPanelGui } = await createDeferredPivotModeGrid();
+        const sport = gridApi.getColumn('sport')! as AgColumn;
+
         expect(getApplyButton(toolPanelGui).disabled).toBe(true);
+
+        // Step 1: Remove sport from row groups via the drop zone (simulates removing pill)
+        const rowGroupPanel = toolPanel.rowGroupDropZonePanel;
+        const originalRowGroupCols = [...rowGroupPanel.getExistingItems()];
+        const withoutSport = originalRowGroupCols.filter((c: AgColumn) => c !== sport);
+        rowGroupPanel['updateItems'](withoutSport);
+        toolPanel.refreshDeferredUi();
+
+        expect(getApplyButton(toolPanelGui).disabled).toBe(false);
+
+        // Step 2: Drag sport back to row groups at same position (exact revert)
+        rowGroupPanel['updateItems'](originalRowGroupCols);
+        toolPanel.refreshDeferredUi();
+
+        // Apply should be disabled since we reverted to original state
+        expect(getApplyButton(toolPanelGui).disabled).toBe(true);
+    });
+
+    test('apply button is disabled after removing row group pill via X and dragging column back from list in pivot mode', async () => {
+        const { gridApi, toolPanel, toolPanelGui } = await createDeferredPivotModeGrid();
+        const sport = gridApi.getColumn('sport')! as AgColumn;
+        const strategy = getUpdateStrategy(toolPanel);
+
+        expect(getApplyButton(toolPanelGui).disabled).toBe(true);
+
+        // Step 1: Click X on Sport pill in CTP row group drop zone
+        const rowGroupPanel = toolPanel.rowGroupDropZonePanel;
+        const withoutSport = rowGroupPanel.getExistingItems().filter((c: AgColumn) => c !== sport);
+        rowGroupPanel['updateItems'](withoutSport);
+        rowGroupPanel.refreshGui();
+        toolPanel.refreshDeferredUi();
+
+        expect(getApplyButton(toolPanelGui).disabled).toBe(false);
+
+        // Step 2: Drag Sport from columns list into row groups drop zone
+        // handleDragEnterEnd sets column visibility to false (hide column on group)
+        rowGroupPanel.setColumnsVisible([sport], false, 'uiColumnDragged');
+        // addItem adds Sport back to row groups
+        rowGroupPanel.addItem(sport);
+        toolPanel.refreshDeferredUi();
+
+        // Deferred state should match live state — no pending changes
+        expect(strategy.hasPendingChanges(true)).toBe(false);
+        expect(getApplyButton(toolPanelGui).disabled).toBe(true);
+    });
+
+    test('apply button becomes enabled when row group columns are rearranged', async () => {
+        const { toolPanel, toolPanelGui } = await createDeferredPivotModeGrid();
+
+        expect(getApplyButton(toolPanelGui).disabled).toBe(true);
+
+        // Rearrange row group columns: swap country and sport
+        const rowGroupPanel = toolPanel.rowGroupDropZonePanel;
+        const originalRowGroupCols = [...rowGroupPanel.getExistingItems()];
+        const reversed = [...originalRowGroupCols].reverse();
+        rowGroupPanel['updateItems'](reversed);
+        toolPanel.refreshDeferredUi();
+
+        expect(getApplyButton(toolPanelGui).disabled).toBe(false);
     });
 
     test('apply button becomes enabled when a value column aggregation function is changed', async () => {
