@@ -35,7 +35,7 @@
   "dependencies": {},
   "devDependencies": {
     "typescript": "^5.4.5",
-    "glob": "8.0.3",
+    "glob": "13.0.6",
     "@nx/devkit": "^18.3.4",
     "@types/yargs": "^17.0.32",
     "@swc/helpers": "0.5.3",

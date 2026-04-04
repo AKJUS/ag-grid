@@ -48,6 +48,6 @@
     "stylelint": "14.9.1",
     "stylelint-csstree-validator": "2.0.0",
     "stylelint-scss": "4.3.0",
-    "glob": "8.0.3"
+    "glob": "13.0.6"
   }
 }
