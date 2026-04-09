@@ -1,9 +1,9 @@
 import type {
-    AgColumn,
     BeanCollection,
     BeanStub,
     CellCtrl,
     CellNote,
+    GetNoteParams,
     ICellNotesFeature,
     RowCtrl,
     RowGui,
@@ -11,6 +11,7 @@ import type {
 
 import { AgNotesPopup } from './agNotesPopup';
 import type { ICellNotePopupOwner, INotesFeatureSupport, NoteTarget } from './notesShared';
+import { isFullWidthRowNoteParams } from './notesShared';
 
 const CSS_HAS_CELL_NOTES = 'ag-has-cell-notes';
 const NOTE_SHOW_DELAY = 180;
@@ -31,13 +32,13 @@ abstract class BaseNotesFeature implements ICellNotesFeature, ICellNotePopupOwne
     public refresh(): void {
         this.refreshHasNotesStyling();
 
-        if (this.activeTarget && !this.notesSvc.getCellNoteAccess(this.activeTarget)?.canView) {
+        if (this.activeTarget && !this.notesSvc.getCellNoteAccess(this.activeTarget.noteParams)?.canView) {
             this.closeNotePopup(false);
         }
     }
 
-    public show(params?: { focusEditor?: boolean; column?: AgColumn }): void {
-        const target = this.getTarget(params?.column);
+    public show(params?: { focusEditor?: boolean; pinned?: 'left' | 'right' }): void {
+        const target = this.getTarget(params?.pinned);
         if (!target) {
             return;
         }
@@ -68,7 +69,7 @@ abstract class BaseNotesFeature implements ICellNotesFeature, ICellNotePopupOwne
             return;
         }
 
-        const access = target && this.notesSvc.getCellNoteAccess(target);
+        const access = target && this.notesSvc.getCellNoteAccess(target.noteParams);
         this.cancelHide();
 
         if (!target || !access?.canView) {
@@ -109,10 +110,10 @@ abstract class BaseNotesFeature implements ICellNotesFeature, ICellNotePopupOwne
 
     protected abstract refreshHasNotesStyling(): void;
 
-    protected abstract getTarget(column?: AgColumn): NoteTarget | undefined;
+    protected abstract getTarget(pinned?: 'left' | 'right'): NoteTarget | undefined;
 
     private openPopup(target: NoteTarget, focusEditor = false): void {
-        const access = this.notesSvc.getCellNoteAccess(target);
+        const access = this.notesSvc.getCellNoteAccess(target.noteParams);
         if (!access || (!access.canView && !(focusEditor && access.canCreate))) {
             return;
         }
@@ -165,7 +166,7 @@ abstract class BaseNotesFeature implements ICellNotesFeature, ICellNotePopupOwne
             this.beans.focusSvc.setFocusedCell({
                 rowIndex: target.rowNode.rowIndex!,
                 rowPinned: target.rowNode.rowPinned,
-                column: target.column,
+                column: target.focusColumn,
                 forceBrowserFocus: true,
                 preventScrollOnBrowserFocus: true,
                 sourceEvent: closeEvent,
@@ -177,15 +178,15 @@ abstract class BaseNotesFeature implements ICellNotesFeature, ICellNotePopupOwne
         }
 
         this.notesSvc.setCellNote({
-            ...target,
+            ...target.noteParams,
             note,
-            previousNote: this.notesSvc.getCellNoteAccess(target)?.note,
+            previousNote: this.notesSvc.getCellNoteAccess(target.noteParams)?.note,
             source: 'ui',
         });
     }
 
     private matchesActiveTarget(target: NoteTarget): boolean {
-        return this.activeTarget?.rowNode === target.rowNode && this.activeTarget?.column === target.column;
+        return areSameNoteParams(this.activeTarget?.noteParams, target.noteParams);
     }
 
     private scheduleHide(): void {
@@ -234,19 +235,21 @@ export class AgCellNotesFeature extends BaseNotesFeature {
         return {
             rowNode: this.ctrl.rowNode,
             column: this.ctrl.column,
-        };
+        } satisfies GetNoteParams;
     }
 
-    protected getTarget(_column?: AgColumn): NoteTarget {
+    protected getTarget(): NoteTarget {
         return {
-            ...this.getPosition(),
+            noteParams: this.getPosition(),
+            rowNode: this.ctrl.rowNode,
+            focusColumn: this.ctrl.column,
             anchorElement: this.ctrl.eGui,
         };
     }
 }
 
 export class AgFullWidthRowNotesFeature extends BaseNotesFeature {
-    private readonly registeredElements = new WeakSet<BeanStub>();
+    private readonly registeredGuis = new WeakSet<BeanStub>();
 
     constructor(
         beans: BeanCollection,
@@ -276,11 +279,11 @@ export class AgFullWidthRowNotesFeature extends BaseNotesFeature {
 
     private registerGui(gui: RowGui): void {
         const { compBean, element } = gui;
-        if (this.registeredElements.has(compBean)) {
+        if (this.registeredGuis.has(compBean)) {
             return;
         }
 
-        this.registeredElements.add(compBean);
+        this.registeredGuis.add(compBean);
         compBean.addManagedListeners(element, {
             pointerenter: (event: PointerEvent) => this.onPointerEnter(this.getTargetForGui(gui), event),
             pointerleave: (event: PointerEvent) => this.onPointerLeave(event),
@@ -288,31 +291,32 @@ export class AgFullWidthRowNotesFeature extends BaseNotesFeature {
         });
     }
 
-    private getPositionForGui(gui: RowGui) {
-        const column = this.ctrl.getColumnForFullWidth(gui);
-        if (!column) {
-            return undefined;
-        }
-
+    private getPositionForGui(gui: RowGui): GetNoteParams {
+        const pinned = this.ctrl.getPinnedForFullWidth(gui);
+        const normalisedPinned = pinned === 'left' || pinned === 'right' ? pinned : undefined;
         return {
             rowNode: this.ctrl.rowNode,
-            column,
+            location: 'fullWidthRow',
+            pinned: normalisedPinned,
         };
     }
 
     private getTargetForGui(gui: RowGui): NoteTarget | undefined {
         const position = this.getPositionForGui(gui);
-        if (!position) {
+        const focusColumn = this.ctrl.getColumnForFullWidth(gui);
+        if (!focusColumn) {
             return undefined;
         }
 
         return {
-            ...position,
+            noteParams: position,
+            rowNode: this.ctrl.rowNode,
+            focusColumn,
             anchorElement: gui.element,
         };
     }
 
-    protected getTarget(column?: AgColumn): NoteTarget | undefined {
+    protected getTarget(pinned?: 'left' | 'right'): NoteTarget | undefined {
         let matchedTarget: NoteTarget | undefined;
         let firstTarget: NoteTarget | undefined;
 
@@ -330,11 +334,28 @@ export class AgFullWidthRowNotesFeature extends BaseNotesFeature {
                 firstTarget = target;
             }
 
-            if (!column || target.column === column) {
+            if (isFullWidthRowNoteParams(target.noteParams) && target.noteParams.pinned === pinned) {
                 matchedTarget = target;
             }
         });
 
         return matchedTarget ?? firstTarget;
     }
+}
+
+function areSameNoteParams(left?: GetNoteParams, right?: GetNoteParams): boolean {
+    if (!left || !right) {
+        return left === right;
+    }
+
+    if (isFullWidthRowNoteParams(left) || isFullWidthRowNoteParams(right)) {
+        return (
+            isFullWidthRowNoteParams(left) &&
+            isFullWidthRowNoteParams(right) &&
+            left.rowNode === right.rowNode &&
+            left.pinned === right.pinned
+        );
+    }
+
+    return left.rowNode === right.rowNode && left.column === right.column;
 }
