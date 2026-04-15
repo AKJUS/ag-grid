@@ -28,7 +28,7 @@ runs:
           run: |
               set -eux
 
-              git add "${{ inputs.path }}"
+              git add ${{ inputs.path }}
               git status
               if [[ $(git diff --cached --name-only | wc -l) -gt 0 ]] ; then
                   echo "Stashing changes."
