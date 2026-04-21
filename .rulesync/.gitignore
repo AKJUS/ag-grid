@@ -32,4 +32,6 @@ mcp.json
 !/rules/docs-pages.md
 !/rules/examples.md
 !/rules/testing.md
-# docs-review-testing.md is delivered by the ag-grid plugin — staged, not tracked.
+# docs-review-testing.md ships as a sibling asset of the ag-prodeng docs-review
+# skill config (at skills/docs-review/ag-grid/), not as a top-level rule, so no
+# allowlist entry is needed here.
