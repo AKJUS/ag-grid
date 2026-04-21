@@ -112,16 +112,15 @@ For detailed information about preferred technologies and architectural constrai
 
 Run rulesync commands via slash notation:
 
--   `/pr-review` - Review pull requests
--   `/code-cleanup` - Reduce code bloat and productionize
--   `/code-fixup` - Fix build and lint errors
--   `/batch-lint-cleanup` - ESLint auto-fix tool
--   `/git-split` - Split large files preserving git history
--   `/git-bisect` - Find commits that introduced issues
--   `/remember` - Save branch context or project learnings as memory
--   `/recall` - Load branch context and browse project memory
--   `/docs-review` - Review documentation pages for technical accuracy
--   `/release-docs-review` - Review all documentation changes between releases
+-   `/ag-prodeng:pr-review` - Review pull requests
+-   `/ag-prodeng:code-fixup` - Fix build and lint errors
+-   `/ag-prodeng:batch-lint-cleanup` - ESLint auto-fix tool
+-   `/ag-prodeng:git-split` - Split large files preserving git history
+-   `/ag-prodeng:git-bisect` - Find commits that introduced issues
+-   `/ag-core:remember` - Save branch context or project learnings as memory
+-   `/ag-core:recall` - Load branch context and browse project memory
+-   `/ag-prodeng:docs-review` - Review documentation pages for technical accuracy (auto-detects ag-grid; product config at `plugins/ag-prodeng/skills/docs-review/ag-grid/config.md`)
+-   `/ag-prodeng:release-docs-review` - Review all documentation changes between releases
 
 ### Architecture
 
