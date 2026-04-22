@@ -39,12 +39,13 @@ const baseParams: NoteStyleParams = {
     noteIndicatorColor: {
         ref: 'accentColor',
     },
-    noteIndicatorSize: '10px',
+    noteIndicatorSize: '8px',
     notePopupBackgroundColor: {
-        ref: 'backgroundColor',
+        ref: 'menuBackgroundColor',
     },
     notePopupTextColor: {
-        ref: 'secondaryForegroundColor',
+        ref: 'menuTextColor',
+        mix: 0.75,
     },
     notePopupInputTextColor: {
         ref: 'inputTextColor',
