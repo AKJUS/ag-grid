@@ -107,6 +107,7 @@
     gap: calc(var(--ag-spacing) * 0.5);
     border: solid var(--ag-border-width) var(--ag-border-color);
     border-radius: var(--ag-border-radius);
+    min-width: 240px;
     width: 280px;
 }
 
@@ -114,11 +115,24 @@
     box-shadow: var(--ag-focus-shadow);
 }
 
+/*
+ * Within the Find pill the icon renders as a flex sibling rather than an
+ * absolute overlay, so the input's bounding rect does not span the icon.
+ * This keeps the VoiceOver focus indicator aligned with the visible input.
+ */
+:where(.ag-toolbar-find) .ag-toolbar-input-icon {
+    position: static;
+    padding-inline-start: var(--ag-spacing);
+}
+
 /* stylelint-disable-next-line no-descending-specificity */
 :where(.ag-toolbar-find) .ag-toolbar-input-field {
     border: 0;
     border-radius: 0;
+    padding-left: 0;
     padding-right: 0;
+    flex: 1;
+    min-width: 0;
 }
 
 :where(.ag-toolbar-find) .ag-toolbar-input-field:focus {
@@ -136,8 +150,11 @@
     opacity: 0.7;
     user-select: none;
     font-variant-numeric: tabular-nums;
-    min-width: 11ch;
     cursor: text;
+}
+
+:where(.ag-toolbar-find-match-count):not(:empty) {
+    padding-inline-start: calc(var(--ag-spacing) * 0.5);
 }
 
 .ag-toolbar-find-button {

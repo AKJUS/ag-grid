@@ -6,7 +6,6 @@ export interface CustomToolbarButtonParams extends IToolbarItemParams {
     icon: string;
     onClick: (api: GridApi) => void;
 }
-
 export class CustomToolbarButton implements IToolbarItemComp {
     params!: CustomToolbarButtonParams;
     eGui!: HTMLButtonElement;

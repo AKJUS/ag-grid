@@ -58,6 +58,7 @@ const gridOptions: GridOptions<IOlympicData> = {
         alignment: 'right',
         items: [
             { toolbarItem: 'agRowGroupPanelToolbarItem', alignment: 'left' },
+            'separator',
             'agFindToolbarItem',
             {
                 key: 'autoSizeAll',
@@ -66,10 +67,10 @@ const gridOptions: GridOptions<IOlympicData> = {
                 action: (params) => params.api.autoSizeAllColumns(),
             },
             {
-                key: 'resetColumns',
-                tooltip: 'Reset Columns',
-                icon: 'minimize',
-                action: (params) => params.api.resetColumnState(),
+                key: 'excelExport',
+                tooltip: 'Excel Export',
+                icon: 'excel',
+                action: (params) => params.api.exportDataAsExcel(),
             },
             {
                 toolbarItem: 'agMenuToolbarItem',
