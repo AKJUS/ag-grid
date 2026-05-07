@@ -1,27 +1,25 @@
 import type { GridApi, GridOptions } from 'ag-grid-community';
 import {
     ClientSideRowModelModule,
+    ColumnApiModule,
     ColumnAutoSizeModule,
     CsvExportModule,
     ModuleRegistry,
     NumberFilterModule,
-    QuickFilterModule,
     TextFilterModule,
     ValidationModule,
     createGrid,
 } from 'ag-grid-community';
-import { ContextMenuModule, ExcelExportModule, FindModule, ToolbarModule } from 'ag-grid-enterprise';
+import { ContextMenuModule, ToolbarModule } from 'ag-grid-enterprise';
 
 ModuleRegistry.registerModules([
+    ClientSideRowModelModule,
     TextFilterModule,
     NumberFilterModule,
-    ClientSideRowModelModule,
-    ColumnAutoSizeModule,
-    ContextMenuModule,
     CsvExportModule,
-    ExcelExportModule,
-    FindModule,
-    QuickFilterModule,
+    ColumnAutoSizeModule,
+    ColumnApiModule,
+    ContextMenuModule,
     ToolbarModule,
     ...(process.env.NODE_ENV !== 'production' ? [ValidationModule] : []),
 ]);
@@ -42,25 +40,43 @@ const gridOptions: GridOptions<IOlympicData> = {
     },
     toolbar: {
         items: [
-            'agQuickFilterToolbarItem',
-            'separator',
-            'agFindToolbarItem',
-            'separator',
             {
-                label: 'Fit Columns To Grid',
+                key: 'sizeColumnsToFit',
                 icon: 'maximize',
-                alignment: 'right',
+                tooltip: 'Size Columns to Fit',
                 action: (params) => params.api.sizeColumnsToFit(),
             },
+            'separator',
             {
-                toolbarItem: 'agMenuToolbarItem',
-                icon: 'save',
-                alignment: 'right',
-                label: 'Export',
-                tooltip: 'Export as CSV or Excel',
-                toolbarItemParams: {
-                    menuItems: ['csvExport', 'excelExport'],
-                },
+                key: 'autoSizeAll',
+                icon: 'minimize',
+                tooltip: 'Auto-size All Columns',
+                action: (params) => params.api.autoSizeAllColumns(),
+            },
+            'separator',
+            {
+                key: 'sortFirstColumnAsc',
+                icon: 'sortAscending',
+                tooltip: 'Sort First Column Ascending',
+                action: (params) =>
+                    params.api.applyColumnState({
+                        state: [{ colId: 'athlete', sort: 'asc' }],
+                        defaultState: { sort: null },
+                    }),
+            },
+            'separator',
+            {
+                key: 'resetFilters',
+                icon: 'clipboardCut',
+                tooltip: 'Reset All Filters',
+                action: (params) => params.api.setFilterModel(null),
+            },
+            'separator',
+            {
+                key: 'resetColumns',
+                icon: 'columns',
+                tooltip: 'Reset Column State',
+                action: (params) => params.api.resetColumnState(),
             },
         ],
     },
