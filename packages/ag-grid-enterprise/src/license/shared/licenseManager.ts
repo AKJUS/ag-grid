@@ -15,7 +15,7 @@ export interface ILicenseManager {
 
 export class LicenseManager {
     // eslint-disable-next-line no-restricted-syntax
-    private static readonly RELEASE_INFORMATION: string = 'MTc3NTU1MDg5NDgwOQ==';
+    private static readonly RELEASE_INFORMATION: string = 'MTc3ODI1ODU4MTQyNw==';
     // eslint-disable-next-line no-restricted-syntax
     private static licenseKey: string;
     // eslint-disable-next-line no-restricted-syntax
