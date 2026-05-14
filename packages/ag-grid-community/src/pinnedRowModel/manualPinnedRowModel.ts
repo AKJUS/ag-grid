@@ -222,9 +222,11 @@ export class ManualPinnedRowModel extends BeanStub implements IPinnedRowModel {
         rowTop = 0;
         this.top.forEach(updateRowHeight);
 
-        this.eventSvc.dispatchEvent({
-            type: 'pinnedHeightChanged',
-        });
+        if (anyChange) {
+            this.eventSvc.dispatchEvent({
+                type: 'pinnedHeightChanged',
+            });
+        }
 
         return anyChange;
     }

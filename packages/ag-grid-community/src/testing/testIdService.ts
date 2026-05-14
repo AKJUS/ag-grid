@@ -140,7 +140,7 @@ export class TestIdService extends BeanStub implements NamedBean, ITestIdService
 
         /** Rows */
 
-        root.querySelectorAll('.ag-row').forEach((row) => {
+        root.querySelectorAll('.ag-row[row-id]').forEach((row) => {
             const rowId = row.getAttribute('row-id');
             setTestId(row, agTestIdFor.rowNode(rowId));
 
@@ -458,7 +458,7 @@ export class TestIdService extends BeanStub implements NamedBean, ITestIdService
         });
     }
 
-    private setupColumnDropArea(root: ParentNode, source: 'panel' | 'toolbar'): void {
+    private setupColumnDropArea(root: Element, source: 'panel' | 'toolbar'): void {
         root.querySelectorAll('.ag-column-drop').forEach((columnDrop) => {
             const dropAreaName = columnDrop.querySelector('.ag-column-drop-list')?.getAttribute('aria-label');
             setTestId(columnDrop, agTestIdFor.columnDropArea(source, dropAreaName));
