@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# gh perm test
+
 REPO="ag-grid/ag-grid"
 BRANCH="latest"
 
