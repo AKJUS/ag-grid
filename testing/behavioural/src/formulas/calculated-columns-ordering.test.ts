@@ -388,6 +388,102 @@ describe('calculated columns - display ordering', () => {
         `);
     });
 
+    test('dialog add preserves runtime unpinned state from an initially pinned colDef', async () => {
+        const api = createGrid('calculated-dialog-preserves-unpinned-state', {
+            rowData: [{ id: 'r1', athlete: 'Michael Phelps', age: 23 }],
+            columnDefs: [{ field: 'athlete', pinned: 'left' }, { field: 'age' }],
+        });
+
+        await new GridColumns(api, 'dialog add preserves unpinned state setup').checkColumns(`
+            LEFT
+            └── athlete "Athlete" width:200
+            CENTER
+            └── age "Age" width:200
+        `);
+
+        api.setColumnsPinned(['athlete'], null);
+        await asyncSetTimeout(0);
+
+        await new GridColumns(api, 'dialog add preserves unpinned state after unpin').checkColumns(`
+            CENTER
+            ├── athlete "Athlete" width:200
+            └── age "Age" width:200
+        `);
+
+        api.showColumnMenu('age');
+        await asyncSetTimeout(10);
+        await clickColumnMenuItem('Add Calculated Column');
+        await asyncSetTimeout(1);
+
+        setExpression('[Age] * 2');
+        clickDialogButton('Apply');
+        await asyncSetTimeout(1);
+
+        await new GridColumns(api, 'dialog add preserves unpinned state after calculated column add').checkColumns(`
+            CENTER
+            ├── athlete "Athlete" width:200
+            ├── age "Age" width:200
+            └── calculated_1 "New title" width:200
+        `);
+        await new GridRows(api, 'dialog add preserves unpinned state - rows').check(`
+            ROOT id:ROOT_NODE_ID
+            └── LEAF id:r1 athlete:"Michael Phelps" age:23 calculated_1:46
+        `);
+    });
+
+    test('dialog add preserves a runtime sort that diverged from the colDef sort', async () => {
+        const api = createGrid('calculated-dialog-preserves-sort', {
+            rowData: [{ id: 'r1', a: 1, b: 2 }],
+            columnDefs: [{ field: 'a', sort: 'asc' }, { field: 'b' }],
+        });
+
+        api.applyColumnState({ state: [{ colId: 'a', sort: 'desc' }] });
+        await asyncSetTimeout(0);
+        expect(api.getColumn('a')!.getSort()).toBe('desc');
+
+        const calc = await addViaDialog(api, 'b', '[a] + [b]');
+
+        // Adding a calc col must not reset 'a' back to its colDef sort ('asc').
+        expect(api.getColumn('a')!.getSort()).toBe('desc');
+        expect(order(api)).toEqual(['a', 'b', calc]);
+        await new GridColumns(api, 'preserved runtime sort after calc add').checkColumns(`
+            CENTER
+            ├── a "A" width:200 sort:desc
+            ├── b "B" width:200
+            └── calculated_1 "New title" width:200
+        `);
+        await new GridRows(api, 'preserved runtime sort after calc add - rows').check(`
+            ROOT id:ROOT_NODE_ID
+            └── LEAF id:r1 a:1 b:2 calculated_1:3
+        `);
+    });
+
+    test('dialog add preserves a runtime column width that diverged from the colDef width', async () => {
+        const api = createGrid('calculated-dialog-preserves-width', {
+            rowData: [{ id: 'r1', a: 1, b: 2 }],
+            columnDefs: [{ field: 'a', width: 150 }, { field: 'b' }],
+        });
+
+        api.applyColumnState({ state: [{ colId: 'a', width: 250 }] });
+        await asyncSetTimeout(0);
+        expect(api.getColumn('a')!.getActualWidth()).toBe(250);
+
+        const calc = await addViaDialog(api, 'b', '[a] + [b]');
+
+        expect(api.getColumn('a')!.getActualWidth()).toBe(250);
+        expect(order(api)).toEqual(['a', 'b', calc]);
+        await new GridColumns(api, 'preserved runtime width after calc add').checkColumns(`
+            CENTER
+            ├── a "A" width:250
+            ├── b "B" width:200
+            └── calculated_1 "New title" width:200
+        `);
+        await new GridRows(api, 'preserved runtime width after calc add - rows').check(`
+            ROOT id:ROOT_NODE_ID
+            └── LEAF id:r1 a:1 b:2 calculated_1:3
+        `);
+    });
+
     test('two calc cols from the same anchor stack newest-first (tree + display agree)', async () => {
         const api = createGrid('dialog-same-anchor', {
             rowData: [{ id: 'r1', revenue: 10, cost: 3 }],
