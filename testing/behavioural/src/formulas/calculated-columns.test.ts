@@ -740,6 +740,7 @@ describe('ag-grid calculated columns', () => {
     test('reset column state removes dynamic calculated columns and restores provided calculated columns', async () => {
         const removed = vi.fn();
         const api = createGrid('calculated-reset-column-state', {
+            calculatedColumns: { applyMode: 'deferred' },
             rowData: [{ id: 'r1', revenue: 10, cost: 3 }],
             columnDefs: [
                 { field: 'revenue' },
@@ -821,6 +822,7 @@ describe('ag-grid calculated columns', () => {
 
     test('edit dialog updates calculated column cellDataType without keeping stale boolean renderer', async () => {
         const api = createGrid('calculated-grid-api-cell-data-type', {
+            calculatedColumns: { applyMode: 'deferred' },
             rowData: [{ id: 'r1', revenue: 10, cost: 3 }],
             columnDefs: [
                 { field: 'revenue' },
@@ -1212,6 +1214,50 @@ describe('ag-grid calculated columns', () => {
         expect(api.getCellValue({ rowNode: firstRow, colKey: 'doubleProfit', useFormatter: false })).toBe(24);
     });
 
+    test('live apply typing does not refetch server-side rows', async () => {
+        const rowData = [
+            { id: 'r1', revenue: 10, cost: 3 },
+            { id: 'r2', revenue: 20, cost: 8 },
+        ];
+        let getRowsCalls = 0;
+        const api = createGrid('calculated-live-apply-ssrm', {
+            rowModelType: 'serverSide',
+            serverSideDatasource: {
+                getRows: (params: any) => {
+                    getRowsCalls++;
+                    params.success({
+                        rowData: rowData.slice(params.request.startRow, params.request.endRow),
+                        rowCount: rowData.length,
+                    });
+                },
+            },
+            columnDefs: [
+                { field: 'revenue' },
+                { field: 'cost' },
+                { colId: 'profit', calculatedExpression: '[revenue] - [cost]', cellDataType: 'number' },
+            ],
+        });
+        await waitForFirstRow(api);
+        const callsAfterLoad = getRowsCalls;
+        expect(callsAfterLoad).toBeGreaterThan(0);
+
+        enableOffsetParentPolyfill();
+        api.openCalculatedColumnDialog('profit');
+        await asyncSetTimeout(1);
+
+        // Each keystroke flushes on an animation frame; wait past each flush.
+        setExpression('[revenue] - [cost] + 1');
+        await asyncSetTimeout(40);
+        setExpression('[revenue] * [cost]');
+        await asyncSetTimeout(40);
+        setExpression('[revenue] + [cost]');
+        await asyncSetTimeout(40);
+
+        const firstRow = api.getDisplayedRowAtIndex(0)!;
+        expect(api.getCellValue({ rowNode: firstRow, colKey: 'profit', useFormatter: false })).toBe(13);
+        expect(getRowsCalls).toBe(callsAfterLoad);
+    });
+
     test('server-side store updates invalidate calculated column caches', async () => {
         let rowData = [{ id: 'r1', revenue: 10, cost: 3 }];
         const api = createGrid('calculated-server-side-cache', {
@@ -1292,6 +1338,7 @@ describe('ag-grid calculated columns', () => {
         const costColId = 'server-cost-81f3431b-e4aa-4ef8-bef0';
         const created = vi.fn();
         const api = createGrid('calculated-dialog-references', {
+            calculatedColumns: { applyMode: 'deferred' },
             rowData: [{ id: 'r1', revenue: 10, cost: 3 }],
             columnDefs: [
                 { field: 'revenue', colId: revenueColId, headerName: 'Revenue' },
@@ -1357,6 +1404,7 @@ describe('ag-grid calculated columns', () => {
 
     test('clearing the expression shows an empty-expression message, not the formula error', async () => {
         const api = createGrid('calculated-empty-expression', {
+            calculatedColumns: { applyMode: 'deferred' },
             rowData: [{ id: 'r1', revenue: 10, cost: 3 }],
             columnDefs: [{ field: 'revenue' }, { field: 'cost' }],
         });
@@ -1420,6 +1468,7 @@ describe('ag-grid calculated columns', () => {
 
     test('dialog accepts column references in any case', async () => {
         const api = createGrid('calculated-dialog-case-insensitive-references', {
+            calculatedColumns: { applyMode: 'deferred' },
             rowData: [{ id: 'r1', revenue: 10, cost: 3 }],
             columnDefs: [{ field: 'revenue' }, { field: 'cost' }],
         });
@@ -1440,6 +1489,7 @@ describe('ag-grid calculated columns', () => {
 
     test('dialog operator suggestions replace existing operators near the caret', async () => {
         const api = createGrid('calculated-dialog-operator-replacement', {
+            calculatedColumns: { applyMode: 'deferred' },
             rowData: [{ id: 'r1', age: 23, medals: 8 }],
             columnDefs: [{ field: 'age' }, { field: 'medals' }],
         });
@@ -1478,6 +1528,7 @@ describe('ag-grid calculated columns', () => {
 
     test('dialog picker keeps button focus until suggestion is accepted', async () => {
         const api = createGrid('calculated-dialog-picker-focus', {
+            calculatedColumns: { applyMode: 'deferred' },
             rowData: [{ id: 'r1', age: 23, medals: 8 }],
             columnDefs: [{ field: 'age' }, { field: 'medals' }],
         });
@@ -1526,6 +1577,7 @@ describe('ag-grid calculated columns', () => {
         };
         const columnDefs: ColGroupDef[] = [year2025, year2026];
         const api = createGrid('calculated-dialog-group-no-mutation', {
+            calculatedColumns: { applyMode: 'deferred' },
             rowData: [{ id: 'r1', revenue2025: 10, cost2025: 3, revenue2026: 20, cost2026: 8 }],
             columnDefs,
         });
@@ -1573,6 +1625,7 @@ describe('ag-grid calculated columns', () => {
 
     test('dialog inserts calculated columns after generated auto group columns in visible order', async () => {
         const api = createGrid('calculated-dialog-auto-group-order', {
+            calculatedColumns: { applyMode: 'deferred' },
             rowData: [{ id: 'r1', productType: 'A', revenue: 10, cost: 3 }],
             columnDefs: [{ field: 'productType', rowGroup: true, hide: true }, { field: 'revenue' }, { field: 'cost' }],
         });
@@ -1629,7 +1682,8 @@ describe('ag-grid calculated columns', () => {
         await asyncSetTimeout(1);
         setExpression('[Revenue] - [Cost]');
         clickDialogButton('Apply');
-        await asyncSetTimeout(1);
+        // Wait past the live-apply animation frame so no flush is in flight during the toggles below.
+        await asyncSetTimeout(40);
         await new GridColumns(api, 'auto-group toggle - after add').checkColumns(`
             CENTER
             ├── ag-Grid-AutoColumn "Group" width:200
@@ -1661,6 +1715,7 @@ describe('ag-grid calculated columns', () => {
 
     test('calc col anchored to the first of two auto-group cols after a grouping toggle', async () => {
         const api = createGrid('calculated-autogroup-toggle-multi', {
+            calculatedColumns: { applyMode: 'deferred' },
             groupDisplayType: 'multipleColumns',
             rowData: [{ id: 'r1', productType: 'A', country: 'UK', revenue: 10, cost: 3 }],
             columnDefs: [
@@ -1719,6 +1774,7 @@ describe('ag-grid calculated columns', () => {
 
     test('dialog inserts calculated columns after the clicked generated auto group column in multiple-columns mode', async () => {
         const api = createGrid('calculated-dialog-multiple-auto-group-order', {
+            calculatedColumns: { applyMode: 'deferred' },
             groupDisplayType: 'multipleColumns',
             rowData: [{ id: 'r1', productType: 'A', country: 'UK', revenue: 10, cost: 3 }],
             columnDefs: [
@@ -1779,7 +1835,8 @@ describe('ag-grid calculated columns', () => {
 
         setExpression('[Revenue] - [Cost]');
         clickDialogButton('Apply');
-        await asyncSetTimeout(1);
+        // Wait past the live-apply animation frame so no flush is in flight during the moves below.
+        await asyncSetTimeout(40);
 
         // Placed immediately after its anchor on creation.
         expect(api.getAllDisplayedColumns().map((column) => column.getColId())).toEqual([
@@ -1834,7 +1891,8 @@ describe('ag-grid calculated columns', () => {
         await asyncSetTimeout(1);
         setExpression('[Revenue] - [Cost]');
         clickDialogButton('Apply');
-        await asyncSetTimeout(1);
+        // Wait past the live-apply animation frame so each add's flush lands before the next step.
+        await asyncSetTimeout(40);
 
         showColumnMenu(api, 'ag-Grid-AutoColumn-country');
         await asyncSetTimeout(10);
@@ -1842,7 +1900,7 @@ describe('ag-grid calculated columns', () => {
         await asyncSetTimeout(1);
         setExpression('[Revenue] + [Cost]');
         clickDialogButton('Apply');
-        await asyncSetTimeout(1);
+        await asyncSetTimeout(40);
 
         // Adding the second column must not displace the first from its own anchor.
         expect(api.getAllDisplayedColumns().map((column) => column.getColId())).toEqual([
@@ -2123,6 +2181,7 @@ describe('ag-grid calculated columns', () => {
         const changed = vi.fn();
         const removed = vi.fn();
         const api = createGrid('calculated-ui-events', {
+            calculatedColumns: { applyMode: 'deferred' },
             rowData: [{ id: 'r1', revenue: 10, cost: 3 }],
             columnDefs: [
                 { field: 'revenue', headerName: 'Revenue' },
@@ -2323,6 +2382,7 @@ describe('ag-grid calculated columns', () => {
 
     test('dialog type list contains the default data types only', async () => {
         const api = createGrid('calculated-dialog-types', {
+            calculatedColumns: { applyMode: 'deferred' },
             rowData: [{ id: 'r1', revenue: 10, cost: 3 }],
             columnDefs: [{ field: 'revenue' }, { field: 'cost' }],
         });
@@ -2448,6 +2508,7 @@ describe('ag-grid calculated columns', () => {
 
     test('dialog validates formula syntax and function names before apply', async () => {
         const api = createGrid('calculated-dialog-validation', {
+            calculatedColumns: { applyMode: 'deferred' },
             rowData: [{ id: 'r1', revenue: 10, cost: 3 }],
             columnDefs: [{ field: 'revenue' }, { field: 'cost' }],
         });
@@ -2575,6 +2636,7 @@ describe('ag-grid calculated columns', () => {
 
     test('calculated columns add calculated column classes and edit highlighting by default', async () => {
         const api = createGrid('calculated-column-classes', {
+            calculatedColumns: { applyMode: 'deferred' },
             rowData: [{ id: 'r1', revenue: 10, cost: 3 }],
             columnDefs: [
                 { field: 'revenue' },
@@ -2692,6 +2754,7 @@ describe('ag-grid calculated columns', () => {
 
     test('adding a calculated column does not highlight the new column', async () => {
         const api = createGrid('calculated-column-add-no-highlight', {
+            calculatedColumns: { applyMode: 'deferred' },
             rowData: [{ id: 'r1', revenue: 10, cost: 3 }],
             columnDefs: [{ field: 'revenue' }, { field: 'cost' }],
         });
@@ -2717,6 +2780,7 @@ describe('ag-grid calculated columns', () => {
 
     test('multiple open calculated column dialogs highlight each edited column', async () => {
         const api = createGrid('calculated-column-multi-highlight', {
+            calculatedColumns: { applyMode: 'deferred' },
             rowData: [{ id: 'r1', revenue: 10, cost: 3 }],
             columnDefs: [
                 { field: 'revenue' },
