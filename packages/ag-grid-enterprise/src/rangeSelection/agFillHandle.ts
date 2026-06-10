@@ -348,6 +348,10 @@ export class AgFillHandle extends AbstractSelectionHandle {
         ) => {
             let currentValue: any;
             let skipValue: boolean = false;
+            // ValueContext entries feed the cyclic source lookup in processValues, so a filled
+            // cell must record the cell its value originated from, not the cell being written.
+            let valueSourceCol: AgColumn = col;
+            let valueSourceRowNode: RowNode = rowNode;
 
             if (withinInitialRange) {
                 currentValue = valueSvc.getValue(col, rowNode, 'edit');
@@ -368,6 +372,9 @@ export class AgFillHandle extends AbstractSelectionHandle {
                     rowNode,
                     idx: idx++,
                 });
+
+                valueSourceCol = sourceCol ?? col;
+                valueSourceRowNode = sourceRowNode ?? rowNode;
 
                 currentValue = value;
                 if (col.isCellEditable(rowNode)) {
@@ -410,8 +417,8 @@ export class AgFillHandle extends AbstractSelectionHandle {
             if (!skipValue) {
                 currentValues.push({
                     value: currentValue,
-                    column: col,
-                    rowNode,
+                    column: valueSourceCol,
+                    rowNode: valueSourceRowNode,
                 });
             }
         };
