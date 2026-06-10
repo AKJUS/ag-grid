@@ -1090,9 +1090,84 @@
 
     .ag-overlay-loading-wrapper,
     .ag-overlay-exporting-wrapper,
-    .ag-overlay-modal-wrapper {
+    .ag-overlay-modal-wrapper,
+    .ag-overlay-file-input-wrapper {
         // prevent interaction with grid while it's loading
         pointer-events: all;
+    }
+
+    .ag-overlay-file-input-center {
+        border: solid 1px var(--ag-border-color);
+        background: var(--ag-background-color);
+        border-radius: var(--ag-card-radius);
+        box-shadow: var(--ag-card-shadow);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: calc(var(--ag-grid-size) * 2);
+        max-width: 420px;
+        padding: calc(var(--ag-grid-size) * 2);
+    }
+
+    .ag-file-input-error-banner {
+        background: color-mix(in srgb, var(--ag-invalid-color) 10%, var(--ag-background-color));
+        color: var(--ag-invalid-color);
+        border-radius: var(--ag-border-radius);
+        padding: calc(var(--ag-grid-size) * 0.75) calc(var(--ag-grid-size) * 2);
+        width: 100%;
+        text-align: center;
+        font-size: 0.9em;
+    }
+
+    .ag-file-input-drop-zone {
+        border: dashed 2px var(--ag-border-color);
+        border-radius: var(--ag-border-radius);
+        padding: calc(var(--ag-grid-size) * 4);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--ag-grid-size);
+        width: 100%;
+    }
+
+    .ag-file-input-drop-zone-active {
+        border-color: var(--ag-input-focus-border-color);
+        background: color-mix(in srgb, var(--ag-input-focus-border-color) 10%, var(--ag-background-color));
+    }
+
+    .ag-file-input-processing {
+        display: flex;
+        align-items: center;
+        gap: calc(var(--ag-grid-size) * 0.75);
+        padding: calc(var(--ag-grid-size) * 4);
+
+        .ag-loading-icon {
+            @include ag.unthemed-rtl(
+                (
+                    padding-right: 0,
+                )
+            );
+        }
+    }
+
+    .ag-file-input-text-row {
+        display: flex;
+        align-items: center;
+        gap: calc(var(--ag-grid-size) * 0.75);
+    }
+
+    .ag-file-input-text {
+        font-weight: 600;
+    }
+
+    .ag-file-input-browse {
+        cursor: pointer;
+        border: solid 1px var(--ag-border-color);
+        background: transparent;
+        color: var(--ag-text-color);
+        border-radius: var(--ag-border-radius);
+        padding: calc(var(--ag-grid-size) * 0.5) calc(var(--ag-grid-size) * 2);
+        font: inherit;
     }
 
     // /**

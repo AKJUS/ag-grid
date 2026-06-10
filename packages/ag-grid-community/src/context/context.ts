@@ -206,6 +206,7 @@ export type UserComponentName =
     | 'agExportingOverlay'
     | 'agNoRowsOverlay'
     | 'agNoMatchingRowsOverlay'
+    | 'agFileInputOverlay'
     | 'agTooltipComponent'
     | 'agReadOnlyFloatingFilter'
     | 'agTextColumnFilter'

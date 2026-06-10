@@ -281,6 +281,10 @@ export const AG_GRID_LOCALE_EN = {
     noRowsToShow: 'No Rows To Show',
     noMatchingRows: 'No Matching Rows',
     exportingOoo: 'Exporting...',
+    fileInputOverlay: 'Drag & Drop file to import data',
+    fileInputOverlayBrowse: 'Browse files',
+    fileInputProcessing: 'Processing ${variable}',
+    fileInputProcessingFailed: 'Error processing ${variable}',
     enabled: 'Enabled',
 
     // Menu
