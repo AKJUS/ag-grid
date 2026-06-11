@@ -28,8 +28,9 @@ export class AgColumnGroup<TValue = any> extends BeanStub<AgColumnGroupEvent> im
 
     // all children, regardless of open/closed state
     public children: (AgColumn | AgColumnGroup)[] | null = null;
-    // only the currently displaying children (depends on open/closed state)
-    public displayedChildren: (AgColumn | AgColumnGroup)[] | null = null;
+    // only the currently displaying children (depends on open/closed state). Kept as an array (never null at
+    // runtime) so reads — `getDisplayedChildren()`, `checkLeft`, tool-panel membership — match released behaviour.
+    public displayedChildren: (AgColumn | AgColumnGroup)[] | null = [];
 
     // measured header height when autoHeaderHeight is enabled
     public autoHeaderHeight: number | null = null;
@@ -71,16 +72,18 @@ export class AgColumnGroup<TValue = any> extends BeanStub<AgColumnGroupEvent> im
     }
 
     public checkLeft(): void {
-        const displayedChildren = this.displayedChildren!;
+        const displayedChildren = this.displayedChildren;
         let minLeft: number | null = null;
-        for (let i = 0, len = displayedChildren.length; i < len; ++i) {
-            const child = displayedChildren[i];
-            if (isColumnGroup(child)) {
-                child.checkLeft();
-            }
-            const childLeft = child.left;
-            if (childLeft != null && (minLeft == null || childLeft < minLeft)) {
-                minLeft = childLeft;
+        if (displayedChildren) {
+            for (let i = 0, len = displayedChildren.length; i < len; ++i) {
+                const child = displayedChildren[i];
+                if (isColumnGroup(child)) {
+                    child.checkLeft();
+                }
+                const childLeft = child.left;
+                if (childLeft != null && (minLeft == null || childLeft < minLeft)) {
+                    minLeft = childLeft;
+                }
             }
         }
         this.setLeft(minLeft);
