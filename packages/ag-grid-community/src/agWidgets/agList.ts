@@ -260,7 +260,7 @@ export class AgList<
         } else {
             const currentIdx = listItems.indexOf(highlightedItem);
             let nextPos = currentIdx + (isDown ? 1 : -1);
-            nextPos = Math.min(Math.max(nextPos, 0), listItems.length - 1);
+            nextPos = Math.max(0, Math.min(nextPos, listItems.length - 1));
             itemToHighlight = listItems[nextPos];
         }
         this.highlightItem(itemToHighlight);
