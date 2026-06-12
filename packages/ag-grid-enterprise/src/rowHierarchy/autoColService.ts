@@ -1,7 +1,9 @@
 import type {
+    CellRendererSelectorResult,
     ColDef,
     ColumnEventType,
     IAutoColService,
+    ITooltipParams,
     NamedBean,
     PropertyValueChangedEvent,
     RowNode,
@@ -234,7 +236,106 @@ export class AutoColService extends BeanStub implements NamedBean, IAutoColServi
             res.initialSort = undefined;
         }
 
+        if (!underlyingColumn) {
+            this.applyDynamicSingleColumnTooltips(res, autoGroupColumnDef);
+        }
+
         return res;
+    }
+
+    // Each group row's `rowGroupColumn` differs per row, so tooltips must dispatch at render time.
+    private applyDynamicSingleColumnTooltips(res: ColDef, autoGroupColumnDef: ColDef | undefined): void {
+        const leafTooltipValueGetter = autoGroupColumnDef?.tooltipValueGetter;
+        const leafTooltipField = autoGroupColumnDef?.tooltipField;
+        const leafTooltipComponent = autoGroupColumnDef?.tooltipComponent;
+        const leafTooltipComponentParams = autoGroupColumnDef?.tooltipComponentParams;
+        const leafTooltipComponentSelector = autoGroupColumnDef?.tooltipComponentSelector;
+
+        const rowGroupCols = this.beans.rowGroupColsSvc?.columns ?? [];
+        const anyGroupColHasTooltip = rowGroupCols.some(
+            (col) =>
+                col.colDef.tooltipValueGetter ||
+                col.colDef.tooltipField ||
+                col.colDef.tooltipComponent ||
+                col.colDef.tooltipComponentSelector
+        );
+
+        const hasTooltipConfig =
+            anyGroupColHasTooltip ||
+            leafTooltipValueGetter != null ||
+            leafTooltipField != null ||
+            leafTooltipComponent != null ||
+            leafTooltipComponentSelector != null;
+
+        if (!hasTooltipConfig) {
+            return;
+        }
+
+        res.tooltipField = undefined;
+        res.tooltipComponent = undefined;
+        res.tooltipComponentParams = undefined;
+
+        res.tooltipValueGetter = (params) => {
+            if (params.node?.group) {
+                const groupedCol = params.node.rowGroupColumn as AgColumn | undefined;
+                if (!groupedCol) {
+                    return undefined;
+                }
+                const colDef = groupedCol.colDef;
+                if (colDef.tooltipValueGetter) {
+                    return colDef.tooltipValueGetter(params);
+                }
+                if (colDef.tooltipField) {
+                    return params.value;
+                }
+                return undefined;
+            }
+            if (leafTooltipValueGetter) {
+                return leafTooltipValueGetter(params);
+            }
+            if (leafTooltipField && params.data) {
+                return (params.data as Record<string, unknown>)[leafTooltipField];
+            }
+            return undefined;
+        };
+
+        const needsSelector =
+            anyGroupColHasTooltip || leafTooltipComponent != null || leafTooltipComponentSelector != null;
+        if (!needsSelector) {
+            return;
+        }
+
+        // tooltipComponentSelector is typed for cell params but called with ITooltipParams at runtime
+        const callSelector = (
+            sel: ColDef['tooltipComponentSelector'],
+            params: ITooltipParams
+        ): CellRendererSelectorResult | undefined =>
+            (sel as unknown as (p: ITooltipParams) => CellRendererSelectorResult | undefined)(params);
+
+        const selector = (params: ITooltipParams): CellRendererSelectorResult | undefined => {
+            if (params.node?.group) {
+                const groupedCol = params.node.rowGroupColumn as AgColumn | undefined;
+                const colDef = groupedCol?.colDef;
+                if (!colDef) {
+                    return undefined;
+                }
+                if (colDef.tooltipComponentSelector) {
+                    return callSelector(colDef.tooltipComponentSelector, params);
+                }
+                if (!colDef.tooltipComponent) {
+                    return undefined;
+                }
+                return { component: colDef.tooltipComponent, params: colDef.tooltipComponentParams };
+            }
+            if (leafTooltipComponentSelector) {
+                return callSelector(leafTooltipComponentSelector, params);
+            }
+            if (leafTooltipComponent == null) {
+                return undefined;
+            }
+            return { component: leafTooltipComponent, params: leafTooltipComponentParams };
+        };
+        res.tooltipComponentSelector = selector as unknown as ColDef['tooltipComponentSelector'];
     }
 
     private createBaseColDef(rowGroupCol?: AgColumn): ColDef {
@@ -252,6 +353,12 @@ export class AutoColService extends BeanStub implements NamedBean, IAutoColServi
         if (rowGroupCol) {
             res.headerName = this.beans.colNames.getDisplayNameForColumn(rowGroupCol, 'header') ?? undefined;
             res.headerValueGetter = rowGroupCol.colDef.headerValueGetter;
+            res.headerTooltip = rowGroupCol.colDef.headerTooltip;
+            res.tooltipField = rowGroupCol.colDef.tooltipField;
+            res.tooltipValueGetter = rowGroupCol.colDef.tooltipValueGetter;
+            res.tooltipComponent = rowGroupCol.colDef.tooltipComponent;
+            res.tooltipComponentParams = rowGroupCol.colDef.tooltipComponentParams;
+            res.tooltipComponentSelector = rowGroupCol.colDef.tooltipComponentSelector;
         }
         return res;
     }
