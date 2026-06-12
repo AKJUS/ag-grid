@@ -1,3 +1,5 @@
+@use 'ag';
+
 @mixin output {
     .ag-calculated-column-panel .ag-panel-content-wrapper {
         padding: var(--ag-grid-size) var(--ag-cell-horizontal-padding);
@@ -41,9 +43,15 @@
     .ag-calculated-column-expression-tools {
         display: flex;
 
-        .ag-group-container {
-            flex: 1 1 auto;
-            justify-content: end;
+        .ag-label {
+            @include ag.unthemed-rtl(
+                (
+                    text-align: right,
+                )
+            );
+        }
+
+        .ag-field-set-wrapper {
             gap: var(--ag-grid-size);
             flex-wrap: nowrap;
             align-items: center;
