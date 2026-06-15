@@ -553,7 +553,8 @@ export class CellCtrl extends BeanStub {
         const res: ICellRendererParams = _addGridCommonParams(gos, {
             value: value,
             valueFormatted: valueFormatted,
-            getValue: () => valueSvc.getDisplayValue(column, rowNode, 'edit'),
+            getValue: () =>
+                valueSvc.getDisplayValue(column, rowNode, this.shouldUseShowValueAsValue() ? 'transformed' : 'edit'),
             setValue: (value: any) =>
                 editSvc?.setDataValue({ rowNode, column }, value) || rowNode.setDataValue(column, value),
             formatValue: this.formatValue.bind(this),
@@ -710,11 +711,18 @@ export class CellCtrl extends BeanStub {
     }
 
     public formatValue(value: any): any {
-        return this.callValueFormatter(value) ?? value;
-    }
-
-    private callValueFormatter(value: any): string | null {
-        return this.beans.valueSvc.formatValue(this.column, this.rowNode, value);
+        const valueSvc = this.beans.valueSvc;
+        const column = this.column;
+        const node = this.rowNode;
+        // While a mode is active and there is no live editor, format with the mode's formatter; else the column's.
+        // `showValueAs` is null for every ordinary column, so it short-circuits before touching the edit service.
+        if (this.shouldUseShowValueAsValue()) {
+            const transformed = valueSvc.formatTransformedValue(column, node, value);
+            if (transformed !== undefined) {
+                return transformed ?? value;
+            }
+        }
+        return valueSvc.formatValue(column, node, value) ?? value;
     }
 
     public updateAndFormatValue(compareValues: boolean): boolean {
@@ -725,7 +733,7 @@ export class CellCtrl extends BeanStub {
             column: this.column,
             node: this.rowNode,
             includeValueFormatted: true,
-            from: 'edit',
+            from: this.shouldUseShowValueAsValue() ? 'transformed' : 'edit',
         });
         this.value = value;
         this.valueFormatted = valueFormatted;
@@ -734,6 +742,10 @@ export class CellCtrl extends BeanStub {
             return !this.valuesAreEqual(oldValue, this.value) || this.valueFormatted != oldValueFormatted;
         }
         return true;
+    }
+
+    private shouldUseShowValueAsValue(): boolean {
+        return this.column.showValueAs != null && !this.editSvc?.isEditing(this, { withOpenEditor: true });
     }
 
     private valuesAreEqual(val1: any, val2: any): boolean {
