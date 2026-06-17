@@ -35,6 +35,8 @@ export interface CalculatedColumnsOptions {
     applyMode?: CalculatedColumnApplyMode;
 }
 
+export type CalculatedColumnsGridOption = boolean | CalculatedColumnsOptions;
+
 export type CalculatedColumnDef<TData = any, TValue = any> = ColDef<TData, TValue> & {
     calculatedExpression: string;
 };
@@ -66,5 +68,6 @@ export interface ICalculatedColumnsService extends Bean {
     restoreDynamicColumnDefs(state: ColumnState[]): boolean;
     /** Run a suppressed rebuild after calc-col mutation so column-state ops avoid spurious calc lifecycle events. */
     refreshDynamicColumns(source: ColumnEventType): void;
+    isEnabled(): boolean;
     isHighlightedColumn(column: AgColumn | null): boolean;
 }

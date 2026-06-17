@@ -490,10 +490,12 @@ export class MenuItemMapper extends BeanStub implements NamedBean {
                           }
                         : null;
                 }
+
                 case 'calculatedColumn': {
-                    if (!calculatedColsSvc) {
+                    if (!calculatedColsSvc?.isEnabled()) {
                         return null;
                     }
+
                     const headerPosition = focusSvc.focusedHeader ?? (column ? { headerRowIndex: 0, column } : null);
 
                     return {
@@ -507,7 +509,7 @@ export class MenuItemMapper extends BeanStub implements NamedBean {
                     };
                 }
                 case 'editCalculatedColumn': {
-                    if (!calculatedColsSvc || !column?.isCalculatedCol) {
+                    if (!calculatedColsSvc?.isEnabled() || !column?.isCalculatedCol) {
                         return null;
                     }
                     const headerPosition = focusSvc.focusedHeader ?? { headerRowIndex: 0, column };
@@ -522,8 +524,9 @@ export class MenuItemMapper extends BeanStub implements NamedBean {
                             }),
                     };
                 }
+
                 case 'removeCalculatedColumn':
-                    return calculatedColsSvc && column?.isCalculatedCol
+                    return calculatedColsSvc?.isEnabled() && column?.isCalculatedCol
                         ? {
                               name: localeTextFunc('calculatedColumnRemove', 'Remove Calculated Column'),
                               icon: _createIconNoSpan('calculatedColumnRemove', beans, null),

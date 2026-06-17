@@ -13,6 +13,7 @@ import type {
     CalculatedColumnExpressionPicker,
     CalculatedColumnUpdate,
     CalculatedColumnValidationReason,
+    CalculatedColumnsOptions,
     ColDef,
     ColKey,
     ColumnEventType,
@@ -26,6 +27,7 @@ import {
     BeanStub,
     _addColumnDefaultAndTypes,
     _createUserColumn,
+    _isCalculatedColumnsEnabled,
     _mergedEqual,
     _normaliseCalculatedExpression,
     _warn,
@@ -138,13 +140,24 @@ export class CalculatedColumnsService extends BeanStub implements NamedBean, ICa
                 this.checkValidationStates(event.source);
             },
         });
-        this.addManagedPropertyListener('calculatedColumns', () => this.refreshOpenDialogHighlights());
+        this.addManagedPropertyListener('calculatedColumns', () => {
+            if (!this.isEnabled()) {
+                this.clearDynamicColumnInstances();
+            }
+            this.refreshDynamicColumns('gridOptionsChanged');
+            this.refreshOpenDialogHighlights();
+        });
+    }
+
+    public isEnabled(): boolean {
+        return _isCalculatedColumnsEnabled(this.gos.get('calculatedColumns'));
     }
 
     public isHighlightedColumn(column: AgColumn | null): boolean {
         return (
             column != null &&
-            this.gos.get('calculatedColumns')?.suppressColumnHighlighting !== true &&
+            this.isEnabled() &&
+            this.getOptions()?.suppressColumnHighlighting !== true &&
             this.openDialogsByColId.get(column.colId)?.highlight === true
         );
     }
@@ -171,6 +184,9 @@ export class CalculatedColumnsService extends BeanStub implements NamedBean, ICa
     }
 
     private updateCalculatedColumn(column: ColKey, colDef: CalculatedColumnUpdate, validateExpression = true): void {
+        if (!this.isEnabled()) {
+            return;
+        }
         const source: ColumnEventType = 'calculatedColumn';
         const { colModel } = this.beans;
         const targetColumn = colModel.getCol(column);
@@ -288,6 +304,9 @@ export class CalculatedColumnsService extends BeanStub implements NamedBean, ICa
         focus = true,
         restoreFocusParams?: CalculatedColumnDialogRestoreFocusParams
     ): void {
+        if (!this.isEnabled()) {
+            return;
+        }
         const liveApply = this.isLiveApplyMode();
         if (mode === 'add') {
             const colId = this.createUniqueColId();
@@ -370,6 +389,9 @@ export class CalculatedColumnsService extends BeanStub implements NamedBean, ICa
     }
 
     public removeCalculatedColumn(column: AgColumn | null | undefined): void {
+        if (!this.isEnabled()) {
+            return;
+        }
         if (!column?.isCalculatedCol) {
             return;
         }
@@ -394,10 +416,18 @@ export class CalculatedColumnsService extends BeanStub implements NamedBean, ICa
     }
 
     private isLiveApplyMode(): boolean {
-        return this.gos.get('calculatedColumns')?.applyMode !== 'deferred';
+        return this.getOptions()?.applyMode !== 'deferred';
+    }
+
+    private getOptions(): CalculatedColumnsOptions | undefined {
+        const calculatedColumns = this.gos.get('calculatedColumns');
+        return typeof calculatedColumns === 'object' && calculatedColumns != null ? calculatedColumns : undefined;
     }
 
     public overrideFor(colDef: ColDef): ColDef | null | undefined {
+        if (!this.isEnabled()) {
+            return undefined;
+        }
         const overrides = this.staticColOverrides;
         if (overrides.size === 0) {
             return undefined;
@@ -407,6 +437,9 @@ export class CalculatedColumnsService extends BeanStub implements NamedBean, ICa
     }
 
     public contributeTo(build: ColumnTreeBuild): void {
+        if (!this.isEnabled()) {
+            return;
+        }
         const { dynamicColumns, staticColOverrides } = this;
         // Static-col overrides/removals are handled by the build via `overrideFor`; here we only splice
         // in dynamic (API/dialog-added) cols, so nothing to do without them.
@@ -435,6 +468,12 @@ export class CalculatedColumnsService extends BeanStub implements NamedBean, ICa
         });
     }
 
+    private clearDynamicColumnInstances(): void {
+        this.dynamicColumns.forEach((dynamicColumn) => {
+            dynamicColumn.instance = null;
+        });
+    }
+
     public resetDynamicColumnDefs(preserveCreatedColumns = false): boolean {
         if (!preserveCreatedColumns) {
             this.inactiveDynamicColumns.clear();
@@ -456,6 +495,9 @@ export class CalculatedColumnsService extends BeanStub implements NamedBean, ICa
     }
 
     public restoreDynamicColumnDefs(state: ColumnState[]): boolean {
+        if (!this.isEnabled()) {
+            return false;
+        }
         const inactive = this.inactiveDynamicColumns;
         if (!inactive.size) {
             return false;
@@ -744,7 +786,7 @@ export class CalculatedColumnsService extends BeanStub implements NamedBean, ICa
     }
 
     private getDataTypeOptions(currentDataType?: string): CalculatedColumnDataTypeOption[] {
-        const configuredDataTypes = this.gos.get('calculatedColumns')?.dataTypes;
+        const configuredDataTypes = this.getOptions()?.dataTypes;
         const dataTypes = configuredDataTypes
             ? this.getValidConfiguredDataTypes(configuredDataTypes)
             : [...DEFAULT_CALCULATED_COLUMN_DATA_TYPES];
@@ -790,7 +832,7 @@ export class CalculatedColumnsService extends BeanStub implements NamedBean, ICa
     }
 
     private getExpressionPickers(): CalculatedColumnExpressionPicker[] {
-        const expressionPickers = this.gos.get('calculatedColumns')?.expressionPickers;
+        const expressionPickers = this.getOptions()?.expressionPickers;
         return expressionPickers === undefined
             ? [...DEFAULT_CALCULATED_COLUMN_EXPRESSION_PICKERS]
             : (expressionPickers ?? []);
