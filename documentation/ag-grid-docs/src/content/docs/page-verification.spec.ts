@@ -13,6 +13,11 @@ const KNOWN_NOISE = [
     "was delivered in report-only mode, but does not specify a 'report-uri'",
     "was delivered in report-only mode, but does not specify a 'report-to'",
     "directive 'frame-ancestors' is ignored when delivered in a report-only policy",
+    'License Key Not Found',
+    'AG Grid and AG Charts Enterprise License',
+    'All AG Grid and AG Charts Enterprise features are unlocked for trial.',
+    'If you want to hide the watermark please email info@ag-grid.com for a trial license key',
+    '**************************************',
 ];
 
 // Sets up console error/warning collection, uncaught exception capture,
@@ -176,9 +181,16 @@ test.describe('Page Verification', () => {
 
         await page.goto('/react-data-grid/row-sorting/');
         await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-        // Docs examples load inside an iframe — use contentFrame() to reach inside it
-        const exampleFrame = page.locator('.example-runner-outer iframe').first().contentFrame();
-        await expect(exampleFrame.locator('.ag-root-wrapper')).toBeVisible();
+
+        // The iframe uses IntersectionObserver to lazy-load its src — scroll it into view first.
+        // Loading is also blocked while the page is scrolling, so wait for the src attribute to
+        // be populated (which happens once scrolling settles) before checking iframe content.
+        const iframeLocator = page.locator('iframe.exampleRunner').first();
+        await iframeLocator.scrollIntoViewIfNeeded();
+        await expect(iframeLocator).toHaveAttribute('src', /example-runner/);
+
+        const exampleFrame = page.locator('iframe.exampleRunner').first().contentFrame();
+        await expect(exampleFrame.locator('.ag-root-wrapper')).toBeVisible({ timeout: 30_000 });
 
         expect(errors, 'Console Errors').toEqual([]);
     });
