@@ -280,7 +280,10 @@ export class ValueService extends BeanStub implements NamedBean {
     // aggregation) must pre-resolve via `_resolvePivotColumnForRow`. Run the getValue benchmark to verify.
     // This does NOT resolve pending edit values (edit or batch)
     public getValueFromData(column: AgColumn, rowNode: IRowNode, ignoreAggData: boolean = false): any {
-        let result = column.isCalculatedCol
+        // An actively-aggregating calc col aggregates its per-leaf results, so group rows read aggData
+        // instead of re-evaluating the formula (gated on the active state, not just a defined aggFunc).
+        const evaluateFormula = column.isCalculatedCol && !(column.aggregationActive && rowNode.group);
+        let result = evaluateFormula
             ? this.formula?.resolveValue(column, rowNode as RowNode)
             : this.resolveCoreValue(column, rowNode, ignoreAggData);
 
