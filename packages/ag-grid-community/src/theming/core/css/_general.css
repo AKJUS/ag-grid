@@ -51,6 +51,7 @@
     min-width: 0;
     overflow: hidden;
     flex: 1 1 auto;
+    background-color: var(--ag-data-background-color);
 }
 
 .ag-viewport {
@@ -343,7 +344,7 @@
     :where(.ag-row:not(.ag-full-width-row)),
     :where(.ag-header-row),
     :where(.ag-row.ag-embedded-full-width-row) {
-        :where(> .ag-grid-scrolling-cells) {
+        > :where(.ag-grid-scrolling-cells) {
             order: 1;
         }
     }
