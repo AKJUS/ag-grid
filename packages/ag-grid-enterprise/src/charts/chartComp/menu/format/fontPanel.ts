@@ -28,10 +28,6 @@ export interface FontPanelParams {
     cssIdentifier?: string;
 }
 
-function _capitalise(str: string): string {
-    return str[0].toUpperCase() + str.substring(1).toLowerCase();
-}
-
 export class FontPanel extends Component {
     private chartTranslation: ChartTranslationService;
 
@@ -147,11 +143,9 @@ export class FontPanel extends Component {
                 initialValue = families[valueIndex];
             } else {
                 // add user provided value to list
-                const capitalisedFontValue = _capitalise(familyDisplayName);
-
                 options.push({
                     value: family,
-                    text: capitalisedFontValue,
+                    text: familyDisplayName,
                 });
 
                 initialValue = family;
