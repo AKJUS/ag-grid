@@ -1,6 +1,6 @@
 {
   "name": "update-algolia-indices",
-  "version": "36.0.0-beta.20260624.556",
+  "version": "36.0.0-beta.20260624.859",
   "description": "Update algolia indices",
   "main": "src/index.ts",
   "type": "module",
