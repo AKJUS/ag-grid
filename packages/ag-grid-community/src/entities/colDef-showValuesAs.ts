@@ -21,8 +21,9 @@ export type ShowValuesAsType = ShowValuesAsBuiltInType | (string & {});
  * Whether a mode applies in the current view (the result of {@link ShowValuesAsModeDef.applicability}). Drives both the
  * transform (an inapplicable mode shows the raw value) and how the mode appears in the column menu.
  * - `true` / `'enabled'` (default `true`): applicable - the transform runs and the menu shows it normally.
- * - `'inapplicable'`: not applicable in this view - shown greyed but still selectable, so it can be chosen ahead
- *   of the view that activates it (it stays dormant, showing the raw value, until then).
+ * - `'inapplicable'`: not applicable in this view - shown greyed and non-interactive (it shows the raw value).
+ *   An active selection that becomes inapplicable still shows checked, but is changed away from by choosing an
+ *   applicable mode.
  * - `'disabled'`: not applicable - shown greyed and non-interactive (the menu item is disabled altogether).
  * - `'hide'` / `false`: not applicable - omitted from the menu, except the active selection, which is kept (greyed
  *   but still selectable) so it stays visible and changeable.

@@ -633,13 +633,14 @@ export class ShowValuesAsService extends BeanStub implements NamedBean, IShowVal
                     ? only.action
                     : () => this.setColumnShowValuesAs(column, type);
         }
-        if (menuState === 'disabled') {
-            // Greyed AND non-interactive — the menu item is disabled altogether.
+        if (menuState === 'disabled' || menuState === 'inapplicable') {
+            // Greyed AND non-interactive — a mode that does not apply in the current view cannot be selected.
+            // An active selection that has become inapplicable still shows checked but is changed away from by
+            // choosing an applicable mode.
             item.disabled = true;
         } else if (menuState !== 'enabled') {
-            // `'inapplicable'`, or a `'hidden'` mode kept because it is the active selection: greyed like a
-            // disabled item but still selectable, so it can be chosen ahead of the view that activates it (it
-            // stays dormant — raw value — until then) or changed away from.
+            // A `'hidden'` mode kept because it is the active selection: greyed to show it is dormant — raw
+            // value / `#N/A` — but still selectable so it stays visible and can be changed away from.
             item.cssClasses = ['ag-show-values-as-inapplicable'];
         }
         return item;
@@ -701,7 +702,7 @@ export class ShowValuesAsService extends BeanStub implements NamedBean, IShowVal
     private buildApplicabilityParams(column: AgColumn): ShowValuesAsApplicabilityParams {
         // `undefined` ⇒ that hierarchy's module is not registered; `false` ⇒ registered but inactive. The `hasX`
         // flags distinguish the two, letting a custom `applicability` callback hide a mode its module can't support.
-        // The built-ins never hide: they stay inapplicable-but-selectable in either case.
+        // The built-ins never hide: they stay greyed and non-interactive in either case.
         const groupStage = this.groupStage;
         return _addGridCommonParams(this.gos, {
             column,
